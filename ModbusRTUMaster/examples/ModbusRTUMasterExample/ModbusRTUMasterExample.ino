@@ -1,155 +1,156 @@
 /*
   ModbusRTUMasterExample
-  
+ 
   This example demonstrates how to setup and use the ModbusRTUMaster library (https://github.com/CMB27/ModbusRTUMaster).
-  It is intended to be used with a second board running ModbusRTUSlaveExample from the ModbusRTUSlave library (https://github.com/CMB27/ModbusRTUSlave).  
-  
-  Circuit:
-  - The center pin of a potentiometer to pin A0, and the outside pins of the potentiometer to your board's logic level voltage (5V or 3.3V) and GND
-  - The center pin of a potentiometer to pin A1, and the outside pins of the potentiometer to your board's logic level voltage (5V or 3.3V) and GND
-  - A pushbutton switch from pin 2 to GND
-  - A pushbutton switch from pin 3 to GND
-  - A LED from pin 5 to GND with a 1K ohm series resistor
-  - A LED from pin 6 to GND with a 1K ohm series resistor
-  - A LED from pin 7 to GND with a 1K ohm series resistor
-  - A LED from pin 8 to GND with a 1K ohm series resistor
-  - RX pin (typically pin 0 or pin 10 if using SoftwareSerial) to TX pin of the master/client board
-  - TX pin (typically pin 1 or pin 11 if using SoftwareSerial) to RX pin of the master/client board
-  - GND to GND of the master/client board
-  - Pin 13 is set up as the driver enable pin. This pin will be HIGH whenever the board is transmitting.
-
-  !NOTE
-  Both boards will also need power.
+  See README.md (https://github.com/CMB27/ModbusRTUMaster/blob/main/examples/ModbusRTUMasterExample/README.md) for hardware setup details.
   
   Created: 2023-07-22
   By: C. M. Bulliner
-  Last Modified: 2024-02-29
+  Last Modified: 2024-09-07
   By: C. M. Bulliner
   
 */
 
-#if __AVR__
-  // Uncomment the following line if you want to use SoftwareSerial on pins 10 and ll; note this only works on AVR boards.
-  //# define USE_SOFTWARE_SERIAL
-#endif
-
-// Comment out the following line if you want to disable debugging; note debugging is automatically disabled on the Arduino UNO and Arduino Mega when not using softwareSerial
-#define DEBUGGING_ENABLED
-
-#if defined USE_SOFTWARE_SERIAL
-  #include <SoftwareSerial.h>
-#endif
-
 #include <ModbusRTUMaster.h>
 
-const byte potPins[2] = {A0, A1};
-const byte buttonPins[2] = {2, 3};
-const byte ledPins[4] = {5, 6, 7, 8};
-const byte dePin = 13;
-
-#if defined USE_SOFTWARE_SERIAL
-  const byte rxPin = 10;
-  const byte txPin = 11;
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
+  // The ATmega328P and ATmega168 only have one HardwareSerial port, and on Arduino boards it is usually connected to a USB/UART bridge.
+  // So, for these boards, we will use SoftwareSerial with the lbrary, leaving the HardwareSerial port available to send debugging messages.
+  #define SOFTWARE_SERIAL
+  #include <SoftwareSerial.h>
+  const int8_t rxPin = 10;
+  const int8_t txPin = 11;
   SoftwareSerial mySerial(rxPin, txPin);
-  ModbusRTUMaster modbus(mySerial, dePin); // serial port, driver enable pin for rs-485
+  #define MODBUS_SERIAL mySerial
+#elif defined(ARDUINO_NANO_ESP32)
+  // On the Arduino Nano ESP32, the HardwareSerial port on pins 0 and 1 is Serial0
+  #define MODBUS_SERIAL Serial0
 #else
-  #if (defined __AVR_ATmega328P__ || defined __AVR_ATmega168__ || defined __AVR_ATmega1280__ || defined __AVR_ATmega2560__)
-    ModbusRTUMaster modbus(Serial, dePin); // serial port, driver enable pin for rs-485
-    #undef DEBUGGING_ENABLED
-  #elif defined ESP32
-    ModbusRTUMaster modbus(Serial0, dePin); // serial port, driver enable pin for rs-485
-  #else
-    ModbusRTUMaster modbus(Serial1, dePin); // serial port, driver enable pin for rs-485
-  #endif
+  // On the majority of Arduino boards, the HardwareSerial port on pins 0 and 1 is Serial1
+  // On the Arduino Mega and Adruino Due, Serial1 is on pins 18 and 19.
+  #define MODBUS_SERIAL Serial1
 #endif
 
-bool coils[2];
-bool discreteInputs[2];
-uint16_t holdingRegisters[2];
-uint16_t inputRegisters[2];
+#if (defined(ARDUINO_NANO_RP2040_CONNECT) && !defined(ARDUINO_ARCH_MBED)) || defined(ARDUINO_NANO_ESP32)
+  // These boards operate unsing GPIO numbers that don't correspond to the numbers on the boards.
+  // However they do have D# values #defined to correct this.
+  const int8_t buttonPins[2] = {D2, D3};
+  const int8_t ledPins[4] = {D5, D6, D7, D8};
+  const int8_t dePin = D13;
+#else
+  // Other boards do not have D# values, and will throw an error if you try to use them.
+  const int8_t buttonPins[2] = {2, 3};
+  const int8_t ledPins[4] = {5, 6, 7, 8};
+  const int8_t dePin = 13;
+#endif
+const int8_t knobPins[2] = {A0, A1};
+
+ModbusRTUMaster modbus(MODBUS_SERIAL, dePin);
+
+const uint8_t numCoils = 2;
+const uint8_t numDiscreteInputs = 2;
+const uint8_t numHoldingRegisters = 2;
+const uint8_t numInputRegisters = 2;
+
+bool coils[numCoils];
+bool discreteInputs[numDiscreteInputs];
+uint16_t holdingRegisters[numHoldingRegisters];
+uint16_t inputRegisters[numInputRegisters];
+
+unsigned long transactionCounter = 0;
+unsigned long errorCounter = 0;
+
+const char* errorStrings[] = {
+  "success",
+  "invalid id",
+  "invalid buffer",
+  "invalid quantity",
+  "response timeout",
+  "frame error",
+  "crc error",
+  "unknown comm error",
+  "unexpected id",
+  "exception response",
+  "unexpected function code",
+  "unexpected response length",
+  "unexpected byte count",
+  "unexpected address",
+  "unexpected value",
+  "unexpected quantity"
+};
+
+
+
+void printLog(uint8_t unitId, uint8_t functionCode, uint16_t startingAddress, uint16_t quantity, uint8_t error) {
+  transactionCounter++;
+  if (error) errorCounter++;
+  char string[128];
+  sprintf(string, "%ld %ld %02X %02X %04X %04X %s", transactionCounter, errorCounter, unitId, functionCode, startingAddress, quantity, errorStrings[error]);
+  Serial.print(string);
+  if (error == MODBUS_RTU_MASTER_EXCEPTION_RESPONSE) {
+    sprintf(string, ": %02X", modbus.getExceptionResponse());
+    Serial.print(string);
+  }
+  Serial.println();
+}
+
+
 
 void setup() {
-  #if defined ESP32
-    analogReadResolution(10);
-  #endif
-
-  pinMode(potPins[0], INPUT);
-  pinMode(potPins[1], INPUT);
+  pinMode(knobPins[0], INPUT);
+  pinMode(knobPins[1], INPUT);
   pinMode(buttonPins[0], INPUT_PULLUP);
   pinMode(buttonPins[1], INPUT_PULLUP);
   pinMode(ledPins[0], OUTPUT);
   pinMode(ledPins[1], OUTPUT);
   pinMode(ledPins[2], OUTPUT);
   pinMode(ledPins[3], OUTPUT);
-  
-  modbus.begin(38400);
 
-  #if defined DEBUGGING_ENABLED
-    Serial.begin(115200);
-    while (!Serial);
+  #if defined(ARDUINO_NANO_ESP32)
+    analogReadResolution(10);
+  #endif
+  
+  Serial.begin(115200);
+
+  // You can change the baud and config values if you like.
+  // Just make sure they match the settings you use in ModbusRTUSlaveExample.
+  // Note, the config value will be ignored when using SoftwareSerial.
+  // SoftwareSerial only supports SERIAL_8N1.
+  unsigned long baud = 38400;
+  #ifndef SOFTWARE_SERIAL
+    uint32_t config = SERIAL_8N1;
+    MODBUS_SERIAL.begin(baud, config);
+    modbus.begin(baud, config);
+  #else
+    MODBUS_SERIAL.begin(baud);
+    modbus.begin(baud);
   #endif
 }
 
 void loop() {
-  holdingRegisters[0] = map(analogRead(potPins[0]), 0, 1023, 0, 255);
-  holdingRegisters[1] = map(analogRead(potPins[1]), 0, 1023, 0, 255);
+  holdingRegisters[0] = map(analogRead(knobPins[0]), 0, 1023, 0, 255);
+  holdingRegisters[1] = map(analogRead(knobPins[1]), 0, 1023, 0, 255);
   coils[0] = !digitalRead(buttonPins[0]);
   coils[1] = !digitalRead(buttonPins[1]);
 
-  #if defined DEBUGGING_ENABLED
-    debug(modbus.writeMultipleHoldingRegisters(1, 0, holdingRegisters, 2)); // slave id, starting data address, unsigned 16 bit integer array of holding register values, number of holding registers to write
-    debug(modbus.writeMultipleCoils(1, 0, coils, 2));                       // slave id, starting data address, bool array of coil values, number of coils to write
-    debug(modbus.readInputRegisters(1, 0, inputRegisters, 2));              // slave id, starting data address, unsigned 16 bit integer array to place input register values, number of input registers to read
-    debug(modbus.readDiscreteInputs(1, 0, discreteInputs, 2));              // slave id, starting data address, bool array to place discrete input values, number of discrete inputs to read
-  #else
-    modbus.writeMultipleHoldingRegisters(1, 0, holdingRegisters, 2); // slave id, starting data address, unsigned 16 bit integer array of holding register values, number of holding registers to write
-    modbus.writeMultipleCoils(1, 0, coils, 2);                       // slave id, starting data address, bool array of coil values, number of coils to write
-    modbus.readInputRegisters(1, 0, inputRegisters, 2);              // slave id, starting data address, unsigned 16 bit integer array to place input register values, number of input registers to read
-    modbus.readDiscreteInputs(1, 0, discreteInputs, 2);              // slave id, starting data address, bool array to place discrete input values, number of discrete inputs to read
-  #endif
+  uint8_t unitId = 1;
+  uint16_t startingAddress[4] = {0, 0, 0, 0};
+  uint8_t error;
+
+  error = modbus.writeMultipleHoldingRegisters(unitId, startingAddress[0], holdingRegisters, numHoldingRegisters);
+  printLog(unitId, 16, startingAddress[0], numHoldingRegisters, error);
+
+  error = modbus.writeMultipleCoils(unitId, startingAddress[1], coils, numCoils);
+  printLog(unitId, 15, startingAddress[1], numHoldingRegisters, error);
+
+  error = modbus.readInputRegisters(unitId, startingAddress[2], inputRegisters, numInputRegisters);
+  printLog(unitId, 4, startingAddress[2], numHoldingRegisters, error);
+
+  error = modbus.readDiscreteInputs(unitId, startingAddress[3], discreteInputs, numDiscreteInputs);
+  printLog(unitId, 2, startingAddress[3], numHoldingRegisters, error);
   
   analogWrite(ledPins[0], inputRegisters[0]);
   analogWrite(ledPins[1], inputRegisters[1]);
   digitalWrite(ledPins[2], discreteInputs[0]);
   digitalWrite(ledPins[3], discreteInputs[1]);
 }
-
-# if defined DEBUGGING_ENABLED
-  bool debug(bool modbusRequest) {
-    if (modbusRequest == true) {
-      Serial.println("Success");
-    }
-    else {
-      Serial.print("Failure");
-      if (modbus.getTimeoutFlag() == true) {
-        Serial.print(": Timeout");
-        modbus.clearTimeoutFlag();
-      }
-      else if (modbus.getExceptionResponse() != 0) {
-        Serial.print(": Exception Response ");
-        Serial.print(modbus.getExceptionResponse());
-        switch (modbus.getExceptionResponse()) {
-          case 1:
-            Serial.print(" (Illegal Function)");
-            break;
-          case 2:
-            Serial.print(" (Illegal Data Address)");
-            break;
-          case 3:
-            Serial.print(" (Illegal Data Value)");
-            break;
-          case 4:
-            Serial.print(" (Server Device Failure)");
-            break;
-          default:
-            Serial.print(" (Uncommon Exception Response)");
-            break;
-        }
-        modbus.clearExceptionResponse();
-      }
-      Serial.println();
-    }
-    Serial.flush();
-    return modbusRequest;
-  }
-#endif

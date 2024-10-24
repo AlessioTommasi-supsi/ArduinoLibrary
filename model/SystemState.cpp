@@ -81,10 +81,8 @@ void SystemState::startRecordingRegister(int addr, int milliseconds)
                 SystemState::getInstance()->pushRegister(addr, value);
                 //stampo su seriale notifica
                 Serial.println("Recording value: " + String(value) + " at address " + String(addr));
-                // Resetta il watchdog in modo esplicito per evitare il reset del dispositivo
-                esp_task_wdt_reset(); 
+                
                 std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
-                //std::this_thread::sleep_for(std::chrono::milliseconds(2000));
             }
         });
         }

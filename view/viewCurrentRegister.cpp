@@ -34,8 +34,13 @@ String viewCurrentRegister::generateHTML() //codice generato solo la prima volta
     return html;
 }
 
-
 String viewCurrentRegister::generateHTML(String registerAddress, float registerValue)
+{
+    return viewCurrentRegister::generateHTML(registerAddress, registerValue, "");
+}
+
+
+String viewCurrentRegister::generateHTML(String registerAddress, float registerValue, String popupScript = "")
 {
     // Creazione dell'header HTML con il foglio di stile CSS
     String html = viewGeneric::defaultCssHeader("Current Register");
@@ -75,7 +80,7 @@ String viewCurrentRegister::generateHTML(String registerAddress, float registerV
     html += "<div class=\"form-container\" style=\"margin-top: 20px; text-align: center;\">";
     html += "    <label for=\"milliseconds\">Milliseconds:</label>";
     html += "    <input type=\"text\" id=\"milliseconds\" name=\"milliseconds\" required>";
-    html += "    <form action=\"/startRecording\" method=\"get\" style=\"display: inline;\">";
+    html += "    <form action=\"/startRecording\" method=\"get\" style=\"display: inline;\" onsubmit=\"document.getElementById('startMilliseconds').value = document.getElementById('milliseconds').value;\">";
     html += "        <input type=\"hidden\" name=\"milliseconds\" id=\"startMilliseconds\">";
     html += "        <input type=\"hidden\" name=\"registerAddress\" value=\"" + registerAddress + "\">";     // Campo nascosto per l'indirizzo del registro
     html += "        <button type=\"submit\" style=\"padding: 10px; background-color: red; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;\">Start Recording</button>";
@@ -86,15 +91,35 @@ String viewCurrentRegister::generateHTML(String registerAddress, float registerV
     html += "    </form>";
     html += "</div>";
 
+    // Aggiunta del popup
+    html += "<div id=\"popup\" style=\"display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); padding:20px; background-color:white; border:1px solid black; z-index:1000;\">";
+    html += "    <p id=\"popupMessage\"></p>";
+    html += "    <button onclick=\"document.getElementById('popup').style.display='none';\">Close</button>";
+    html += "</div>";
+
     // Chiusura del contenitore principale
     html += "</div>";
 
     // Aggiunta del footer
     html += viewGeneric::defaultFooter();
 
+    // Aggiunta del JavaScript per gestire il popup
+    html += "<script>";
+    html += "function showPopup(message) {";
+    html += "    document.getElementById('popupMessage').innerText = message;";
+    html += "    document.getElementById('popup').style.display = 'block';";
+    html += "}";
+    html += "</script>";
+
+    // Aggiunta del popupScript se presente
+    if (popupScript != "") {
+        html += "<script>";
+        html += popupScript;
+        html += "</script>";
+    }
+
     return html;
 }
-
 String viewCurrentRegister::generateHTMLConfirm(String registerAddress, float registerValue)
 {
     // Creazione dell'header HTML con il foglio di stile CSS
@@ -118,5 +143,3 @@ String viewCurrentRegister::generateHTMLConfirm(String registerAddress, float re
 
     return html;
 }
-
-

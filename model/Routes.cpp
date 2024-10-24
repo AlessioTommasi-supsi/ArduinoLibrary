@@ -102,39 +102,56 @@ void Routes::defineRoutes(AsyncWebServer &server)
     });
 
     server.on("/startRecording", HTTP_GET, [](AsyncWebServerRequest *request){
-                try {
-                    String milliseconds = request->getParam("milliseconds")->value();
-                    String registerAddress = request->getParam("registerAddress")->value();
+        try {
+            String milliseconds = request->getParam("milliseconds")->value();
+            String registerAddress = request->getParam("registerAddress")->value();
 
-                    Serial.println("Start recording register " + registerAddress + " every " + milliseconds + " milliseconds");
-                    Serial.println("integer milliseconds: " + milliseconds.toInt());
-                    
-                    SystemState::getInstance()->startRecordingRegister(registerAddress.toInt(), milliseconds.toInt());
+            Serial.println("Start recording register " + registerAddress + " every " + milliseconds + " milliseconds");
+            //Serial.println("integer milliseconds: " + milliseconds.toInt());
+            
+            SystemState::getInstance()->startRecordingRegister(registerAddress.toInt(), milliseconds.toInt());
 
-                    request->send(200, "text/plain", "Recording started");
-                } catch (const std::exception &e) {
-                    String errorMessage = "Error: ";
-                    errorMessage += e.what();
-                    request->send(500, "text/plain", errorMessage);
-                } catch (...) {
-                    request->send(500, "text/plain", "Unknown error occurred");
-                }
+            String popupScript = "showPopup('Recording started');";
+            String htmlContent = viewCurrentRegister::generateHTML(registerAddress, 0.0, popupScript);
+            const char *htmlContentPtr = htmlContent.c_str();
+            request->send(200, "text/html", htmlContentPtr);
+        } catch (const std::exception &e) {
+            String errorMessage = "Error: ";
+            errorMessage += e.what();
+            String popupScript = "showPopup('" + errorMessage + "');";
+            String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
+            const char *htmlContentPtr = htmlContent.c_str();
+            request->send(500, "text/html", htmlContentPtr);
+        } catch (...) {
+            String popupScript = "showPopup('Unknown error occurred');";
+            String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
+            const char *htmlContentPtr = htmlContent.c_str();
+            request->send(500, "text/html", htmlContentPtr);
+        }
     });
 
     server.on("/stopRecording", HTTP_GET, [](AsyncWebServerRequest *request){
+        try {
+            String registerAddress = request->getParam("registerAddress")->value();
+            SystemState::getInstance()->stopRecordingRegister(registerAddress.toInt());
 
-                try {
-                    String registerAddress = request->getParam("registerAddress")->value();
-                    SystemState::getInstance()->stopRecordingRegister(registerAddress.toInt());
-
-                    request->send(200, "text/plain", "Recording stopped");
-                } catch (const std::exception &e) {
-                    String errorMessage = "Error: ";
-                    errorMessage += e.what();
-                    request->send(500, "text/plain", errorMessage);
-                } catch (...) {
-                    request->send(500, "text/plain", "Unknown error occurred");
-                }
+            String popupScript = "showPopup('Recording stopped');";
+            String htmlContent = viewCurrentRegister::generateHTML(registerAddress, 0.0, popupScript);
+            const char *htmlContentPtr = htmlContent.c_str();
+            request->send(200, "text/html", htmlContentPtr);
+        } catch (const std::exception &e) {
+            String errorMessage = "Error: ";
+            errorMessage += e.what();
+            String popupScript = "showPopup('" + errorMessage + "');";
+            String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
+            const char *htmlContentPtr = htmlContent.c_str();
+            request->send(500, "text/html", htmlContentPtr);
+        } catch (...) {
+            String popupScript = "showPopup('Unknown error occurred');";
+            String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
+            const char *htmlContentPtr = htmlContent.c_str();
+            request->send(500, "text/html", htmlContentPtr);
+        }
     });
 
 

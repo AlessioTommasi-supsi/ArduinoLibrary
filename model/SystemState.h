@@ -15,6 +15,8 @@
 #include <atomic>
 #include <chrono>
 #include <map>
+#include <esp_task_wdt.h>
+
 
 
 class WiFiManager;
@@ -73,6 +75,8 @@ public:
     char * getStateString();
 
     void setError(char * message);
+
+    void setError(const char * message);
 
     char * getError();
 

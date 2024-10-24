@@ -19,6 +19,7 @@ public:
     static String generateEmptyFormRegister();
     static String generateHTML(String registerAddress, float registerValue);
     static String generateHTMLConfirm(String registerAddress, float registerValue);
+    static String generateHTML(String registerAddress, float registerValue, String popupScript);
 };
 
 

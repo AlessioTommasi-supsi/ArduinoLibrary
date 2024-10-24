@@ -59,25 +59,42 @@ void SystemState::pushRegister(int addr, float val)
 
 void SystemState::startRecordingRegister(int addr, int milliseconds)
 {
-    std::lock_guard<std::mutex> lock(recordingMutex);
-
-    // Se c'è già una registrazione in corso per questo indirizzo, fermala prima di iniziarne una nuova
-    if (recordingActive[addr].load()) {
-        stopRecordingRegister(addr);
-    }
-
-    recordingActive[addr].store(true);
-
-    recordingThreads[addr] = std::thread([this, addr, milliseconds]() {
-        while (recordingActive[addr].load()) {
-            int value = SystemState::masterModbus->readHoldingIntRegisters(addr);
-            SystemState::getInstance()->pushRegister(addr, value);
-            //stampo su seriale notifica
-            Serial.println("Recording value: " + String(value) + " at address " + String(addr));
-            //std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
-            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    try
+    {
+        if (milliseconds < 1000)
+        {
+            milliseconds = 1000; // Imposta un minimo di 1 secondo per non sovraccaricare il sistema
         }
-    });
+        
+        std::lock_guard<std::mutex> lock(recordingMutex);
+
+        // Se c'è già una registrazione in corso per questo indirizzo, fermala prima di iniziarne una nuova
+        if (recordingActive[addr].load()) {
+            stopRecordingRegister(addr);
+        }
+
+        recordingActive[addr].store(true);
+
+        recordingThreads[addr] = std::thread([this, addr, milliseconds]() {
+            while (recordingActive[addr].load()) {
+                int value = SystemState::masterModbus->readHoldingIntRegisters(addr);
+                SystemState::getInstance()->pushRegister(addr, value);
+                //stampo su seriale notifica
+                Serial.println("Recording value: " + String(value) + " at address " + String(addr));
+                // Resetta il watchdog in modo esplicito per evitare il reset del dispositivo
+                esp_task_wdt_reset(); 
+                std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+                //std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+            }
+        });
+        }
+    catch(const std::exception& e)
+    {
+        stopRecordingRegister(addr);
+        setError(("Error: " + String(e.what())).c_str());
+    }
+    
+    
 }
 
 void SystemState::stopRecordingRegister(int addr)
@@ -152,6 +169,15 @@ char * SystemState::getStateString()
         return "ERROR";
     }
 }
+
+void SystemState::setError(const char * message)
+{
+    char error[100];
+    strncpy(error, message, sizeof(error) - 1);
+    error[sizeof(error) - 1] = '\0';
+    setError(error);
+}
+
 
 void SystemState::setError( char* message)
 {

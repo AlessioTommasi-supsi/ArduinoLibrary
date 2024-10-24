@@ -71,6 +71,21 @@ String viewCurrentRegister::generateHTML(String registerAddress, float registerV
     html += "    </form>";
     html += "</div>";
 
+    // Aggiunta della casella di testo per i millisecondi e dei pulsanti Start/Stop Recording
+    html += "<div class=\"form-container\" style=\"margin-top: 20px; text-align: center;\">";
+    html += "    <label for=\"milliseconds\">Milliseconds:</label>";
+    html += "    <input type=\"text\" id=\"milliseconds\" name=\"milliseconds\" required>";
+    html += "    <form action=\"/startRecording\" method=\"get\" style=\"display: inline;\">";
+    html += "        <input type=\"hidden\" name=\"milliseconds\" id=\"startMilliseconds\">";
+    html += "        <input type=\"hidden\" name=\"registerAddress\" value=\"" + registerAddress + "\">";     // Campo nascosto per l'indirizzo del registro
+    html += "        <button type=\"submit\" style=\"padding: 10px; background-color: red; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;\">Start Recording</button>";
+    html += "    </form>";
+    html += "    <form action=\"/stopRecording\" method=\"get\" style=\"display: inline;\">";
+    html += "        <input type=\"hidden\" name=\"registerAddress\" value=\"" + registerAddress + "\">";     // Campo nascosto per l'indirizzo del registro
+    html += "        <button type=\"submit\" style=\"padding: 10px; background-color: grey; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;\">Stop Recording</button>";
+    html += "    </form>";
+    html += "</div>";
+
     // Chiusura del contenitore principale
     html += "</div>";
 

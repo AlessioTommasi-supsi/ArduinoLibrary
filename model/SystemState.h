@@ -9,6 +9,12 @@
 #include "Logger.h"
 
 #include <string>
+#include <vector>
+#include <mutex>
+#include <thread>
+#include <atomic>
+#include <chrono>
+#include <map>
 
 
 class WiFiManager;
@@ -32,6 +38,14 @@ private:
     
     std::vector<int> address;
     std::vector<float> value;
+
+        
+    std::mutex registerMutex;
+
+    std::map<int, std::thread> recordingThreads;
+    std::map<int, std::atomic<bool>> recordingActive;
+    std::mutex recordingMutex;
+
     
     static int sd_pin;
 
@@ -63,6 +77,10 @@ public:
     char * getError();
 
     void pushRegister(int address, float value);
+
+    void startRecordingRegister(int addr, int milliseconds);
+
+    void stopRecordingRegister(int addr);
 
     std::vector<float> getAllRegisterValue(int address);
 

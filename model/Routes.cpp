@@ -101,6 +101,43 @@ void Routes::defineRoutes(AsyncWebServer &server)
                 request->send(200, "text/html", htmlContentPtr); 
     });
 
+    server.on("/startRecording", HTTP_GET, [](AsyncWebServerRequest *request){
+                try {
+                    String milliseconds = request->getParam("milliseconds")->value();
+                    String registerAddress = request->getParam("registerAddress")->value();
+
+                    Serial.println("Start recording register " + registerAddress + " every " + milliseconds + " milliseconds");
+                    Serial.println("integer milliseconds: " + milliseconds.toInt());
+                    
+                    SystemState::getInstance()->startRecordingRegister(registerAddress.toInt(), milliseconds.toInt());
+
+                    request->send(200, "text/plain", "Recording started");
+                } catch (const std::exception &e) {
+                    String errorMessage = "Error: ";
+                    errorMessage += e.what();
+                    request->send(500, "text/plain", errorMessage);
+                } catch (...) {
+                    request->send(500, "text/plain", "Unknown error occurred");
+                }
+    });
+
+    server.on("/stopRecording", HTTP_GET, [](AsyncWebServerRequest *request){
+
+                try {
+                    String registerAddress = request->getParam("registerAddress")->value();
+                    SystemState::getInstance()->stopRecordingRegister(registerAddress.toInt());
+
+                    request->send(200, "text/plain", "Recording stopped");
+                } catch (const std::exception &e) {
+                    String errorMessage = "Error: ";
+                    errorMessage += e.what();
+                    request->send(500, "text/plain", errorMessage);
+                } catch (...) {
+                    request->send(500, "text/plain", "Unknown error occurred");
+                }
+    });
+
+
     // update del grafico!
     server.on("/getRegisterValues", HTTP_GET, [](AsyncWebServerRequest *request){
         if (request->hasParam("address")) {

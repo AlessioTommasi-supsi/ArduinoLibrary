@@ -57,9 +57,48 @@ void SystemState::pushRegister(int addr, float val)
     value.push_back(val);
 }
 
+void SystemState::startRecordingRegister(int addr, int milliseconds)
+{
+    std::lock_guard<std::mutex> lock(recordingMutex);
+
+    // Se c'è già una registrazione in corso per questo indirizzo, fermala prima di iniziarne una nuova
+    if (recordingActive[addr].load()) {
+        stopRecordingRegister(addr);
+    }
+
+    recordingActive[addr].store(true);
+
+    recordingThreads[addr] = std::thread([this, addr, milliseconds]() {
+        while (recordingActive[addr].load()) {
+            int value = SystemState::masterModbus->readHoldingIntRegisters(addr);
+            SystemState::getInstance()->pushRegister(addr, value);
+            //stampo su seriale notifica
+            Serial.println("Recording value: " + String(value) + " at address " + String(addr));
+            //std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        }
+    });
+}
+
+void SystemState::stopRecordingRegister(int addr)
+{
+    std::lock_guard<std::mutex> lock(recordingMutex);
+
+    if (recordingActive[addr].load()) {
+        recordingActive[addr].store(false);
+        if (recordingThreads[addr].joinable()) {
+            recordingThreads[addr].join();
+        }
+        recordingThreads.erase(addr);
+        recordingActive.erase(addr);
+    }
+}
+
+
 std::vector<float> SystemState::getAllRegisterValue(int addres)
 {
     std::vector<float> values;
+    std::lock_guard<std::mutex> lock(registerMutex);
     for (int i = 0; i < address.size(); i++)
     {
         if (address[i] == addres)

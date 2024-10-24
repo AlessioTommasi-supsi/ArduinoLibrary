@@ -49,6 +49,7 @@ String viewGraph::generateHTML()
     html += "        },";
     html += "        options: {";
     html += "          responsive: true,";
+    html += "          animation: false,";  // Disabilita l'animazione
     html += "          scales: {";
     html += "            x: {";
     html += "              display: true,";
@@ -69,7 +70,10 @@ String viewGraph::generateHTML()
     html += "      });";
     html += "    });";
     html += "}";
-    html += "document.addEventListener('DOMContentLoaded', () => updateGraph());"; // Per caricare il grafico all'avvio
+    html += "document.addEventListener('DOMContentLoaded', () => {";
+    html += "  updateGraph();"; // Per caricare il grafico all'avvio
+    html += "  setInterval(updateGraph, 5000);"; // Aggiorna il grafico ogni 5 secondi
+    html += "});";
     html += "</script>";
 
     html += viewGeneric::defaultFooter();

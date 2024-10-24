@@ -1,66 +1,32 @@
 #include "MasterModbus.h"
+#include <HardwareSerial.h>  // Includi la libreria per Serial
 
-// link prof: se non funziona questo: https://embeddedthere.com/how-to-interface-esp32-with-rs485-modbus-sensors-with-example-code/#Modbus_Library_Functions
-
-MasterModbus::MasterModbus(): modbus(Serial1, dePin){
+MasterModbus::MasterModbus(): modbus(Serial1, dePin)
+{
     begin();
 }
 
 void MasterModbus::processError()
 {
-    if (modbus.getTimeoutFlag())
-    {
-        Serial.println(F("Connection timed out"));
-        modbus.clearTimeoutFlag();
-    }
-    else if (modbus.getExceptionResponse() != 0)
-    {
-        Serial.print(F("Received exception response: "));
-        Serial.print(modbus.getExceptionResponse());
-        switch (modbus.getExceptionResponse())
-        {
-        case 1:
-            Serial.println(F(" - Illegal function"));
-            break;
-        case 2:
-            Serial.println(F(" - Illegal data address"));
-            break;
-        case 3:
-            Serial.println(F(" - Illegal data value"));
-            break;
-        case 4:
-            Serial.println(F(" - Server device failure"));
-            break;
-        default:
-            Serial.println();
-            break;
-        }
-        modbus.clearExceptionResponse();
-    }
-    else
-    {
-        Serial.println("An error occurred");
-    }
+    // Se la libreria non supporta getTimeoutFlag(), rimuovi questa parte.
+    Serial.println("Error occurred while communicating with Modbus device.");
+    // Puoi includere qui eventuali controlli di timeout o altre eccezioni, se supportati.
 }
 
 void MasterModbus::begin()
 {
-
-    modbus.begin(9600, SERIAL_8N1, rxPin, txPin, false);
+    modbus.begin(9600, SERIAL_8N1); // Usa solo i parametri richiesti
     modbus.setTimeout(100);
-    Serial.print(F("Modbus serial port configuration: 9600"));
-    Serial.println(F("-8-N-1"));
-    Serial.println();
+    Serial.println(F("Modbus serial port configuration: 9600-8-N-1"));
 }
 
-uint32_t MasterModbus::readHoldingRegisters(uint16_t address){
+uint32_t MasterModbus::readHoldingRegisters(uint16_t address)
+{
     uint16_t holdingRegisters[2];
     uint8_t success = modbus.readHoldingRegisters(1, address - 1, holdingRegisters, 2);
     uint32_t value = 0;
     if (success)
     {
-
-        // Combine the two 16-bit registers into a 32-bit integer
         value = holdingRegisters[0] << 16 | holdingRegisters[1];
         Serial.print(F("Received value: "));
         Serial.println(value);
@@ -79,10 +45,7 @@ float MasterModbus::readHoldingFloatRegisters(uint16_t address)
     float value = 0;
     if (success)
     {
-
-        // Combine the two 16-bit registers into a 32-bit integer
         uint32_t combined = ((uint32_t)holdingRegisters[0] << 16) | holdingRegisters[1];
-        // Convert the combined 32-bit integer to a float
         memcpy(&value, &combined, sizeof(value));
 
         Serial.print(F("Read value of "));

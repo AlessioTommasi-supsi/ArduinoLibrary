@@ -126,11 +126,13 @@ std::vector<float> SystemState::getAllRegisterValue(int addres)
 
 std::vector<float> SystemState::getAllRegisterValue()
 {
+    std::lock_guard<std::mutex> lock(registerMutex);
     return value;
 }
 
 std::vector<int> SystemState::getAllRegisterAddress()
 {
+    std::lock_guard<std::mutex> lock(registerMutex);
     return address;
 }
 

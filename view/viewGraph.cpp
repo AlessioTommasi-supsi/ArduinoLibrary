@@ -8,7 +8,7 @@ String viewGraph::generateHTML()
     html += "<h1>Graph View</h1>";
 
     // Menu a tendina per selezionare l'indirizzo del registro
-    html += "<label for='register-select'>Select Register Address:</label>";
+    html += "<label for='           register-select'>Select Register Address:</label>";
     html += "<select id='register-select' onchange='updateGraph()'>";
 
     std::vector<int> addresses = SystemState::getInstance()->getAllRegisterAddress();

@@ -2,6 +2,8 @@
 #include "SystemState.h"
 #include "WiFiManager.h"
 
+#include "esp_task_wdt.h"
+
 SystemState *SystemState::instance = nullptr;
 MasterModbus *SystemState::masterModbus = nullptr;
 bool SystemState::isStopped = false;
@@ -66,7 +68,7 @@ void SystemState::startRecordingRegister(int addr, int milliseconds)
             milliseconds = 1000; // Imposta un minimo di 1 secondo per non sovraccaricare il sistema
         }
         
-        std::lock_guard<std::mutex> lock(recordingMutex);
+        //std::lock_guard<std::mutex> lock(recordingMutex);//togliendo questo ho risolto anche monitor di piu registri in parallelo non ho ben chiaro perche ma funziona, watchdog si triggerava perche sistema andava in deadlock!
 
         // Se c'è già una registrazione in corso per questo indirizzo, fermala prima di iniziarne una nuova
         if (recordingActive[addr].load()) {
@@ -81,8 +83,13 @@ void SystemState::startRecordingRegister(int addr, int milliseconds)
                 SystemState::getInstance()->pushRegister(addr, value);
                 //stampo su seriale notifica
                 Serial.println("Recording value: " + String(value) + " at address " + String(addr));
-                
+                /*
+                yield();
                 std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+                */
+
+                // Utilizza vTaskDelay per cedere il controllo al sistema operativo
+                vTaskDelay(milliseconds / portTICK_PERIOD_MS);
             }
         });
         }

@@ -72,7 +72,7 @@ String viewGraph::generateHTML()
     html += "}";
     html += "document.addEventListener('DOMContentLoaded', () => {";
     html += "  updateGraph();"; // Per caricare il grafico all'avvio
-    html += "  setInterval(updateGraph, 2000);"; // Aggiorna il grafico ogni 2 secondi
+    html += "  setInterval(updateGraph, 3000);"; // Aggiorna il grafico ogni 2 secondi
     html += "});";
     html += "</script>";
 

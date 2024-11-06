@@ -38,6 +38,38 @@ void Routes::defineRoutes(AsyncWebServer &server)
                 const char *htmlContentPtr = htmlContent.c_str();
                 request->send(200, "text/html", htmlContentPtr); 
     });
+    
+    server.on("/getHistoryContent", HTTP_GET, [](AsyncWebServerRequest *request){
+        String content = "";
+        std::vector<float> valuesVector = SystemState::getInstance()->getAllRegisterValue();
+        std::vector<int> addresses = SystemState::getInstance()->getAllRegisterAddress();
+
+        // Loop through each value in the vector in reverse order
+        for (size_t i = valuesVector.size(); i > 0; i--)
+        {
+            size_t index = i - 1;
+            content += "<tr>";
+            content += "<td>" + String(addresses[index]) + "</td>"; // Display the address
+
+            // Display the value with an input field for editing inside a form
+            content += "<td>";
+            content += "<form action='/editRegister' method='GET'>";
+            content += "<input type='hidden' name='index' value='" + String(index) + "'>";
+            content += "<input type='text' class='edit-input' name='value' value='" + String(valuesVector[index]) + "'>";
+            content += "<input type='submit' value='Edit' class='action-link edit-link'>";
+            content += "</form>";
+            content += "</td>";
+
+            // Add delete button with link
+            content += "<td>";
+            content += "<a href='/deleteRegister?index=" + String(index) + "' class='action-link delete-link'>Delete</a>"; // Delete link
+            content += "</td>";
+
+            content += "</tr>";
+        }
+
+        request->send(200, "text/html", content);
+    });
 
     server.on("/deleteRegister", HTTP_GET, [](AsyncWebServerRequest *request){
                 String registerAddress = request->getParam("index")->value();

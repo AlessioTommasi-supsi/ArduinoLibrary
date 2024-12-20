@@ -33,6 +33,16 @@ void Routes::defineRoutes(AsyncWebServer &server)
 
     */
 
+    server.on("/pinout", HTTP_GET, [](AsyncWebServerRequest *request){
+                String htmlContent = Pinout::generateHTML();
+                const char *htmlContentPtr = htmlContent.c_str();
+                request->send(200, "text/html", htmlContentPtr); 
+    });
+
+    server.on("/pinoutContent", HTTP_GET, [](AsyncWebServerRequest *request){
+                //TODO: see getHistoryContent
+    });
+
     server.on("/history", HTTP_GET, [](AsyncWebServerRequest *request){
                 String htmlContent = viewHistory::generateHTML();
                 const char *htmlContentPtr = htmlContent.c_str();

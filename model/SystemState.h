@@ -26,7 +26,8 @@ enum class State
     MASTER,
     SLAVE,
     ERROR,
-    WIFI_CHANGE
+    WIFI_CHANGE,
+    READ_VOLTAGE
 };
 
 class SystemState

@@ -8,6 +8,7 @@
 
 #include "viewCurrentRegister.h"
 #include "viewHistory.h"
+#include "Pinout.h"
 #include "viewGraph.h"
 #include "viewConfig.h"
 #include "viewWifiSuccessChange.h"

@@ -49,6 +49,6 @@ void SlaveModbus::loopTask()
     {
         task();
         yield();
-        delay(100);
+        delay(1000);
     }
 }

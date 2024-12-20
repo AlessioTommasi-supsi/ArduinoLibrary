@@ -2,19 +2,19 @@
 #define PINTYPE_H
 
 enum class PinType {
-    ANALOGIC,
-    DIGITAL,
-    VIN,
-    VOUT,
-    GND,
-    ADC,
-    DAC,
-    PWM,
-    TOUCH,
-    UART,
-    SPI,
-    I2C,
-    // Aggiungi altri tipi se necessario
+    ANALOGIC, // Pin per segnali analogici generici
+    DIGITAL,  // Pin per segnali digitali generici (HIGH/LOW)
+    VIN,      // Ingresso di alimentazione
+    VOUT,     // Uscita di alimentazione
+    GND,      // Massa (ground)
+    EN,       // Enable, tipicamente usato per attivare o disattivare parti del circuito
+    ADC,      // Analog-to-Digital Converter, converte segnali analogici in digitali
+    DAC,      // Digital-to-Analog Converter, converte segnali digitali in analogici
+    PWM,      // Pulse Width Modulation, usato per generare segnali PWM
+    TOUCH,    // Pin capacitivo per rilevamento del tocco
+    UART,     // Universal Asynchronous Receiver-Transmitter, comunicazione seriale asincrona
+    SPI,      // Serial Peripheral Interface, protocollo di comunicazione seriale sincrona
+    I2C,      // Inter-Integrated Circuit, protocollo di comunicazione seriale sincrona per corto raggio
 };
 
 #endif // PINTYPE_H

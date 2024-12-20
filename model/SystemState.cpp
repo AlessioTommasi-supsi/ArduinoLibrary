@@ -45,7 +45,8 @@ SystemState *SystemState::getInstance()
 void SystemState::update()
 {
     //qui per esempio posso modificare led in base allo stato del componente!
-    logCurrentState();
+    //logCurrentState();
+    Serial.println("Updating system state...");
     
 }
 

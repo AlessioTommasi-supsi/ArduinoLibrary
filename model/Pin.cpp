@@ -1,11 +1,22 @@
 #include "Pin.h"
-#include <sstream>
 
-Pin::Pin(int num, PinType t, float volt)
-    : number(num), type(t), voltage(volt) {}
+Pin::Pin(int num, PinType t, bool input, String n, float volt)
+    : number(num), type(t), voltage(volt), isInput(input), note(n) {
+    pinMode(number, input ? INPUT : OUTPUT);
+}
 
-std::string Pin::toString() const {
-    std::ostringstream oss;
-    oss << "Pin number: " << number << ", Type: " << static_cast<int>(type) << ", Voltage: " << voltage;
-    return oss.str();
+void Pin::setMode(bool input) {
+    isInput = input;
+    pinMode(number, input ? INPUT : OUTPUT);
+}
+
+void Pin::setNote(const String& newNote) {
+    note = newNote;
+}
+
+String Pin::toString() const {
+    String result = "Pin number: " + String(number) + ", Type: " + String(static_cast<int>(type)) 
+                    + ", Voltage: " + String(voltage) + ", Input: " + (isInput ? "Yes" : "No") 
+                    + ", Note: " + note;
+    return result;
 }

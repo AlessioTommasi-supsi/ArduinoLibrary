@@ -1,6 +1,6 @@
 #include "Pin.h"
 
-Pin::Pin(int num, PinType t, bool input, String n, float volt)
+Pin::Pin(uint8_t num, PinType t, bool input, char*  n, float volt)
     : number(num), type(t), voltage(volt), isInput(input), note(n) {
     pinMode(number, input ? INPUT : OUTPUT);
 }

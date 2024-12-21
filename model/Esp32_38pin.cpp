@@ -4,7 +4,7 @@
 
 
 Esp32_38pin::Esp32_38pin() {
-    Serial.println("Costruttore Esp32_38pin");
+    Serial.println(F("Costruttore Esp32_38pin"));
     initializePins();
     
 }
@@ -14,18 +14,19 @@ void Esp32_38pin::initializePins() {
     try
     {
         pins.clear();
-        Serial.println("Inizializzazione dei pin...");
-        //METODO FUNZIONANTE!
-        Pin defaultPin(0, PinType::UNKNOWN, false, "default pin");
+        Serial.println(F("Inizializzazione dei pin..."));
+        //IL PROBLEMA STA CHE SFORO FUORI DAL LIMITE DI MEMORIA!
+        /*
+        Pin defaultPin(0, PinType::UNKNOWN, false, "default pin"));
         addPin(defaultPin);
-        Serial.println("Pin default aggiunto"); 
-
+        Serial.println(F("Pin default aggiunto")); 
+        */
         addPin(Pin(-1, PinType::VOUT, false, "3.3V"));
-        Serial.println("Pin 3.3V aggiunto");
+        Serial.println(F("Pin 3.3V aggiunto"));
 
         addPin(Pin(-2, PinType::GND, false, "0V"));
         addPin(Pin(-3, PinType::EN, false, "Pin Enable"));
-
+        /*
         // Pin GPIO23 - VSPI MOSI
         addPin(Pin(23, PinType::SPI, true, "VSPI MOSI or input digital"));
 
@@ -130,10 +131,11 @@ void Esp32_38pin::initializePins() {
 
         // Pin GPIO6 SD0 SPID HS1 CLK
         addPin(Pin(6, PinType::DIGITAL, true, "segnale di clock temporizzato"));
+        */
     }
     catch(const std::exception& e)
     {
-        Serial.println("Errore durante l'inizializzazione dei pin: " + String(e.what()));
+        Serial.println(F("Errore durante l'inizializzazione dei pin: " + String(e.what()));
     }
     
     
@@ -149,24 +151,24 @@ void Esp32_38pin::addPin(const Pin& pin) {
     }
     catch(...)
     {
-        Serial.println("Errore durante l'aggiunta del pin: " + pin.toString());
+        Serial.println(F("Errore durante l'aggiunta del pin: " + pin.toString());
     }
     
 }
 
 
 void Esp32_38pin::printPinsOnSerial() {
-    Serial.println("Pinout ESP32 38 pin:");
+    Serial.println(F("Pinout ESP32 38 pin:"));
 
     try
     {
         for (const auto& pin : pins) {
-            Serial.println(pin.toString());
+            Serial.println(F(pin.toString()));
         }
     }
     catch(const std::exception& e)
     {
-        Serial.println("Errore durante la stampa dei pin: " + String(e.what()));
+        Serial.println(F("Errore durante la stampa dei pin: " + String(e.what())));
     }
     
 }
@@ -177,7 +179,7 @@ void Esp32_38pin::readPins() {
     for (auto& pin : pins) {
         if (!pin.isInput) {
             // Gestisci errore: il pin è configurato come output
-            Serial.println("Il pin " + String(pin.number) + " è configurato come output.");
+            Serial.println(F("Il pin " + String(pin.number) + " è configurato come output."));
             continue;  // Ignora la lettura di questo pin
         }
 

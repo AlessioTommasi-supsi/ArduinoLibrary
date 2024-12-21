@@ -11,10 +11,8 @@ public:
     std::vector<Pin> pins;
     Esp32_38pin();
 
-    void initializePins();
-    void printPinsOnSerial();
-    
-    
+    void printPinsOnSerial() override;
+    void initializePins() override;
     void readPins() override;
     void addPin(const Pin& pin) override;
     Pin& getPin(int GPIOPin) override;

@@ -9,6 +9,8 @@ class PinoutData {
 public:
     virtual ~PinoutData() = default;
 
+    virtual void initializePins() = 0;
+    virtual void printPinsOnSerial() = 0;
     virtual void readPins() = 0;
     virtual void addPin(const Pin& pin) = 0;
     virtual Pin& getPin(int GPIOPin) = 0;

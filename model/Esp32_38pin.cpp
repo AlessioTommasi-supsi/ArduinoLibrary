@@ -4,14 +4,18 @@
 
 
 Esp32_38pin::Esp32_38pin() {
-    //initializePins();
+    Serial.println("Costruttore Esp32_38pin");
+    initializePins();
+    
 }
 
 
 void Esp32_38pin::initializePins() {
     try
     {
+        pins.clear();
         Serial.println("Inizializzazione dei pin...");
+
         addPin(Pin(-1, PinType::VOUT, false, "3.3V"));
         Serial.println("Pin 3.3V aggiunto");
 
@@ -134,6 +138,19 @@ void Esp32_38pin::initializePins() {
 }
 
 
+void Esp32_38pin::addPin(const Pin& pin) {
+    try
+    {
+        pins.push_back(pin);
+    }
+    catch(...)
+    {
+        Serial.println("Errore durante l'aggiunta del pin: " + pin.toString());
+    }
+    
+}
+
+
 void Esp32_38pin::printPinsOnSerial() {
     Serial.println("Pinout ESP32 38 pin:");
 
@@ -187,9 +204,6 @@ Pin& Esp32_38pin::getPin(int GPIOPin) {
 }
 
 
-void Esp32_38pin::addPin(const Pin& pin) {
-    pins.push_back(pin);
-}
 
 std::vector<Pin>::iterator Esp32_38pin::begin() {
     return pins.begin();

@@ -2,6 +2,7 @@
 #define MASTERMODBUS_H
 
 #include <ModbusRTUMaster.h>
+#include "PinoutData.h"
 
 class MasterModbus
 {
@@ -16,6 +17,7 @@ public:
 
     MasterModbus();
     void begin();
+    void registerPins(PinoutData *pinoutData);
     uint32_t readHoldingRegisters(uint16_t address);
     float readHoldingFloatRegisters(uint16_t address);
     int readHoldingIntRegisters(uint16_t address);

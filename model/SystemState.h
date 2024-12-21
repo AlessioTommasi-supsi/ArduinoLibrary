@@ -7,6 +7,8 @@
 #include "WiFiManager.h"
 #include "WebServer.h"
 #include "Logger.h"
+#include "PinoutData.h"
+
 
 #include <string>
 #include <vector>
@@ -38,10 +40,10 @@ private:
 
     static char * error_message;
     
+    /*Modbus attribute*/
     std::vector<int> address;
     std::vector<float> value;
 
-        
     std::mutex registerMutex;
 
     std::map<int, std::thread> recordingThreads;
@@ -54,6 +56,9 @@ private:
     SystemState() {}
 
 public:
+     /*pinout attribute*/
+    static PinoutData *pinoutData;
+
     static MasterModbus *masterModbus;
 
     static WiFiManager *wifiManager;
@@ -97,6 +102,8 @@ public:
     void defaultClear();
 
     void setWifiManager(WiFiManager *wifiController);
+
+    void setPinoutData(PinoutData *pinoutData);
 
     void switchNetwork(const char *ssid, const char *password);
 

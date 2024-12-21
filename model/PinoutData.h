@@ -9,7 +9,9 @@ class PinoutData {
 public:
     virtual ~PinoutData() = default;
 
+    virtual void readPins() = 0;
     virtual void addPin(const Pin& pin) = 0;
+    virtual Pin& getPin(int GPIOPin) = 0;
     virtual std::vector<Pin>::iterator begin() = 0;
     virtual std::vector<Pin>::iterator end() = 0;
     virtual std::vector<Pin>::const_iterator begin() const = 0;

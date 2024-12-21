@@ -9,7 +9,7 @@ public:
     int number;
     PinType type;
     float voltage;
-    bool isInput;      // Attributo per indicare se il pin è usato come input
+    bool isInput;      // Attributo per indicare se il pin è usato come input se viene indicato da un compnente devo modificare direttamente attributo e non usare setmode!
     String note;       // Attributo per le note descrittive
 
     Pin(int num, PinType t, bool input, String n, float volt = 0.0f);

@@ -1,6 +1,7 @@
 #include "MasterModbus.h"
 #include <HardwareSerial.h>  // Includi la libreria per Serial
 
+
 MasterModbus::MasterModbus(): modbus(Serial1, dePin)
 {
     begin();
@@ -13,11 +14,29 @@ void MasterModbus::processError()
     // Puoi includere qui eventuali controlli di timeout o altre eccezioni, se supportati.
 }
 
+void MasterModbus::registerPins(PinoutData *pinoutData)
+{
+    Pin &rxPin = pinoutData->getPin(this->rxPin);
+    rxPin.isInput = false;
+    rxPin.setNote("rxPin pin for Modbus communication");
+
+    Pin &txPin = pinoutData->getPin(this->txPin);
+    txPin.isInput = false;
+    txPin.setNote("txPin pin for Modbus communication");
+
+    Pin &dePin = pinoutData->getPin(this->dePin);
+    dePin.isInput = false;
+    dePin.setNote("dePin pin for Modbus communication");
+}
+
 void MasterModbus::begin()
 {
-    modbus.begin(9600, SERIAL_8N1); // Usa solo i parametri richiesti
+    modbus.begin(115200, SERIAL_8N1); // Usa solo i parametri richiesti
     modbus.setTimeout(100);
     Serial.println(F("Modbus serial port configuration: 9600-8-N-1"));
+    Serial.println(F("Modbus master pin: "));
+    Serial.println(dePin);
+
 }
 
 uint32_t MasterModbus::readHoldingRegisters(uint16_t address)

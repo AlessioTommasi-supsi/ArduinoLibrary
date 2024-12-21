@@ -5,15 +5,19 @@
 
 class Esp32_38pin : public PinoutData {
 private:
-    std::vector<Pin> pins;
+    
 
 public:
+    std::vector<Pin> pins;
     Esp32_38pin();
 
     void initializePins();
-    void readPins();
-
+    void printPinsOnSerial();
+    
+    
+    void readPins() override;
     void addPin(const Pin& pin) override;
+    Pin& getPin(int GPIOPin) override;
     std::vector<Pin>::iterator begin() override;
     std::vector<Pin>::iterator end() override;
     std::vector<Pin>::const_iterator begin() const override;

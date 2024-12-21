@@ -15,6 +15,10 @@ void Esp32_38pin::initializePins() {
     {
         pins.clear();
         Serial.println("Inizializzazione dei pin...");
+        //METODO FUNZIONANTE!
+        Pin defaultPin(0, PinType::UNKNOWN, false, "default pin");
+        addPin(defaultPin);
+        Serial.println("Pin default aggiunto"); 
 
         addPin(Pin(-1, PinType::VOUT, false, "3.3V"));
         Serial.println("Pin 3.3V aggiunto");

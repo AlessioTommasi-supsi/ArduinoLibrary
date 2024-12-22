@@ -6,16 +6,16 @@
 
 class Pin {
 public:
-    int number;
+    uint8_t number;      // Usa uint8_t per ridurre la dimensione
     PinType type;
     float voltage;
-    bool isInput;      // Attributo per indicare se il pin è usato come input se viene indicato da un compnente devo modificare direttamente attributo e non usare setmode!
-    String note;       // Attributo per le note descrittive
+    uint8_t isInput;     // Usa uint8_t per risparmiare spazio
+    char note[50];       // Usa array di char per gestire le note
 
-    Pin(int num, PinType t, bool input, String n, float volt = 0.0f);
+    Pin(uint8_t num, PinType t, uint8_t input, const char* n, float volt = 0.0f);
 
-    void setMode(bool input);
-    void setNote(const String& newNote);  // Metodo per cambiare la nota
+    void setMode(uint8_t input);
+    void setNote(const char* newNote);  // Metodo per cambiare la nota
     String toString() const;
 };
 

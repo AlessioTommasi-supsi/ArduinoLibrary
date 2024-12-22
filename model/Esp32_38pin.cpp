@@ -132,7 +132,7 @@ void Esp32_38pin::initializePins() {
 
         // Pin GPIO6 SD0 SPID HS1 CLK
         addPin(Pin(6, PinType::DIGITAL, true, "segnale di clock temporizzato"));
-        */
+        
     }
     catch(const std::exception& e)
     {

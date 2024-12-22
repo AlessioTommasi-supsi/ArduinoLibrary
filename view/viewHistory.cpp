@@ -6,7 +6,7 @@ String viewHistory::generateHTML()
 {
     html = viewGeneric::defaultCssHeader("History Register");
 
-    html += "<h1>History Register</h1>";
+    html += "<h1>History</h1>";
     html += "<div class='scrollable-container' style='overflow-y: auto; max-height: 80vh;'>"; // Add inline style for scrollbar
     html += "<table class='history-table'>";
     html += "<tr>";
@@ -25,7 +25,14 @@ String viewHistory::generateHTML()
     {
         size_t index = i - 1;
         html += "<tr>";
-        html += "<td>" + String(addresses[index]) + "</td>"; // Display the address
+        // Controlla se l'indirizzo è maggiore di 0 
+        if (addresses[index] > 0) { 
+            html += "<td>" + String(addresses[index]) + "</td>"; 
+            // Display the address 
+        } else { 
+            html += "<td>GPIO:" + String(-addresses[index]) + "</td>"; 
+            // Display the negative address as GPIO 
+        }
 
         // Display the value with an input field for editing inside a form
         html += "<td>";

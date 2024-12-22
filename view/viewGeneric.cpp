@@ -95,6 +95,7 @@ String viewGeneric::addCss()
 String viewGeneric::addNavbar()
 {
     String navbar = "<div class='navbar'>";
+    navbar += "<a href='/pinout'>Pinout</a>";
     navbar += "<a href='/currentregister'>Current Register</a>";
     navbar += "<a href='/history'>History</a>";
     navbar += "<a href='/graph'>Graph</a>";

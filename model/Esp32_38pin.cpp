@@ -181,7 +181,7 @@ void Esp32_38pin::readPins() {
         if (!pin.isInput)/*controlla se isInput != 0 allora entro nel true! */ {
             // Gestisci errore: il pin è configurato come output
             Serial.println("Errore: Il pin " + String(pin.number) + " è configurato come output.");
-            pin.voltage = 0; // Imposta a zero per indicare un errore o stato non leggibile
+            pin.voltage = -1; 
             continue;  // Ignora la lettura di questo pin
         }
 

@@ -40,7 +40,11 @@ void Routes::defineRoutes(AsyncWebServer &server)
     });
 
     server.on("/pinoutContent", HTTP_GET, [](AsyncWebServerRequest *request){
-                //TODO: see getHistoryContent
+                String content = "";
+                PinoutData *pinoutData = SystemState::getInstance()->pinoutData;
+                pinoutData->readPins();
+                content += pinoutData->toString();
+                request->send(200, "text/html", content);
     });
 
     server.on("/history", HTTP_GET, [](AsyncWebServerRequest *request){

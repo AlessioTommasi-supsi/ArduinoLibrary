@@ -8,15 +8,19 @@ String viewGraph::generateHTML()
     html += "<h1>Graph View</h1>";
 
     // Menu a tendina per selezionare l'indirizzo del registro
-    html += "<label for='           register-select'>Select Register Address:</label>";
+    html += "<label for='           register-select'>Select Register Address: or gpio value</label>";
     html += "<select id='register-select' onchange='updateGraph()'>";
 
     std::vector<int> addresses = SystemState::getInstance()->getAllRegisterAddress();
     std::set<int> uniqueAddresses(addresses.begin(), addresses.end());
-    for (int addr : uniqueAddresses)
-    {
+    for (int addr : uniqueAddresses) {
+    if (addr > 0) {
         html += "<option value='" + String(addr) + "'>" + String(addr) + "</option>";
+    } else {
+        html += "<option value='" + String(addr) + "'>GPIO:" + String(-addr) + "</option>";
     }
+}
+
 
     html += "</select>";
 
@@ -72,7 +76,7 @@ String viewGraph::generateHTML()
     html += "}";
     html += "document.addEventListener('DOMContentLoaded', () => {";
     html += "  updateGraph();"; // Per caricare il grafico all'avvio
-    html += "  setInterval(updateGraph, 3000);"; // Aggiorna il grafico ogni 2 secondi
+    html += "  setInterval(updateGraph, 3000);"; // Aggiorna il grafico ogni 3 secondi
     html += "});";
     html += "</script>";
 

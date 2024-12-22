@@ -16,9 +16,11 @@ void Esp32_38pin::initializePins() {
         pins.clear();
         Serial.println("Inizializzazione dei pin...");
         //METODO FUNZIONANTE!
+        /*
         Pin defaultPin(0, PinType::UNKNOWN, false, "default pin");
         addPin(defaultPin);
         Serial.println("Pin default aggiunto"); 
+        */
 
         addPin(Pin(-1, PinType::VOUT, false, "3.3V"));
         Serial.println("Pin 3.3V aggiunto");
@@ -31,7 +33,7 @@ void Esp32_38pin::initializePins() {
 
         // Pin GPIO36 - ADC1 (SENSOR_VP)
         addPin(Pin(36, PinType::ADC, true, "ADC0 - SENSOR_VP"));
-
+        /*
         // Pin GPIO22 - I2C SCL
         addPin(Pin(22, PinType::I2C, true, "I2C SCL"));
 
@@ -130,6 +132,7 @@ void Esp32_38pin::initializePins() {
 
         // Pin GPIO6 SD0 SPID HS1 CLK
         addPin(Pin(6, PinType::DIGITAL, true, "segnale di clock temporizzato"));
+        */
     }
     catch(const std::exception& e)
     {

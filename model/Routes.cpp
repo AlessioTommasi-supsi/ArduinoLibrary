@@ -40,12 +40,13 @@ void Routes::defineRoutes(AsyncWebServer &server)
     });
 
     server.on("/pinoutContent", HTTP_GET, [](AsyncWebServerRequest *request){
-                String content = "";
-                PinoutData *pinoutData = SystemState::getInstance()->pinoutData;
-                pinoutData->readPins();
-                content += pinoutData->toString();
-                request->send(200, "text/html", content);
+        String content = "";
+        PinoutData *pinoutData = SystemState::getInstance()->pinoutData;
+        pinoutData->readPins();
+        content += String(pinoutData->toString().c_str()); // Conversione da std::string a String
+        request->send(200, "text/html", content);
     });
+
 
     server.on("/history", HTTP_GET, [](AsyncWebServerRequest *request){
                 String htmlContent = viewHistory::generateHTML();

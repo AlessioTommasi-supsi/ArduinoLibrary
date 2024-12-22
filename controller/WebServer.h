@@ -13,6 +13,7 @@
 #include <SPIFFS.h>
 
 #include "Routes.h"
+#include <stdexcept>
 
 
 class WebServer

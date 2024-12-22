@@ -178,27 +178,34 @@ void Esp32_38pin::printPinsOnSerial() {
 
 void Esp32_38pin::readPins() {
     for (auto& pin : pins) {
-        if (!pin.isInput) {
+        if (!pin.isInput)/*controlla se isInput != 0 allora entro nel true! */ {
             // Gestisci errore: il pin è configurato come output
-            Serial.println("Il pin " + String(pin.number) + " è configurato come output.");
+            Serial.println("Errore: Il pin " + String(pin.number) + " è configurato come output.");
+            pin.voltage = 0; // Imposta a zero per indicare un errore o stato non leggibile
             continue;  // Ignora la lettura di questo pin
         }
 
-        
         switch (pin.type) {
             case PinType::ADC:
             case PinType::ANALOGIC:
-                pin.voltage = analogRead(pin.number) * (3.3 / 4095.0); // Conversione per ESP32
+                pin.voltage = static_cast<uint16_t>(analogRead(pin.number) * (3300.0 / 4095.0)); // Conversione in mV
                 break;
             case PinType::TOUCH:
-                pin.voltage = touchRead(pin.number); // Valore grezzo da touchRead
+                pin.voltage = static_cast<uint16_t>(touchRead(pin.number)); // Valore grezzo da touchRead
                 break;
             default:
-                pin.voltage = digitalRead(pin.number); // 1 per HIGH, 0 per LOW
+                pin.voltage = static_cast<uint16_t>(digitalRead(pin.number) * 1000); // HIGH = 1000 mV, LOW = 0 mV
                 break;
         }
+
+        // Stampa il valore letto per il debug
+        Serial.print("Pin ");
+        Serial.print(pin.number);
+        Serial.print(" lettura: ");
+        Serial.println(pin.voltage);
     }
 }
+
 
 Pin& Esp32_38pin::getPin(int GPIOPin) {
     for (auto& pin : pins) {

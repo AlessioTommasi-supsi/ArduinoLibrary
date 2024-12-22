@@ -6,7 +6,7 @@
 Esp32_38pin::Esp32_38pin() {
     Serial.println("Costruttore Esp32_38pin");
     initializePins();
-    
+    Serial.println("Inizializzazione dei pin effettuata!");
 }
 
 
@@ -14,7 +14,7 @@ void Esp32_38pin::initializePins() {
     try
     {
         pins.clear();
-        Serial.println("Inizializzazione dei pin...");
+        
         //METODO FUNZIONANTE!
         /*
         Pin defaultPin(0, PinType::UNKNOWN, false, "default pin");
@@ -111,19 +111,19 @@ void Esp32_38pin::initializePins() {
         addPin(Pin(2, PinType::ADC, true, "ADC12"));
         */
         // Pin GPIO9 SD2 SPIHD  HS1 DATA 2
-        addPin(Pin(9 , PinType::DIGITAL, true, "Input digital SD2 SPIHD  HS1 DATA 2 ovvero per interfacchiamento scheda sd"));
+        addPin(Pin(9 , PinType::DIGITAL, true, "SD D2"));
 
         // Pin GPIO15 - ADC2, HSPI_CS0
         //addPin(Pin(15, PinType::ADC, true, "ADC13, HSPI_CS0  HS2 CMD ovvero per interfacciamento con memoria flash"));
 
         // Pin GPIO10 - SD3 SPIWP HS1 DATA 3
-        addPin(Pin(10, PinType::DIGITAL, true, "Input digital SD3 SPIWP HS1 DATA 3 ovvero per interfacchiamento scheda sd"));
+        //addPin(Pin(10, PinType::DIGITAL, true, ""));
         
         //Pin GPIO8 - SD2 SPIWP HS1 DATA 1
         //addPin(Pin(8, PinType::DIGITAL, true, "Input digital SD2 SPIWP HS1 DATA 1 ovvero per interfacchiamento scheda sd"));
 
         // Pin GPIO11 SPICS0 HS1 CMD
-        addPin(Pin(11, PinType::DIGITAL, true, "Input digital SPICS0 HS1 CMD ovvero per interfacchiamento scheda sd"));
+        //addPin(Pin(11, PinType::DIGITAL, true, ""));
 
         // Pin GPIO 7 SD0 SPIQ HS1 DATA 0
         //addPin(Pin(7, PinType::DIGITAL, true, "Input digital SD0 SPIQ HS1 DATA 0 ovvero per interfacchiamento scheda sd"));
@@ -131,7 +131,7 @@ void Esp32_38pin::initializePins() {
         //addPin(Pin(-4, PinType::VIN, false, "tensione di alimentazione del dispositivo (5V)"));
 
         // Pin GPIO6 SD0 SPID HS1 CLK
-        addPin(Pin(6, PinType::DIGITAL, true, "segnale di clock temporizzato"));
+        //addPin(Pin(6, PinType::DIGITAL, true, "segnale di clock temporizzato"));
         
     }
     catch(const std::exception& e)

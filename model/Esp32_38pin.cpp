@@ -33,16 +33,16 @@ void Esp32_38pin::initializePins() {
 
         // Pin GPIO36 - ADC1 (SENSOR_VP)
         addPin(Pin(36, PinType::ADC, true, "ADC0 - SENSOR_VP"));
-        /*
+        
         // Pin GPIO22 - I2C SCL
         addPin(Pin(22, PinType::I2C, true, "I2C SCL"));
-
+        /*
         // Pin GPIO39 - ADC1 (SENSOR_VN)
         addPin(Pin(39, PinType::ADC, true, "ADC3 - SENSOR_VN"));
 
         // Pin GPIO1 - UART TXD0
         addPin(Pin(1, PinType::UART, true, "UART TXD0 or input digital"));
-
+        
         // Pin GPIO34 - ADC1 (Input only)
         addPin(Pin(34, PinType::ADC, true, "ADC6 - Input only"));
         

@@ -3,7 +3,7 @@
 
 #include "Arduino.h"
 #include "ModbusADU.h"
-#include "c.h"
+#include "ModbusRTUComm.h"
 
 enum ModbusRTUMasterError : uint8_t {
   MODBUS_RTU_MASTER_SUCCESS = 0,

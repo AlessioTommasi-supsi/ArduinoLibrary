@@ -12,6 +12,8 @@ private:
 public:
     static String html;
     static String generateHTML();
+    static String generateHTML(String popupScript); 
+    static String pageContent();
 };
 
 #endif

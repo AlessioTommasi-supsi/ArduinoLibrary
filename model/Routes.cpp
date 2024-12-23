@@ -43,7 +43,12 @@ void Routes::defineRoutes(AsyncWebServer &server)
         String content = "";
         PinoutData *pinoutData = SystemState::getInstance()->pinoutData;
         pinoutData->readPins();
-        content += String(pinoutData->toString().c_str()); // Conversione da std::string a String
+        //content += String(pinoutData->toString().c_str()); // Conversione da std::string a String
+        for (auto pin = pinoutData->begin(); pin != pinoutData->end(); ++pin) {
+            content += pin->toString();
+            content += "<br>";
+        }
+        
         request->send(200, "text/html", content);
     });
 

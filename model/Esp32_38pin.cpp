@@ -199,10 +199,9 @@ void Esp32_38pin::readPins() {
         }
 
         // Stampa il valore letto per il debug
-        Serial.print("Pin ");
-        Serial.print(pin.number);
-        Serial.print(" lettura: ");
-        Serial.println(pin.voltage);
+        //Serial.println("readed value: "); 
+        //Serial.println(pin.toString());
+        
     }
 }
 

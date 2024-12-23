@@ -57,48 +57,50 @@ uint16_t Pin::read()
     return  voltage;
 }
 
+
+void Pin:: recordingFunction(int milliseconds)
+{
+    while (true)
+    {
+        uint16_t value = read();
+        Serial.println("Recording value: " + String(value) + " at pin " + String(number));
+        delay(milliseconds);
+    }
+}
+
+
 void Pin::startRecording(int milliseconds)
 {
-    try
+    if (recordingTask == NULL)
     {
-        if (milliseconds < 100)
-        {
-            milliseconds = 100; // Imposta un minimo di 1 secondo per non sovraccaricare il sistema
-        }
-
-        if (recordingActive.load())
-        {
-            stopRecording();
-        }
-
-        recordingActive.store(true);
-
-        recordingThread = std::thread([this, milliseconds]() {
-            while (recordingActive.load())
-            {
-                uint16_t value = read();
-                //stampo su seriale notifica
-                Serial.println("Recording Pin value: " + String(value) + " at pin " + String(number));
-                std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
-            }
-        });
-
-    }
-    catch (const std::exception &e)
+        xTaskCreatePinnedToCore(
+            [](void* parameter) {
+                Pin* pin = static_cast<Pin*>(parameter);
+                pin->recordingFunction(1000);
+            },
+            "recordingTask",
+            10000,
+            this,
+            1,
+            &recordingTask,
+            0);
+    }else
     {
+        Serial.println("Recording already active");
+        Serial.println("Stoppin recording...");
         stopRecording();
-        Serial.println("Errore durante la registrazione del pin: " + toString());
+        Serial.println("Starting recording...");
+        startRecording(milliseconds);
     }
 }
 
 void Pin::stopRecording()
 {
-    if (recordingActive.load())
+    if (recordingTask != NULL)
     {
-        recordingActive.store(false);
-        if (recordingThread.joinable())
-        {
-            recordingThread.join();
-        }
+        vTaskDelete(recordingTask);
+        recordingTask = NULL;
+        Serial.println("Recording stopped!");
     }
 }
+

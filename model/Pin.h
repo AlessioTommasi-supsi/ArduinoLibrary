@@ -3,10 +3,6 @@
 
 #include "PinType.h"
 #include <Arduino.h>
-#include <mutex>
-#include <thread>
-#include <atomic>
-#include <chrono>
 #include <vector>
 
 class Pin {
@@ -18,9 +14,8 @@ public:
     char note[50];       // Usa array di char per gestire le note
 
     std::vector<uint16_t> valuesVoltage;
-    std::thread recordingThread;
-    std::atomic<bool> recordingActive;
-    std::mutex recordingMutex;
+    
+    TaskHandle_t recordingTask = NULL;
 
     Pin(uint8_t num, PinType t, uint8_t input, const char* n, uint16_t volt = 0);
 
@@ -31,6 +26,8 @@ public:
 
     void startRecording(int milliseconds);
     void stopRecording();
+
+    void recordingFunction(int milliseconds);
 
 };
 

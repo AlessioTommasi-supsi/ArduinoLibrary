@@ -53,5 +53,52 @@ uint16_t Pin::read()
          voltage = static_cast<uint16_t>(digitalRead(number) * 1000); // HIGH = 1000 mV, LOW = 0 mV
         break;
     }
+    valuesVoltage.push_back(voltage);
     return  voltage;
+}
+
+void Pin::startRecording(int milliseconds)
+{
+    try
+    {
+        if (milliseconds < 100)
+        {
+            milliseconds = 100; // Imposta un minimo di 1 secondo per non sovraccaricare il sistema
+        }
+
+        if (recordingActive.load())
+        {
+            stopRecording();
+        }
+
+        recordingActive.store(true);
+
+        recordingThread = std::thread([this, milliseconds]() {
+            while (recordingActive.load())
+            {
+                uint16_t value = read();
+                //stampo su seriale notifica
+                Serial.println("Recording Pin value: " + String(value) + " at pin " + String(number));
+                std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+            }
+        });
+
+    }
+    catch (const std::exception &e)
+    {
+        stopRecording();
+        Serial.println("Errore durante la registrazione del pin: " + toString());
+    }
+}
+
+void Pin::stopRecording()
+{
+    if (recordingActive.load())
+    {
+        recordingActive.store(false);
+        if (recordingThread.joinable())
+        {
+            recordingThread.join();
+        }
+    }
 }

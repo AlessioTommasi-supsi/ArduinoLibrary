@@ -18,7 +18,6 @@ public:
     virtual std::vector<Pin>::iterator end() = 0;
     virtual std::vector<Pin>::const_iterator begin() const = 0;
     virtual std::vector<Pin>::const_iterator end() const = 0;
-
     virtual std::string toString() const = 0;
 };
 

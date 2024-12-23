@@ -49,7 +49,7 @@ void Routes::defineRoutes(AsyncWebServer &server)
             content += "<form action='/startRecordingPin' method='get' style='display: inline;'>";
             content += "  <input type='hidden' name='pin' value='" + String(pin->number) + "'>";
             content += "  <label for='milliseconds'>Milliseconds:</label>";
-            content += "  <input type='text' id='milliseconds' name='milliseconds' required>";
+            content += "  <input type='text' id='milliseconds' name='milliseconds' required value='1000'>";
             content += "  <button type='submit' style='padding: 5px; background-color: red; color: white; border: none; border-radius: 4px; cursor: pointer;'>Start Recording</button>";
             content += "</form>";
             content += "<form action='/stopRecordingPin' method='get' style='display: inline; margin-left: 10px;'>";

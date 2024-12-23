@@ -22,22 +22,38 @@ String Pinout::pageContent()
     // Aggiungo una sezione per i dati dei pin
     html += "<div id='pinData'></div>";
 
-    // Aggiungi lo script per aggiornare il div ogni k secondi
+    // Aggiungi lo script per gestire l'aggiornamento e gli eventi di input
     html += "<script>";
     html += "document.addEventListener('DOMContentLoaded', () => {";
-    html += "  setInterval(() => {";
-    html += "    fetch('/pinoutContent')";
-    html += "      .then(response => response.text())";
-    html += "      .then(data => {";
-    html += "        document.getElementById('pinData').innerHTML = data;";
-    html += "      });";
-    html += "  }, 3000);"; // Aggiorna ogni 3 secondi (puoi cambiare il valore a k*1000 per k secondi)
+    html += "  let intervalId;";
+    html += "  const startInterval = () => {";
+    html += "    intervalId = setInterval(() => {";
+    html += "      fetch('/pinoutContent')";
+    html += "        .then(response => response.text())";
+    html += "        .then(data => {";
+    html += "          document.getElementById('pinData').innerHTML = data;";
+    html += "        });";
+    html += "    }, 2000);"; // Aggiorna ogni 2 secondi (puoi cambiare il valore a k*1000 per k secondi)
+    html += "  };";
+    html += "  const stopInterval = () => {";
+    html += "    clearInterval(intervalId);";
+    html += "  };";
+    html += "  startInterval();";
+    html += "  document.addEventListener('focusin', (event) => {";
+    html += "    if (event.target.tagName === 'INPUT' && event.target.type === 'text') {";
+    html += "      stopInterval();";
+    html += "    }";
+    html += "  });";
+    html += "  document.addEventListener('focusout', (event) => {";
+    html += "    if (event.target.tagName === 'INPUT' && event.target.type === 'text') {";
+    html += "      startInterval();";
+    html += "    }";
+    html += "  });";
     html += "});";
     html += "</script>";
+
     return html;
 }
-
-
 
 String Pinout::generateHTML(String popupScript)
 {

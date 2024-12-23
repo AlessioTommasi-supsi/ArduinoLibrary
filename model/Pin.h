@@ -17,6 +17,7 @@ public:
     void setMode(uint8_t input);
     void setNote(const char* newNote);  // Metodo per cambiare la nota
     String toString() const;
+    uint16_t read();
 };
 
 #endif // PIN_H

@@ -44,6 +44,9 @@ private:
     std::vector<int> address;
     std::vector<float> value;
 
+    std::vector<int> pinNumber;
+    std::vector<float> pinValue;
+
     std::mutex registerMutex;
 
     std::map<int, std::thread> recordingThreads;
@@ -56,6 +59,7 @@ private:
     SystemState() {}
 
 public:
+    
      /*pinout attribute*/
     static PinoutData *pinoutData;
 

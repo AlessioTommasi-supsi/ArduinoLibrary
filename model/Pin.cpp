@@ -29,3 +29,29 @@ String Pin::toString() const {
                     + ", Note: " + String(note);
     return result;
 }
+
+uint16_t Pin::read()
+{
+    if (!isInput) /*controlla se isInput != 0 allora entro nel true! */
+    {
+        // Gestisci errore: il pin è configurato come output
+        Serial.println("Errore: Il pin " + String(number) + " è configurato come output.");
+        voltage = -1;
+        return voltage;
+    }
+
+    switch (type)
+    {
+    case PinType::ADC:
+    case PinType::ANALOGIC:
+        voltage = static_cast<uint16_t>(analogRead(number) * (3300.0 / 4095.0)); // Conversione in mV
+        break;
+    case PinType::TOUCH:
+         voltage = static_cast<uint16_t>(touchRead(number)); // Valore grezzo da touchRead
+        break;
+    default:
+         voltage = static_cast<uint16_t>(digitalRead(number) * 1000); // HIGH = 1000 mV, LOW = 0 mV
+        break;
+    }
+    return  voltage;
+}

@@ -117,7 +117,7 @@ void Esp32_38pin::initializePins() {
         //addPin(Pin(15, PinType::ADC, true, "ADC13, HSPI_CS0  HS2 CMD ovvero per interfacciamento con memoria flash"));
 
         // Pin GPIO10 - SD3 SPIWP HS1 DATA 3
-        //addPin(Pin(10, PinType::DIGITAL, true, ""));
+        addPin(Pin(10, PinType::DIGITAL, true, ""));
         
         //Pin GPIO8 - SD2 SPIWP HS1 DATA 1
         //addPin(Pin(8, PinType::DIGITAL, true, "Input digital SD2 SPIWP HS1 DATA 1 ovvero per interfacchiamento scheda sd"));
@@ -178,25 +178,7 @@ void Esp32_38pin::printPinsOnSerial() {
 
 void Esp32_38pin::readPins() {
     for (auto& pin : pins) {
-        if (!pin.isInput)/*controlla se isInput != 0 allora entro nel true! */ {
-            // Gestisci errore: il pin è configurato come output
-            Serial.println("Errore: Il pin " + String(pin.number) + " è configurato come output.");
-            pin.voltage = -1; 
-            continue;  // Ignora la lettura di questo pin
-        }
-
-        switch (pin.type) {
-            case PinType::ADC:
-            case PinType::ANALOGIC:
-                pin.voltage = static_cast<uint16_t>(analogRead(pin.number) * (3300.0 / 4095.0)); // Conversione in mV
-                break;
-            case PinType::TOUCH:
-                pin.voltage = static_cast<uint16_t>(touchRead(pin.number)); // Valore grezzo da touchRead
-                break;
-            default:
-                pin.voltage = static_cast<uint16_t>(digitalRead(pin.number) * 1000); // HIGH = 1000 mV, LOW = 0 mV
-                break;
-        }
+        uint16_t value = pin.read();
 
         // Stampa il valore letto per il debug
         //Serial.println("readed value: "); 

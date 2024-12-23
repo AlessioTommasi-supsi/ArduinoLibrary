@@ -13,6 +13,7 @@ private:
 public:
     static String html;
     static String generateHTML();
+    static String generateGraph(std::vector<int> addresses, String apiFetch, String apiFetchParam);
 };
 
 #endif

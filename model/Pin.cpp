@@ -53,7 +53,7 @@ uint16_t Pin::read()
          voltage = static_cast<uint16_t>(digitalRead(number) * 1000); // HIGH = 1000 mV, LOW = 0 mV
         break;
     }
-    valuesVoltage.push_back(voltage);
+    //valuesVoltage.push_back(voltage);
     return  voltage;
 }
 
@@ -64,6 +64,7 @@ void Pin:: recordingFunction(int milliseconds)
     {
         uint16_t value = read();
         Serial.println("Recording value: " + String(value) + " at pin " + String(number));
+        valuesVoltage.push_back(value);
         delay(milliseconds);
     }
 }

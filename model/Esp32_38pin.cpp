@@ -9,8 +9,20 @@ Esp32_38pin::Esp32_38pin() {
     Serial.println("Inizializzazione dei pin effettuata!");
 }
 
+std::vector<Pin> Esp32_38pin::getPins() {
+    return pins;
+}
 
-void Esp32_38pin::initializePins() {
+std::vector<int> Esp32_38pin::getPinNumbers() {
+    std::vector<int> pinNumbers;
+    for (const auto& pin : pins) {
+        pinNumbers.push_back(pin.number);
+    }
+    return pinNumbers;
+}
+
+void Esp32_38pin::initializePins()
+{
     try
     {
         pins.clear();
@@ -143,7 +155,6 @@ void Esp32_38pin::initializePins() {
 
     printPinsOnSerial();
 }
-
 
 void Esp32_38pin::addPin(const Pin& pin) {
     try

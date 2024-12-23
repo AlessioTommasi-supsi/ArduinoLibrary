@@ -67,9 +67,8 @@ void Routes::defineRoutes(AsyncWebServer &server)
             String registerAddress = request->getParam("pin")->value();
 
             Serial.println("Start recording Pin " + registerAddress + " every " + milliseconds + " milliseconds");
-            //Serial.println("integer milliseconds: " + milliseconds.toInt());
             
-            //SystemState::getInstance()->startRecordingRegister(registerAddress.toInt(), milliseconds.toInt());
+            SystemState::getInstance()->pinoutData->getPin(registerAddress.toInt()).startRecording(milliseconds.toInt());
 
             String popupScript = "showPopup('Recording started for pin " + registerAddress + "');";
             String htmlContent = Pinout::generateHTML(popupScript);
@@ -93,8 +92,10 @@ void Routes::defineRoutes(AsyncWebServer &server)
               {
         try {
             String registerAddress = request->getParam("pin")->value();
-            //SystemState::getInstance()->stopRecordingRegister(registerAddress.toInt());
 
+            SystemState::getInstance()->pinoutData->getPin(registerAddress.toInt()).stopRecording();
+            //SystemState::getInstance()->stopRecordingRegister(registerAddress.toInt());
+            Serial.println("Stop recording Pin " + registerAddress);
             String popupScript = "showPopup('Recording stopped');";
             String htmlContent = Pinout::generateHTML(popupScript);
             const char *htmlContentPtr = htmlContent.c_str();
@@ -283,6 +284,24 @@ void Routes::defineRoutes(AsyncWebServer &server)
             request->send(200, "application/json", json);
         } else {
             request->send(400, "application/json", "{\"error\":\"Address parameter missing\"}");
+        } 
+    });
+
+    server.on("/getPinValues", HTTP_GET, [](AsyncWebServerRequest *request){
+        if (request->hasParam("pin")) {
+            String pin = request->getParam("pin")->value();
+            std::vector<float> values = SystemState::getInstance()->pinoutData->getPin(pin.toInt()).getValuesVoltage();
+
+            String json = "[";
+            for (size_t i = 0; i < values.size(); ++i) {
+                if (i > 0) json += ",";
+                json += String(values[i]);
+            }
+            json += "]";
+
+            request->send(200, "application/json", json);
+        } else {
+            request->send(400, "application/json", "{\"error\":\"Pin parameter missing\"}");
         } 
     });
 

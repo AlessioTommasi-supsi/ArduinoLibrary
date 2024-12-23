@@ -7,10 +7,7 @@ String viewGraph::generateHTML()
 
     html += "<h1>Graph View</h1>";
 
-    // Menu a tendina per selezionare l'indirizzo del registro
-    html += "<label for='           register-select'>Select Register Address: or gpio value</label>";
-    html += "<select id='register-select' onchange='updateGraph()'>";
-
+    
     std::vector<int> addresses = SystemState::getInstance()->getAllRegisterAddress();
     String apiFetch = "getRegisterValues";
     String apiFetchParam = "address";
@@ -26,6 +23,10 @@ String viewGraph::generateHTML()
 String viewGraph::generateGraph(std::vector<int> addresses, String apiFetch, String apiFetchParam)
 {
     String var_html = "";
+
+    // Menu a tendina per selezionare l'indirizzo del registro
+    var_html += "<label for='           register-select'>Select Register Address: or gpio value</label>";
+    var_html += "<select id='register-select' onchange='updateGraph()'>";
 
     for (int addr : addresses)
     {

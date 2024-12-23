@@ -16,6 +16,8 @@ public:
     void readPins() override;
     void addPin(const Pin& pin) override;
     Pin& getPin(int GPIOPin) override;
+    std::vector<Pin> getPins() override;
+    std::vector<int> getPinNumbers() override;
     std::vector<Pin>::iterator begin() override;
     std::vector<Pin>::iterator end() override;
     std::vector<Pin>::const_iterator begin() const override;

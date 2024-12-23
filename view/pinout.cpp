@@ -1,4 +1,5 @@
 #include "pinout.h"
+#include "viewGraph.h"
 
 String Pinout::html = "";
 
@@ -51,6 +52,12 @@ String Pinout::pageContent()
     html += "  });";
     html += "});";
     html += "</script>";
+
+    html += "<br><br>";
+
+
+    //aggiungo grafico da ViewGraph
+    html += viewGraph::generateGraph(SystemState::getInstance()->pinoutData->getPinNumbers(), "getPinValues", "pin");
 
     return html;
 }

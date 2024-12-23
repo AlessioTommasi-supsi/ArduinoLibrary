@@ -29,6 +29,10 @@ public:
 
     void recordingFunction(int milliseconds);
 
+    std::vector<float> getValuesVoltage();
+
+
+
 };
 
 #endif // PIN_H

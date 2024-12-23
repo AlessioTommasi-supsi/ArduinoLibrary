@@ -105,3 +105,10 @@ void Pin::stopRecording()
     }
 }
 
+std::vector<float> Pin::getValuesVoltage()
+{
+    //ritorna una copia del vettore
+    std::vector<float> copyValues(valuesVoltage.begin(), valuesVoltage.end());
+    return copyValues;
+}
+

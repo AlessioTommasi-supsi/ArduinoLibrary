@@ -14,6 +14,9 @@ public:
     static String html;
     static String generateHTML();
     static String generateGraph(std::vector<int> addresses, String apiFetch, String apiFetchParam);
+    static String generateCirularProgressBarGraph(String circle_progressbar_label, float circle_progressbar_used_value, float circle_progressbar_total_value);
+    static String initCirularProgressBarGraph();
+    static String endCirularProgressBarGraph();
 };
 
 #endif

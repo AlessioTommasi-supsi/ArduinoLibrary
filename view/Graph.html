@@ -5,8 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barra di Progresso Circolare</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" rel="stylesheet">
     <style>
 
         .circle_progressbar_chart-container {
@@ -63,7 +61,9 @@
 </head>
 
 <body>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <div class="circle_progressbar_chart-container">
+        
         <div class="circle_progressbar_chart-wrapper">
             <div class="circle_progressbar_label">Heap</div>
             <canvas id="chart1" class="circle_progressbar_chart"></canvas>
@@ -71,18 +71,21 @@
             <div class="circle_progressbar_percentage">Utilizzato: 75 / Totale: 100</div>
         </div>
         <div class="circle_progressbar_chart-wrapper">
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
             <div class="circle_progressbar_label">Stack</div>
             <canvas id="chart2" class="circle_progressbar_chart"></canvas>
             <div class="circle_progressbar_center-label" id="label2">50%</div>
             <div class="circle_progressbar_percentage">Utilizzato: 50 / Totale: 100</div>
         </div>
         <div class="circle_progressbar_chart-wrapper">
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
             <div class="circle_progressbar_label">CPU</div>
             <canvas id="chart3" class="chart"></canvas>
             <div class="circle_progressbar_center-label" id="label3">25%</div>
             <div class="circle_progressbar_percentage">Utilizzato: 25 / Totale: 100</div>
         </div>
         <div class="circle_progressbar_chart-wrapper">
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
             <div class="circle_progressbar_label">Memory</div>
             <canvas id="chart4" class="circle_progressbar_chart"></canvas>
             <div class="circle_progressbar_center-label" id="label4">90%</div>
@@ -90,6 +93,7 @@
         </div>
     </div>
 
+    
     <script>
         function createChart(ctx, percentage) {
             new Chart(ctx, {
@@ -112,7 +116,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            createChart(document.getElementById('chart1').getContext('2d'), 75);
+            createChart(document.getElementById('chart1').getContext('2d'), 5);
             createChart(document.getElementById('chart2').getContext('2d'), 50);
             createChart(document.getElementById('chart3').getContext('2d'), 25);
             createChart(document.getElementById('chart4').getContext('2d'), 90);

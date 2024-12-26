@@ -12,6 +12,7 @@
 #include "viewGraph.h"
 #include "viewConfig.h"
 #include "viewWifiSuccessChange.h"
+#include "viewGeneric.h"
 
 //#include "WiFiManager.h"
 #include "SystemState.h"

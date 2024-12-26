@@ -100,3 +100,61 @@ String viewGraph::generateGraph(std::vector<int> addresses, String apiFetch, Str
 
     return var_html;
 }
+
+
+String viewGraph::initCirularProgressBarGraph()
+{
+    String var_circle_progressbar_html = "";
+    var_circle_progressbar_html += "<script src='https://cdn.jsdelivr.net/npm/chart.js'></script>";
+    var_circle_progressbar_html += "<div class='circle_progressbar_chart-container'>";
+    return var_circle_progressbar_html;
+}
+
+String viewGraph::endCirularProgressBarGraph()
+{
+    String var_circle_progressbar_html = "";
+    var_circle_progressbar_html += "</div>";
+    var_circle_progressbar_html += "<script>";
+    var_circle_progressbar_html += "function createChart(ctx, percentage) {";
+    var_circle_progressbar_html += "  new Chart(ctx, {";
+    var_circle_progressbar_html += "    type: 'doughnut',";
+    var_circle_progressbar_html += "    data: {";
+    var_circle_progressbar_html += "      datasets: [{";
+    var_circle_progressbar_html += "        data: [percentage, 100 - percentage],";
+    var_circle_progressbar_html += "        backgroundColor: ['#4caf50', '#ddd'],";
+    var_circle_progressbar_html += "        borderWidth: 0";
+    var_circle_progressbar_html += "      }]";
+    var_circle_progressbar_html += "    },";
+    var_circle_progressbar_html += "    options: {";
+    var_circle_progressbar_html += "      cutout: '80%',";
+    var_circle_progressbar_html += "      plugins: {";
+    var_circle_progressbar_html += "        tooltip: { enabled: false },";
+    var_circle_progressbar_html += "        legend: { display: false }";
+    var_circle_progressbar_html += "      }";
+    var_circle_progressbar_html += "    }";
+    var_circle_progressbar_html += "  });";
+    var_circle_progressbar_html += "}";
+    var_circle_progressbar_html += "</script>";
+
+    return var_circle_progressbar_html;
+}
+
+String viewGraph::generateCirularProgressBarGraph(String circle_progressbar_label, float circle_progressbar_used_value, float circle_progressbar_total_value)
+{
+    String var_circle_progressbar_html = "";
+    var_circle_progressbar_html += "<div class='circle_progressbar_chart-wrapper'>";
+    var_circle_progressbar_html += "    <div class='circle_progressbar_label'> " + circle_progressbar_label + "</div>";
+    var_circle_progressbar_html += "    <canvas id='circle_progressbar_chart_" + circle_progressbar_label + "' width='200' height='200'></canvas>";
+    var_circle_progressbar_html += "    <div class='circle_progressbar_center-label' id='label" + circle_progressbar_label + "'>" + String((int)(circle_progressbar_used_value / circle_progressbar_total_value * 100)) + " %</div>";
+    var_circle_progressbar_html += "<div class='circle_progressbar_percentage'>Utilizzato: " + String(circle_progressbar_used_value) + " / Totale: " + String(circle_progressbar_total_value) + "</div>";
+    var_circle_progressbar_html += "</div>";
+    var_circle_progressbar_html += "<script>";
+    var_circle_progressbar_html += "document.addEventListener('DOMContentLoaded', () => {";
+    var_circle_progressbar_html += "  const ctx = document.getElementById('circle_progressbar_chart_" + circle_progressbar_label + "').getContext('2d');";
+    var_circle_progressbar_html += "  const percentage = " + String(circle_progressbar_used_value / circle_progressbar_total_value * 100) + ";";
+    var_circle_progressbar_html += "  createChart(ctx, percentage);";
+    var_circle_progressbar_html += "});";
+    var_circle_progressbar_html += "</script>";
+
+    return var_circle_progressbar_html;
+}

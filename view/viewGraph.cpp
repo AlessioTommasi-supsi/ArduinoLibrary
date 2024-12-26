@@ -101,12 +101,11 @@ String viewGraph::generateGraph(std::vector<int> addresses, String apiFetch, Str
     return var_html;
 }
 
-
 String viewGraph::initCirularProgressBarGraph()
 {
     String var_circle_progressbar_html = "";
     var_circle_progressbar_html += "<script src='https://cdn.jsdelivr.net/npm/chart.js'></script>";
-    var_circle_progressbar_html += "<div class='circle_progressbar_chart-container'>";
+    var_circle_progressbar_html += "<div class='circle_progressbar_chart-container' style='font-family: Raleway, sans-serif; display: flex; flex-wrap: wrap; justify-content: space-around; gap: 20px; padding: 20px;'>";
     return var_circle_progressbar_html;
 }
 
@@ -134,6 +133,7 @@ String viewGraph::endCirularProgressBarGraph()
     var_circle_progressbar_html += "    }";
     var_circle_progressbar_html += "  });";
     var_circle_progressbar_html += "}";
+
     var_circle_progressbar_html += "</script>";
 
     return var_circle_progressbar_html;
@@ -142,16 +142,17 @@ String viewGraph::endCirularProgressBarGraph()
 String viewGraph::generateCirularProgressBarGraph(String circle_progressbar_label, float circle_progressbar_used_value, float circle_progressbar_total_value)
 {
     String var_circle_progressbar_html = "";
-    var_circle_progressbar_html += "<div class='circle_progressbar_chart-wrapper'>";
-    var_circle_progressbar_html += "    <div class='circle_progressbar_label'> " + circle_progressbar_label + "</div>";
-    var_circle_progressbar_html += "    <canvas id='circle_progressbar_chart_" + circle_progressbar_label + "' width='200' height='200'></canvas>";
-    var_circle_progressbar_html += "    <div class='circle_progressbar_center-label' id='label" + circle_progressbar_label + "'>" + String((int)(circle_progressbar_used_value / circle_progressbar_total_value * 100)) + " %</div>";
-    var_circle_progressbar_html += "<div class='circle_progressbar_percentage'>Utilizzato: " + String(circle_progressbar_used_value) + " / Totale: " + String(circle_progressbar_total_value) + "</div>";
+    float percentage = (circle_progressbar_used_value / circle_progressbar_total_value) * 100;
+    var_circle_progressbar_html += "<div class='circle_progressbar_chart-wrapper' style='display: flex; flex-direction: column; align-items: center; width: 45%; max-width: 300px; min-width: 150px; position: relative;'>";
+    var_circle_progressbar_html += "    <div class='circle_progressbar_label' style='font-size: 1.2rem; margin-bottom: 10px;'> " + circle_progressbar_label + "</div>";
+    var_circle_progressbar_html += "    <canvas id='circle_progressbar_chart_" + circle_progressbar_label + "' class='circle_progressbar_chart' style='width: 100%; height: auto;' width='200' height='200'></canvas>";
+    var_circle_progressbar_html += "    <div class='circle_progressbar_center-label' id='label" + circle_progressbar_label + "' style='position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2rem; font-weight: bold; color: #000; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);'>" + String((int)percentage) + " %</div>";
+    var_circle_progressbar_html += "<div class='circle_progressbar_percentage' style='font-size: 1rem; margin-top: 10px;'>Utilizzato: " + String(circle_progressbar_used_value) + " / Totale: " + String(circle_progressbar_total_value) + "</div>";
     var_circle_progressbar_html += "</div>";
     var_circle_progressbar_html += "<script>";
     var_circle_progressbar_html += "document.addEventListener('DOMContentLoaded', () => {";
     var_circle_progressbar_html += "  const ctx = document.getElementById('circle_progressbar_chart_" + circle_progressbar_label + "').getContext('2d');";
-    var_circle_progressbar_html += "  const percentage = " + String(circle_progressbar_used_value / circle_progressbar_total_value * 100) + ";";
+    var_circle_progressbar_html += "  const percentage = " + String(percentage) + ";";
     var_circle_progressbar_html += "  createChart(ctx, percentage);";
     var_circle_progressbar_html += "});";
     var_circle_progressbar_html += "</script>";

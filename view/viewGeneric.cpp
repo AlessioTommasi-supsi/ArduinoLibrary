@@ -11,7 +11,6 @@ String viewGeneric::addCss()
     css += "flex-direction: column;";
     css += "justify-content: center;";
     css += "align-items: center;";
-    css += "height: 100vh;";
     css += "margin: 0;";
     css += "}";
     css += ".navbar {";
@@ -102,6 +101,8 @@ String viewGeneric::addNavbar()
     navbar += "<a href='/graph'>Graph</a>";
     navbar += "<a href='/config'>Config</a>";
     navbar += "</div>";
+    navbar += "<br><br><br>";
+    navbar += "<br><br><br>";
     return navbar;
 }
 

@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" rel="stylesheet">
     <style>
 
-        .chart-container {
+        .circle_progressbar_chart-container {
             font-family: 'Raleway', sans-serif;
             display: flex;
             flex-wrap: wrap;
@@ -18,7 +18,7 @@
             padding: 20px;
         }
 
-        .chart-wrapper {
+        .circle_progressbar_chart-wrapper {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -28,22 +28,22 @@
             position: relative;
         }
 
-        .chart {
+        .circle_progressbar_chart {
             width: 100%;
             height: auto;
         }
 
-        .label {
-            font-size: 1.2rem;
+        .circle_progressbar_label {
+            font-size: 1.circle_progressbar_2rem;
             margin-bottom: 10px;
         }
 
-        .percentage {
+        .circle_progressbar_percentage {
             font-size: 1rem;
             margin-top: 10px;
         }
 
-        .center-label {
+        .circle_progressbar_center-label {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -51,11 +51,11 @@
             font-size: 2rem;
             font-weight: bold;
             color: #000;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.circle_progressbar_2);
         }
 
         @media (max-width: 768px) {
-            .chart-wrapper {
+            .circle_progressbar_chart-wrapper {
                 width: 100%;
             }
         }
@@ -63,30 +63,30 @@
 </head>
 
 <body>
-    <div class="chart-container">
-        <div class="chart-wrapper">
-            <div class="label">Heap</div>
-            <canvas id="chart1" class="chart"></canvas>
-            <div class="center-label" id="label1">75%</div>
-            <div class="percentage">Utilizzato: 75 / Totale: 100</div>
+    <div class="circle_progressbar_chart-container">
+        <div class="circle_progressbar_chart-wrapper">
+            <div class="circle_progressbar_label">Heap</div>
+            <canvas id="chart1" class="circle_progressbar_chart"></canvas>
+            <div class="circle_progressbar_center-label" id="label1">75%</div>
+            <div class="circle_progressbar_percentage">Utilizzato: 75 / Totale: 100</div>
         </div>
-        <div class="chart-wrapper">
-            <div class="label">Stack</div>
-            <canvas id="chart2" class="chart"></canvas>
-            <div class="center-label" id="label2">50%</div>
-            <div class="percentage">Utilizzato: 50 / Totale: 100</div>
+        <div class="circle_progressbar_chart-wrapper">
+            <div class="circle_progressbar_label">Stack</div>
+            <canvas id="chart2" class="circle_progressbar_chart"></canvas>
+            <div class="circle_progressbar_center-label" id="label2">50%</div>
+            <div class="circle_progressbar_percentage">Utilizzato: 50 / Totale: 100</div>
         </div>
-        <div class="chart-wrapper">
-            <div class="label">CPU</div>
+        <div class="circle_progressbar_chart-wrapper">
+            <div class="circle_progressbar_label">CPU</div>
             <canvas id="chart3" class="chart"></canvas>
-            <div class="center-label" id="label3">25%</div>
-            <div class="percentage">Utilizzato: 25 / Totale: 100</div>
+            <div class="circle_progressbar_center-label" id="label3">25%</div>
+            <div class="circle_progressbar_percentage">Utilizzato: 25 / Totale: 100</div>
         </div>
-        <div class="chart-wrapper">
-            <div class="label">Memory</div>
-            <canvas id="chart4" class="chart"></canvas>
-            <div class="center-label" id="label4">90%</div>
-            <div class="percentage">Utilizzato: 90 / Totale: 100</div>
+        <div class="circle_progressbar_chart-wrapper">
+            <div class="circle_progressbar_label">Memory</div>
+            <canvas id="chart4" class="circle_progressbar_chart"></canvas>
+            <div class="circle_progressbar_center-label" id="label4">90%</div>
+            <div class="circle_progressbar_percentage">Utilizzato: 90 / Totale: 100</div>
         </div>
     </div>
 

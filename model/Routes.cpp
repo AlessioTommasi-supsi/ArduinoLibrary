@@ -376,6 +376,8 @@ void Routes::defineRoutes(AsyncWebServer &server)
 
     server.on("/monitorHeapData", HTTP_GET, [](AsyncWebServerRequest *request){
         //Serial.println("GET /monitorHeapData");
+
+        //todo: implementare qualcosa di simile per ogni pin: potrei monitorare task con Pin.thread!
         try
         {
             String json = "{";

@@ -350,14 +350,20 @@ void Routes::defineRoutes(AsyncWebServer &server)
             String htmlContent = "";
             htmlContent += viewGeneric::defaultCssHeader("Monitor");
             htmlContent += viewGraph::initCirularProgressBarGraph();
-            htmlContent += viewGraph::generateCirularProgressBarGraph("CPU", 50, 100);
-            htmlContent += viewGraph::generateCirularProgressBarGraph("HEAP", 70, 100);
-            htmlContent += viewGraph::generateCirularProgressBarGraph("STACK", 5, 100);
-            htmlContent += viewGraph::endCirularProgressBarGraph();
 
-            const char *htmlContentPtr = htmlContent.c_str();
+            // Ottieni le metriche di sistema
+
+            // HEAP
+            size_t heapFree = heap_caps_get_free_size(MALLOC_CAP_8BIT);
+            size_t heapTotal = heap_caps_get_total_size(MALLOC_CAP_8BIT);
+
+            htmlContent += viewGraph::generateCirularProgressBarGraph("HEAP", heapFree, heapTotal);
+
+            htmlContent += viewGraph::endCirularProgressBarGraph();
             htmlContent += viewGeneric::defaultFooter();
-            request->send(200, "text/html", htmlContentPtr);
+
+            // Invio della risposta HTTP
+            request->send(200, "text/html", htmlContent);
         }
         catch(...)
         {

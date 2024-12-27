@@ -35,8 +35,9 @@ uint16_t Pin::read()
     if (!isInput) /*controlla se isInput != 0 allora entro nel true! */
     {
         // Gestisci errore: il pin è configurato come output
-        Serial.println("Errore: Il pin " + String(number) + " è configurato come output.");
-        voltage = -1;
+        //Serial.println("Errore: Il pin " + String(number) + " è configurato come output.");
+        //voltage = -1;
+        //ritorno semplicemente ultimo voltaggio letto!
         return voltage;
     }
 

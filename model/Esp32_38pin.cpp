@@ -13,6 +13,7 @@ std::vector<Pin> Esp32_38pin::getPins() {
     return pins;
 }
 
+
 std::vector<int> Esp32_38pin::getPinNumbers() {
     std::vector<int> pinNumbers;
     for (const auto& pin : pins) {

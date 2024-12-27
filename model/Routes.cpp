@@ -356,9 +356,10 @@ void Routes::defineRoutes(AsyncWebServer &server)
             // HEAP
             size_t heapFree = heap_caps_get_free_size(MALLOC_CAP_8BIT);
             size_t heapTotal = heap_caps_get_total_size(MALLOC_CAP_8BIT);
+            size_t heapUsed = heapTotal - heapFree;
 
-            htmlContent += viewGraph::generateCirularProgressBarGraph("HEAP", heapFree, heapTotal);
-
+            //htmlContent += viewGraph::generateCirularProgressBarGraph("HEAP", heapUsed, heapTotal);
+            htmlContent += viewGraph::generateCirularProgressBarGraph("HEAP", heapUsed, heapTotal, "monitorHeapData", 1000);
             htmlContent += viewGraph::endCirularProgressBarGraph();
             htmlContent += viewGeneric::defaultFooter();
 
@@ -370,6 +371,32 @@ void Routes::defineRoutes(AsyncWebServer &server)
             String htmlContent = "error";
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(500, "text/html", htmlContentPtr);
+        }
+    });
+
+    server.on("/monitorHeapData", HTTP_GET, [](AsyncWebServerRequest *request){
+        //Serial.println("GET /monitorHeapData");
+        try
+        {
+            String json = "{";
+            // Ottieni le metriche di sistema
+
+            // HEAP
+            size_t heapFree = heap_caps_get_free_size(MALLOC_CAP_8BIT);
+            size_t heapTotal = heap_caps_get_total_size(MALLOC_CAP_8BIT);
+            size_t heapUsed = heapTotal - heapFree;
+
+            json += "\"used\":" + String(heapUsed) + ",";
+            json += "\"total\":" + String(heapTotal);
+
+            json += "}";
+
+            request->send(200, "application/json", json);
+        }
+        catch(...)
+        {
+            String json = "{\"error\":\"An error occurred\"}";
+            request->send(500, "application/json", json);
         }
     });
 }

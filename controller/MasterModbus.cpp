@@ -16,17 +16,26 @@ void MasterModbus::processError()
 
 void MasterModbus::registerPins(PinoutData *pinoutData)
 {
-    Pin &rxPin = pinoutData->getPin(this->rxPin);
-    rxPin.isInput = false;
-    rxPin.setNote("rxPin pin for Modbus communication");
+    Pin *rxPin = pinoutData->getPin(this->rxPin);
+    if (rxPin)//Check if pointer is not null
+    {
+        rxPin->isInput = false;
+        rxPin->setNote("rxPin pin for Modbus communication");
+    }
 
-    Pin &txPin = pinoutData->getPin(this->txPin);
-    txPin.isInput = false;
-    txPin.setNote("txPin pin for Modbus communication");
+    Pin *txPin = pinoutData->getPin(this->txPin);
+    if (txPin)
+    {
+        txPin->isInput = false;
+        txPin->setNote("txPin pin for Modbus communication");
+    }
 
-    Pin &dePin = pinoutData->getPin(this->dePin);
-    dePin.isInput = false;
-    dePin.setNote("dePin pin for Modbus communication");
+    Pin *dePin = pinoutData->getPin(this->dePin);
+    if (dePin)
+    {
+        dePin->isInput = false;
+        dePin->setNote("dePin pin for Modbus communication");
+    }
 }
 
 void MasterModbus::begin()

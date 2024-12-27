@@ -2,21 +2,32 @@
 #include <Arduino.h>
 #include <sstream>
 
-
-Esp32_38pin::Esp32_38pin() {
+Esp32_38pin::Esp32_38pin()
+{
     Serial.println("Costruttore Esp32_38pin");
     initializePins();
     Serial.println("Inizializzazione dei pin effettuata!");
 }
 
-std::vector<Pin> Esp32_38pin::getPins() {
+Esp32_38pin::~Esp32_38pin()
+{
+    for (auto pin : pins)
+    {
+        delete pin;
+    }
+}
+
+std::vector<Pin *> Esp32_38pin::getPins()
+{
     return pins;
 }
 
-std::vector<int> Esp32_38pin::getPinNumbers() {
+std::vector<int> Esp32_38pin::getPinNumbers()
+{
     std::vector<int> pinNumbers;
-    for (const auto& pin : pins) {
-        pinNumbers.push_back(pin.number);
+    for (const auto &pin : pins)
+    {
+        pinNumbers.push_back(pin->number);
     }
     return pinNumbers;
 }
@@ -25,14 +36,18 @@ void Esp32_38pin::initializePins()
 {
     try
     {
+        for (auto pin : pins)
+        {
+            delete pin;
+        }
         pins.clear();
-        
-        //METODO FUNZIONANTE!
+
+        // METODO FUNZIONANTE!
         /*
         Pin defaultPin(0, PinType::UNKNOWN, false, "default pin");
         addPin(defaultPin);
-        Serial.println("Pin default aggiunto"); 
-        
+        Serial.println("Pin default aggiunto");
+
 
         addPin(Pin(-1, PinType::VOUT, false, "3.3V"));
         Serial.println("Pin 3.3V aggiunto");
@@ -45,7 +60,7 @@ void Esp32_38pin::initializePins()
 
         // Pin GPIO36 - ADC1 (SENSOR_VP)
         addPin(Pin(36, PinType::ADC, true, "ADC0 - SENSOR_VP"));
-        
+
         // Pin GPIO22 - I2C SCL
         addPin(Pin(22, PinType::I2C, true, "I2C SCL"));
         /*
@@ -54,10 +69,10 @@ void Esp32_38pin::initializePins()
 
         // Pin GPIO1 - UART TXD0
         addPin(Pin(1, PinType::UART, true, "UART TXD0 or input digital"));
-        
+
         // Pin GPIO34 - ADC1 (Input only)
         addPin(Pin(34, PinType::ADC, true, "ADC6 - Input only"));
-        
+
         // Pin GPIO3 - UART RXD0
         addPin(Pin(3, PinType::UART, true, "UART RXD0"));
 
@@ -71,7 +86,7 @@ void Esp32_38pin::initializePins()
         addPin(Pin(32, PinType::ADC, true, "ADC4, TOUCH9"));
 
         addPin(Pin(-2, PinType::GND, false, "0V"));
-        
+
         // Pin GPIO33 - ADC1, TOUCH8
         addPin(Pin(33, PinType::ADC, true, "ADC5, TOUCH8"));
 
@@ -90,7 +105,7 @@ void Esp32_38pin::initializePins()
         // Pin GPIO5 - VSPI CS0, PWM
         addPin(Pin(5, PinType::PWM, true, "input digital VSPI CS0, PWM"));
 
-        
+
         // Pin GPIO27 - ADC2, TOUCH7
         addPin(Pin(27, PinType::ADC, true, "ADC17, TOUCH7"));
 
@@ -103,7 +118,7 @@ void Esp32_38pin::initializePins()
         // Pin GPIO16 - UART TXD2
         addPin(Pin(16, PinType::UART, true, "UART TXD2"));
 
-        
+
         // Pin GPIO12 - ADC2, TOUCH6, HSPIQ
         addPin(Pin(12, PinType::ADC, true, "ADC15, TOUCH6, HSPIQ"));
 
@@ -112,125 +127,125 @@ void Esp32_38pin::initializePins()
 
 
         addPin(Pin(-2, PinType::GND, false, "0V"));
-        
+
         // Pin GPIO0 - ADC2, TOUCH1
         addPin(Pin(0, PinType::ADC, true, "ADC11, TOUCH1"));
 
         // Pin GPIO13 - ADC2, TOUCH5, HSPI_DATA2
         addPin(Pin(13, PinType::ADC, true, "ADC2, TOUCH5, HSPI_DATA2"));
 
-        // Pin GPIO2 - ADC12 
+        // Pin GPIO2 - ADC12
         addPin(Pin(2, PinType::ADC, true, "ADC12"));
         */
         // Pin GPIO9 SD2 SPIHD  HS1 DATA 2
-        addPin(Pin(9 , PinType::DIGITAL, true, "SD D2"));
+        addPin(new Pin(9, PinType::DIGITAL, true, "SD D2"));
 
         // Pin GPIO15 - ADC2, HSPI_CS0
-        //addPin(Pin(15, PinType::ADC, true, "ADC13, HSPI_CS0  HS2 CMD ovvero per interfacciamento con memoria flash"));
+        // addPin(Pin(15, PinType::ADC, true, "ADC13, HSPI_CS0  HS2 CMD ovvero per interfacciamento con memoria flash"));
 
         // Pin GPIO10 - SD3 SPIWP HS1 DATA 3
-        addPin(Pin(10, PinType::DIGITAL, true, ""));
-        
-        //Pin GPIO8 - SD2 SPIWP HS1 DATA 1
-        //addPin(Pin(8, PinType::DIGITAL, true, "Input digital SD2 SPIWP HS1 DATA 1 ovvero per interfacchiamento scheda sd"));
+        addPin(new Pin(10, PinType::DIGITAL, true, ""));
+
+        // Pin GPIO8 - SD2 SPIWP HS1 DATA 1
+        // addPin(Pin(8, PinType::DIGITAL, true, "Input digital SD2 SPIWP HS1 DATA 1 ovvero per interfacchiamento scheda sd"));
 
         // Pin GPIO11 SPICS0 HS1 CMD
-        //addPin(Pin(11, PinType::DIGITAL, true, ""));
+         //addPin(new Pin(11, PinType::DIGITAL, true, ""));
 
         // Pin GPIO 7 SD0 SPIQ HS1 DATA 0
-        //addPin(Pin(7, PinType::DIGITAL, true, "Input digital SD0 SPIQ HS1 DATA 0 ovvero per interfacchiamento scheda sd"));
+         //addPin(new Pin(7, PinType::DIGITAL, true, "Input digital SD0 SPIQ HS1 DATA 0 ovvero per interfacchiamento scheda sd"));
 
-        //addPin(Pin(-4, PinType::VIN, false, "tensione di alimentazione del dispositivo (5V)"));
+        // addPin(Pin(-4, PinType::VIN, false, "tensione di alimentazione del dispositivo (5V)"));
 
         // Pin GPIO6 SD0 SPID HS1 CLK
-        //addPin(Pin(6, PinType::DIGITAL, true, "segnale di clock temporizzato"));
-        
+        // addPin(Pin(6, PinType::DIGITAL, true, "segnale di clock temporizzato"));
     }
-    catch(const std::exception& e)
+    catch (const std::exception &e)
     {
         Serial.println("Errore durante l'inizializzazione dei pin: " + String(e.what()));
     }
-    
-    
 
     printPinsOnSerial();
 }
 
-void Esp32_38pin::addPin(const Pin& pin) {
+void Esp32_38pin::addPin(Pin *pin)
+{
     try
     {
         pins.push_back(pin);
     }
-    catch(...)
+    catch (...)
     {
-        Serial.println("Errore durante l'aggiunta del pin: " + pin.toString());
+        Serial.println("Errore durante l'aggiunta del pin: " + pin->toString());
     }
-    
 }
 
-
-void Esp32_38pin::printPinsOnSerial() {
+void Esp32_38pin::printPinsOnSerial()
+{
     Serial.println("Pinout ESP32 38 pin:");
 
     try
     {
-        for (const auto& pin : pins) {
-            Serial.println(pin.toString());
+        for (const auto &pin : pins)
+        {
+            Serial.println(pin->toString());
         }
     }
-    catch(const std::exception& e)
+    catch (const std::exception &e)
     {
         Serial.println("Errore durante la stampa dei pin: " + String(e.what()));
     }
-    
 }
 
-
-
-void Esp32_38pin::readPins() {
-    for (auto& pin : pins) {
-        uint16_t value = pin.read();
-
+void Esp32_38pin::readPins()
+{
+    for (auto &pin : pins)
+    {
+        uint16_t value = pin->read();
         // Stampa il valore letto per il debug
-        //Serial.println("readed value: "); 
-        //Serial.println(pin.toString());
-        
+        // Serial.println("readed value: ");
+        // Serial.println(pin->toString());
     }
 }
 
-
-Pin& Esp32_38pin::getPin(int GPIOPin) {
-    for (auto& pin : pins) {
-        if (pin.number == GPIOPin) {
+Pin *Esp32_38pin::getPin(int GPIOPin)
+{
+    for (auto &pin : pins)
+    {
+        if (pin->number == GPIOPin)
+        {
             return pin;
         }
     }
-    static Pin defaultPin(GPIOPin, PinType::UNKNOWN, false, "Pin not found");
-    return defaultPin;
+    return nullptr;
 }
 
-
-
-std::vector<Pin>::iterator Esp32_38pin::begin() {
+std::vector<Pin *>::iterator Esp32_38pin::begin()
+{
     return pins.begin();
 }
 
-std::vector<Pin>::iterator Esp32_38pin::end() {
+std::vector<Pin *>::iterator Esp32_38pin::end()
+{
     return pins.end();
 }
 
-std::vector<Pin>::const_iterator Esp32_38pin::begin() const {
+std::vector<Pin *>::const_iterator Esp32_38pin::begin() const
+{
     return pins.begin();
 }
 
-std::vector<Pin>::const_iterator Esp32_38pin::end() const {
+std::vector<Pin *>::const_iterator Esp32_38pin::end() const
+{
     return pins.end();
 }
 
-std::string Esp32_38pin::toString() const {
+std::string Esp32_38pin::toString() const
+{
     std::ostringstream oss;
-    for (const auto& pin : pins) {
-        oss << pin.toString() << "\n";
+    for (const auto &pin : pins)
+    {
+        oss << pin->toString() << "\n";
     }
     return oss.str();
 }

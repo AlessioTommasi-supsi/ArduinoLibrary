@@ -33,93 +33,127 @@ void Routes::defineRoutes(AsyncWebServer &server)
     
 
     */
+
     server.on("/pinout", HTTP_GET, [](AsyncWebServerRequest *request){
         String htmlContent = Pinout::generateHTML();
         const char *htmlContentPtr = htmlContent.c_str();
-        request->send(200, "text/html", htmlContentPtr); });
+        request->send(200, "text/html", htmlContentPtr); 
+    });
 
-    server.on("/pinoutContent", HTTP_GET, [](AsyncWebServerRequest *request){
+    server.on("/pinoutContent", HTTP_GET, [](AsyncWebServerRequest *request) {
         String content = "";
         PinoutData *pinoutData = SystemState::getInstance()->pinoutData;
         pinoutData->readPins();
         for (auto pin = pinoutData->begin(); pin != pinoutData->end(); ++pin)
         {
-            content += pin->toString();
+            content += (*pin)->toString();
             content += "<br>";
             content += "<form action='/startRecordingPin' method='get' style='display: inline;'>";
-            content += "  <input type='hidden' name='pin' value='" + String(pin->number) + "'>";
+            content += "  <input type='hidden' name='pin' value='" + String((*pin)->number) + "'>";
             content += "  <label for='milliseconds'>Milliseconds:</label>";
             content += "  <input type='text' id='milliseconds' name='milliseconds' required value='1000'>";
             content += "  <button type='submit' style='padding: 5px; background-color: red; color: white; border: none; border-radius: 4px; cursor: pointer;'>Start Recording</button>";
             content += "</form>";
             content += "<form action='/stopRecordingPin' method='get' style='display: inline; margin-left: 10px;'>";
-            content += "  <input type='hidden' name='pin' value='" + String(pin->number ) + "'>";
+            content += "  <input type='hidden' name='pin' value='" + String((*pin)->number) + "'>";
             content += "  <button type='submit' style='padding: 5px; background-color: grey; color: white; border: none; border-radius: 4px; cursor: pointer;'>Stop Recording</button>";
             content += "</form>";
             content += "<br><br>";
         }
-        request->send(200, "text/html", content);
+        request->send(200, "text/html", content); 
     });
 
     server.on("/startRecordingPin", HTTP_GET, [](AsyncWebServerRequest *request){
-        try {
+        try
+        {
             String milliseconds = request->getParam("milliseconds")->value();
             String registerAddress = request->getParam("pin")->value();
 
             Serial.println("Start recording Pin " + registerAddress + " every " + milliseconds + " milliseconds");
-            
-            SystemState::getInstance()->pinoutData->getPin(registerAddress.toInt()).startRecording(milliseconds.toInt());
+
+            SystemState::getInstance()->pinoutData->getPin(registerAddress.toInt())->startRecording(milliseconds.toInt());
 
             String popupScript = "showPopup('Recording started for pin " + registerAddress + "');";
             String htmlContent = Pinout::generateHTML(popupScript);
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(200, "text/html", htmlContentPtr);
-        } catch (const std::exception &e) {
+        }
+        catch (const std::exception &e)
+        {
             String errorMessage = "Error: ";
             errorMessage += e.what();
             String popupScript = "showPopup('" + errorMessage + "');";
             String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(500, "text/html", htmlContentPtr);
-        } catch (...) {
+        }
+        catch (...)
+        {
             String popupScript = "showPopup('Unknown error occurred');";
             String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(500, "text/html", htmlContentPtr);
-    } });
+        } });
 
-    server.on("/stopRecordingPin", HTTP_GET, [](AsyncWebServerRequest *request)
-              {
-        try {
+    server.on("/stopRecordingPin", HTTP_GET, [](AsyncWebServerRequest *request){
+        try
+        {
             String registerAddress = request->getParam("pin")->value();
 
-            SystemState::getInstance()->pinoutData->getPin(registerAddress.toInt()).stopRecording();
-            //SystemState::getInstance()->stopRecordingRegister(registerAddress.toInt());
+            SystemState::getInstance()->pinoutData->getPin(registerAddress.toInt())->stopRecording();
             Serial.println("Stop recording Pin " + registerAddress);
             String popupScript = "showPopup('Recording stopped');";
             String htmlContent = Pinout::generateHTML(popupScript);
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(200, "text/html", htmlContentPtr);
-        } catch (const std::exception &e) {
+        }
+        catch (const std::exception &e)
+        {
             String errorMessage = "Error: ";
             errorMessage += e.what();
             String popupScript = "showPopup('" + errorMessage + "');";
             String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(500, "text/html", htmlContentPtr);
-        } catch (...) {
+        }
+        catch (...)
+        {
             String popupScript = "showPopup('Unknown error occurred');";
             String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(500, "text/html", htmlContentPtr);
-    } });
+        } });
 
-    server.on("/history", HTTP_GET, [](AsyncWebServerRequest *request){
+    server.on("/getPinValues", HTTP_GET,  [](AsyncWebServerRequest *request){
+        if (request->hasParam("pin"))
+        {
+            String pin = request->getParam("pin")->value();
+            std::vector<float> values = SystemState::getInstance()->pinoutData->getPin(pin.toInt())->getValuesVoltage();
+
+            String json = "[";
+            for (size_t i = 0; i < values.size(); ++i)
+            {
+                if (i > 0)
+                    json += ",";
+                json += String(values[i]);
+            }
+            json += "]";
+
+            request->send(200, "application/json", json);
+        }
+        else
+        {
+            request->send(400, "application/json", "{\"error\":\"Pin parameter missing\"}");
+        } 
+    });
+
+
+    server.on("/history", HTTP_GET, [](AsyncWebServerRequest * request){
                 String htmlContent = viewHistory::generateHTML();
                 const char *htmlContentPtr = htmlContent.c_str();
                 request->send(200, "text/html", htmlContentPtr); 
     });
-    
+
     server.on("/getHistoryContent", HTTP_GET, [](AsyncWebServerRequest *request){
         String content = "";
         std::vector<float> valuesVector = SystemState::getInstance()->getAllRegisterValue();
@@ -287,23 +321,6 @@ void Routes::defineRoutes(AsyncWebServer &server)
         } 
     });
 
-    server.on("/getPinValues", HTTP_GET, [](AsyncWebServerRequest *request){
-        if (request->hasParam("pin")) {
-            String pin = request->getParam("pin")->value();
-            std::vector<float> values = SystemState::getInstance()->pinoutData->getPin(pin.toInt()).getValuesVoltage();
-
-            String json = "[";
-            for (size_t i = 0; i < values.size(); ++i) {
-                if (i > 0) json += ",";
-                json += String(values[i]);
-            }
-            json += "]";
-
-            request->send(200, "application/json", json);
-        } else {
-            request->send(400, "application/json", "{\"error\":\"Pin parameter missing\"}");
-        } 
-    });
 
     server.on("/graph", HTTP_GET, [](AsyncWebServerRequest *request){
                 String htmlContent = viewGraph::generateHTML();

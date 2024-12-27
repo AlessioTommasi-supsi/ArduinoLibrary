@@ -3,25 +3,26 @@
 
 #include "PinoutData.h"
 
-class Esp32_38pin : public PinoutData {
+class Esp32_38pin : public PinoutData
+{
 private:
-    
+    std::vector<Pin *> pins;
 
 public:
-    std::vector<Pin> pins;
     Esp32_38pin();
+    ~Esp32_38pin();
 
     void printPinsOnSerial() override;
     void initializePins() override;
     void readPins() override;
-    void addPin(const Pin& pin) override;
-    Pin& getPin(int GPIOPin) override;
-    std::vector<Pin> getPins() override;
+    void addPin(Pin *pin) override;
+    Pin *getPin(int GPIOPin) override;
+    std::vector<Pin *> getPins() override;
     std::vector<int> getPinNumbers() override;
-    std::vector<Pin>::iterator begin() override;
-    std::vector<Pin>::iterator end() override;
-    std::vector<Pin>::const_iterator begin() const override;
-    std::vector<Pin>::const_iterator end() const override;
+    std::vector<Pin *>::iterator begin() override;
+    std::vector<Pin *>::iterator end() override;
+    std::vector<Pin *>::const_iterator begin() const override;
+    std::vector<Pin *>::const_iterator end() const override;
 
     std::string toString() const override;
 };

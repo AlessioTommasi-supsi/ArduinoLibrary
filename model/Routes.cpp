@@ -401,8 +401,7 @@ void Routes::defineRoutes(AsyncWebServer &server)
                     size_t stackUsed = pin->getUsedStackInWords() * 4; // trasformo da parole a byte
                     size_t stackTotal = pin->getStackSizeInWords() * 4;
 
-                    // passo parametro del pin per avere un id univoco con GET
-                    htmlContent += viewGraph::generateCirularProgressBarGraph("Pin " + String(pin->number) + " Stack", stackUsed, stackTotal, "monitorPinStackData?pin=" + String(pin->number), 1000);
+                    htmlContent += viewGraph::generateCirularProgressBarGraph("Pin" + String(pin->number) + "Stack", stackUsed, stackTotal, "/monitorPinStack?pin=" + String(pin->number), 1000);
                 }
             }
             htmlContent += "</div>";
@@ -416,6 +415,38 @@ void Routes::defineRoutes(AsyncWebServer &server)
             String htmlContent = "error";
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(500, "text/html", htmlContentPtr);
+        }
+    });
+
+    server.on("/monitorPinStack", HTTP_GET, [](AsyncWebServerRequest *request){
+        try
+        {
+            String json = "{";
+            if (request->hasParam("pin"))
+            {
+                String pin = request->getParam("pin")->value();
+                PinoutData *pinoutData = SystemState::getInstance()->pinoutData;
+                Pin *pinData = &pinoutData->getPin(pin.toInt());
+
+                // STANPO GRAFICO CON LO STACK LIB
+                size_t stackUsed = pinData->getUsedStackInWords() * 4; // trasformo da parole a byte
+                size_t stackTotal = pinData->getStackSizeInWords() * 4;
+
+                json += "\"used\":" + String(stackUsed) + ",";
+                json += "\"total\":" + String(stackTotal);
+            }
+            else
+            {
+                json += "\"error\":\"Pin parameter missing\"";
+            }
+            json += "}";
+
+            request->send(200, "application/json", json);
+        }
+        catch(...)
+        {
+            String json = "{\"error\":\"An error occurred\"}";
+            request->send(500, "application/json", json);
         }
     });
 

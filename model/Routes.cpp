@@ -390,6 +390,8 @@ void Routes::defineRoutes(AsyncWebServer &server)
             String htmlContent = "";
             PinoutData *pinoutData = SystemState::getInstance()->pinoutData;
 
+            //htmlContent += " <div class='circle_progressbar_chart-container' style='font-family: Raleway, sans-serif; display: flex; flex-wrap: wrap; justify-content: space-around; gap: 20px; padding: 20px;'>";
+            htmlContent += viewGraph::initCirularProgressBarGraph();
             // Loop through each pin in the pinout data
             for (auto pin = pinoutData->begin(); pin != pinoutData->end(); ++pin)
             {
@@ -403,6 +405,8 @@ void Routes::defineRoutes(AsyncWebServer &server)
                     htmlContent += viewGraph::generateCirularProgressBarGraph("Pin " + String(pin->number) + " Stack", stackUsed, stackTotal, "monitorPinStackData?pin=" + String(pin->number), 1000);
                 }
             }
+            htmlContent += "</div>";
+            htmlContent += viewGraph::endCirularProgressBarGraph();
 
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(200, "text/html", htmlContentPtr);

@@ -158,3 +158,29 @@ String viewGeneric::defaultFooter()
     html += "</html>";
     return html;
 }
+
+String viewGeneric::dynamicUpdateContent(String divId, String api, int timeToUpdate)
+{
+    String var_html = "";
+    var_html += "<div id='" + divId + "'></div>";
+    var_html += "<script>";
+    var_html += "function updateContent(api, divId) {";
+    var_html += " fetch(api)";
+    var_html += " .then(response => response.text())";
+    var_html += " .then(data => {";
+    var_html += " document.getElementById(divId).innerHTML = data;";
+    var_html += " })";
+    var_html += " .catch(error => {";
+    var_html += " console.error('Errore durante il recupero dei dati:', error);";
+    var_html += " document.getElementById(divId).innerHTML = '<p>Errore durante il recupero dei dati</p>';";
+    var_html += " });";
+    var_html += "}";
+    var_html += "document.addEventListener('DOMContentLoaded', () => {";
+    var_html += " updateContent('" + api + "', '" + divId + "');";
+    var_html += " setInterval(() => {";
+    var_html += " updateContent('" + api + "', '" + divId + "');";
+    var_html += " }, " + String(timeToUpdate) + ");";
+    var_html += "});";
+    var_html += "</script>";
+    return var_html;
+}

@@ -360,11 +360,52 @@ void Routes::defineRoutes(AsyncWebServer &server)
 
             //htmlContent += viewGraph::generateCirularProgressBarGraph("HEAP", heapUsed, heapTotal);
             htmlContent += viewGraph::generateCirularProgressBarGraph("HEAP", heapUsed, heapTotal, "monitorHeapData", 1000);
+
+           
+
+
             htmlContent += viewGraph::endCirularProgressBarGraph();
+
+            htmlContent += "<br><br><h2> STACK USAGE: </h2> <br><br>";
+
+            htmlContent += viewGeneric::dynamicUpdateContent("divMonitorHeapData", "/monitorPinStackDataContent", 10000 /*10 secondi*/);
+
             htmlContent += viewGeneric::defaultFooter();
 
             // Invio della risposta HTTP
             request->send(200, "text/html", htmlContent);
+        }
+        catch(...)
+        {
+            String htmlContent = "error";
+            const char *htmlContentPtr = htmlContent.c_str();
+            request->send(500, "text/html", htmlContentPtr);
+        }
+    });
+
+    server.on("/monitorPinStackDataContent", HTTP_GET, [](AsyncWebServerRequest *request){
+        
+        try
+        {
+            String htmlContent = "";
+            PinoutData *pinoutData = SystemState::getInstance()->pinoutData;
+
+            // Loop through each pin in the pinout data
+            for (auto pin = pinoutData->begin(); pin != pinoutData->end(); ++pin)
+            {
+                if (pin->recordingTask != NULL)
+                {
+                    // STANPO GRAFICO CON LO STACK LIB
+                    size_t stackUsed = pin->getUsedStackInWords() * 4; // trasformo da parole a byte
+                    size_t stackTotal = pin->getStackSizeInWords() * 4;
+
+                    // passo parametro del pin per avere un id univoco con GET
+                    htmlContent += viewGraph::generateCirularProgressBarGraph("Pin " + String(pin->number) + " Stack", stackUsed, stackTotal, "monitorPinStackData?pin=" + String(pin->number), 1000);
+                }
+            }
+
+            const char *htmlContentPtr = htmlContent.c_str();
+            request->send(200, "text/html", htmlContentPtr);
         }
         catch(...)
         {

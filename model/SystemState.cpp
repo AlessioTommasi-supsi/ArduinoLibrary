@@ -124,13 +124,22 @@ std::vector<float> SystemState::getAllRegisterValue(int addres)
 {
     std::vector<float> values;
     std::lock_guard<std::mutex> lock(registerMutex);
-    for (int i = 0; i < address.size(); i++)
+    try
     {
-        if (address[i] == addres)
+        for (int i = 0; i < address.size(); i++)
         {
-            values.push_back(value[i]);
+            if (address[i] == addres)
+            {
+                values.push_back(value[i]);
+            }
         }
     }
+    catch(...)
+    {
+        Serial.println("Error during get all register value");
+    }
+    
+    
     return values;
 }
 

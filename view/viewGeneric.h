@@ -17,6 +17,7 @@ class viewGeneric
         static String defaultFooter();
         static String addCss();
         static String addNavbar();
+        static String dynamicUpdateContent(String divId, String api, int timeToUpdate);
 
 };
 

@@ -81,7 +81,7 @@ void Pin::startRecording(int milliseconds)
                 pin->recordingFunction(1000);
             },
             "recordingTask",
-            10000,
+            stackSize,
             this,
             1,
             &recordingTask,
@@ -113,3 +113,14 @@ std::vector<float> Pin::getValuesVoltage()
     return copyValues;
 }
 
+
+size_t Pin::getUsedStackInWords()
+{
+    //ritorna la dimensione dello stack sulla base della dimensione della variabile valuesVoltage
+    return valuesVoltage.size()*sizeof(valuesVoltage[0])/4;
+}
+
+size_t Pin::getStackSizeInWords()
+{
+    return stackSize;
+}

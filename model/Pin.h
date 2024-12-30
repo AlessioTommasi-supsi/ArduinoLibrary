@@ -13,6 +13,8 @@ public:
     uint8_t isInput;     // Usa uint8_t per risparmiare spazio
     char note[200];       // Usa array di char per gestire le note
 
+    size_t stackSize = 10000; //e la dimensione del thread recordingTask in Parole ovvero 1 parola = 4 byte
+
     std::vector<uint16_t> valuesVoltage;
     
     TaskHandle_t recordingTask = NULL;
@@ -31,6 +33,10 @@ public:
 
     std::vector<float> getValuesVoltage();
 
+    size_t getUsedStackInWords();
+    size_t getStackSizeInWords();
+
+    
 
 
 };

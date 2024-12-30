@@ -256,9 +256,9 @@ void Esp32_38pin::initializePins()
         Pin &dac1Pin = getPin(25);
         dac1Pin.number = 25;
         dac1Pin.type = PinType::ADC;
-        dac1Pin.isInput = true;
+        dac1Pin.isInput = false;
         dac1Pin.voltage = 3300;
-        sprintf(dac1Pin.note, "ADC18 or DAC1");
+        sprintf(dac1Pin.note, "ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
         addPin(dac1Pin);
 
         Pin &vspiClkPin = getPin(18);
@@ -271,9 +271,9 @@ void Esp32_38pin::initializePins()
         Pin &dac2Pin = getPin(26);
         dac2Pin.number = 26;
         dac2Pin.type = PinType::ADC;
-        dac2Pin.isInput = true;
+        dac2Pin.isInput = false;
         dac2Pin.voltage = 3300;
-        sprintf(dac2Pin.note, "ADC19 or DAC2");
+        sprintf(dac2Pin.note, "ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
         addPin(dac2Pin);
 
         Pin &pwmPin = getPin(5);
@@ -286,8 +286,8 @@ void Esp32_38pin::initializePins()
         Pin &adc17Pin = getPin(27);
         adc17Pin.number = 27;
         adc17Pin.type = PinType::ADC;
-        adc17Pin.isInput = true;
-        sprintf(adc17Pin.note, "ADC17, TOUCH7");
+        adc17Pin.isInput = false;
+        sprintf(adc17Pin.note, "ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
         addPin(adc17Pin);
 
         Pin &uartRxd1Pin = getPin(17);
@@ -300,8 +300,8 @@ void Esp32_38pin::initializePins()
         Pin &adc16Pin = getPin(14);
         adc16Pin.number = 14;
         adc16Pin.type = PinType::ADC;
-        adc16Pin.isInput = true;
-        sprintf(adc16Pin.note, "ADC16, HSPI_CLK");
+        adc16Pin.isInput = false;
+        sprintf(adc16Pin.note, "ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
         addPin(adc16Pin);
 
         Pin &uartTxd2Pin = getPin(16);
@@ -314,8 +314,8 @@ void Esp32_38pin::initializePins()
         Pin &adc15Pin = getPin(12);
         adc15Pin.number = 12;
         adc15Pin.type = PinType::ADC;
-        adc15Pin.isInput = true;
-        sprintf(adc15Pin.note, "ADC15, TOUCH6, HSPIQ");
+        adc15Pin.isInput = false;
+        sprintf(adc15Pin.note, "ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
         addPin(adc15Pin);
 
         Pin &adc10Pin = getPin(4);
@@ -328,22 +328,22 @@ void Esp32_38pin::initializePins()
         Pin &adc11Pin = getPin(0);
         adc11Pin.number = 0;
         adc11Pin.type = PinType::ADC;
-        adc11Pin.isInput = true;
-        sprintf(adc11Pin.note, "ADC11, TOUCH1");
+        adc11Pin.isInput = false;
+        sprintf(adc11Pin.note, "ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
         addPin(adc11Pin);
 
         Pin &adc2Pin = getPin(13);
         adc2Pin.number = 13;
         adc2Pin.type = PinType::ADC;
-        adc2Pin.isInput = true;
-        sprintf(adc2Pin.note, "ADC2, TOUCH5, HSPI_DATA2");
+        adc2Pin.isInput = false;
+        sprintf(adc2Pin.note, "ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
         addPin(adc2Pin);
 
         Pin &adc12Pin = getPin(2);
         adc12Pin.number = 2;
         adc12Pin.type = PinType::ADC;
-        adc12Pin.isInput = true;
-        sprintf(adc12Pin.note, "ADC12");
+        adc12Pin.isInput = false;
+        sprintf(adc12Pin.note, "ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
         addPin(adc12Pin);
 
         // Add pins using the new structure

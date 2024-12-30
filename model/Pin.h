@@ -11,7 +11,7 @@ public:
     PinType type;
     uint16_t voltage;
     uint8_t isInput;     // Usa uint8_t per risparmiare spazio
-    char note[50];       // Usa array di char per gestire le note
+    char note[200];       // Usa array di char per gestire le note
 
     std::vector<uint16_t> valuesVoltage;
     

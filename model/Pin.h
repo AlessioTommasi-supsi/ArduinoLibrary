@@ -14,7 +14,7 @@ public:
     char note[200];       // Usa array di char per gestire le note
 
     size_t stackSize = 10000; //e la dimensione del thread recordingTask in Parole ovvero 1 parola = 4 byte
-
+    size_t timeToRecord = 1000; //tempo di registrazione in millisecondi
     std::vector<uint16_t> valuesVoltage;
     
     TaskHandle_t recordingTask = NULL;

@@ -374,7 +374,7 @@ void Routes::defineRoutes(AsyncWebServer &server)
 
             htmlContent += viewGraph::initCirularProgressBarGraph();
 
-                       // Loop through each pin in the pinout data
+            // Loop through each pin in the pinout data
             for (auto pin = pinoutData->begin(); pin != pinoutData->end(); ++pin)
             {
                 if (pin->recordingTask != NULL)

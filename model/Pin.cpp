@@ -73,12 +73,13 @@ void Pin:: recordingFunction(int milliseconds)
 
 void Pin::startRecording(int milliseconds)
 {
+    timeToRecord = milliseconds;
     if (recordingTask == NULL)
     {
         xTaskCreatePinnedToCore(
             [](void* parameter) {
                 Pin* pin = static_cast<Pin*>(parameter);
-                pin->recordingFunction(1000);
+                pin->recordingFunction(timeToRecord);
             },
             "recordingTask",
             stackSize,

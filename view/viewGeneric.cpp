@@ -159,6 +159,7 @@ String viewGeneric::defaultFooter()
     return html;
 }
 
+
 String viewGeneric::dynamicUpdateContent(String divId/*una stringa univoca nella pagina*/, String api, int timeToUpdate)
 {
     String var_html = "";

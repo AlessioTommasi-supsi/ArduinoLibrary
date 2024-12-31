@@ -132,7 +132,7 @@
     <script>function createChart(ctx, percentage, chartId) { if (charts[chartId]) { charts[chartId].destroy(); } charts[chartId] = new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [percentage, 100 - percentage], backgroundColor: ['#4caf50', '#ddd'], borderWidth: 0 }] }, options: { cutout: '80%', animation: { duration: 0 }, plugins: { tooltip: { enabled: false }, legend: { display: false } } } }); } function updateChart(apiUrl, ctx, labelId, chartId) { fetch(apiUrl).then(response => response.json()).then(data => { const percentage = (data.used / data.total) * 100; createChart(ctx, percentage, chartId); document.getElementById(labelId).innerText = percentage.toFixed(2) + ' %'; }).catch(error => console.error('Error fetching data:', error)); }</script>
     <br><br>
     <h2> STACK USAGE: </h2> <br><br>
-    <div id="divMonitorHeapData">
+    <div id="divMonitorHeapData">// prova a togliere il div
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <div class="circle_progressbar_chart-container"
             style="font-family: Raleway, sans-serif; display: flex; flex-wrap: wrap; justify-content: space-around; gap: 20px; padding: 20px;">

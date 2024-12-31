@@ -349,11 +349,13 @@ void Routes::defineRoutes(AsyncWebServer &server)
         {
             String htmlContent = "";
             htmlContent += viewGeneric::defaultCssHeader("Monitor");
+            
             htmlContent += viewGraph::initCirularProgressBarGraph();
 
             // Ottieni le metriche di sistema
 
             // HEAP
+            
             size_t heapFree = heap_caps_get_free_size(MALLOC_CAP_8BIT);
             size_t heapTotal = heap_caps_get_total_size(MALLOC_CAP_8BIT);
             size_t heapUsed = heapTotal - heapFree;
@@ -367,9 +369,28 @@ void Routes::defineRoutes(AsyncWebServer &server)
             htmlContent += viewGraph::endCirularProgressBarGraph();
 
             htmlContent += "<br><br><h2> STACK USAGE: </h2> <br><br>";
+            PinoutData *pinoutData = SystemState::getInstance()->pinoutData;
 
-            htmlContent += viewGeneric::dynamicUpdateContent("divMonitorHeapData", "/monitorPinStackDataContent", 10000 /*10 secondi*/);
 
+            htmlContent += viewGraph::initCirularProgressBarGraph();
+
+                       // Loop through each pin in the pinout data
+            for (auto pin = pinoutData->begin(); pin != pinoutData->end(); ++pin)
+            {
+                if (pin->recordingTask != NULL)
+                {
+                    // STANPO GRAFICO CON LO STACK LIB
+                    size_t stackUsed = pin->getUsedStackInWords() * 4; // trasformo da parole a byte
+                    size_t stackTotal = pin->getStackSizeInWords() * 4;
+
+                    htmlContent += viewGraph::generateCirularProgressBarGraph("Pin" + String(pin->number) + "Stack", stackUsed, stackTotal, "/monitorPinStack?pin=" + String(pin->number), 1000);
+                }
+            }
+            htmlContent += viewGraph::endCirularProgressBarGraph();
+
+            //non funziona grafici non si aggiornano
+            //htmlContent += viewGeneric::dynamicUpdateContent("divMonitorHeapData"/*deve semplicemente essere id univoco*/, "/monitorPinStackDataContent", 10000 /*10 secondi*/);
+            
             htmlContent += viewGeneric::defaultFooter();
 
             // Invio della risposta HTTP
@@ -383,7 +404,7 @@ void Routes::defineRoutes(AsyncWebServer &server)
         }
     });
 
-    server.on("/monitorPinStackDataContent", HTTP_GET, [](AsyncWebServerRequest *request){
+    server.on("/monitorPinStackDataContent", HTTP_GET, [](AsyncWebServerRequest *request){ /* PER ORA NON USATO*/
         
         try
         {
@@ -392,6 +413,8 @@ void Routes::defineRoutes(AsyncWebServer &server)
 
             //htmlContent += " <div class='circle_progressbar_chart-container' style='font-family: Raleway, sans-serif; display: flex; flex-wrap: wrap; justify-content: space-around; gap: 20px; padding: 20px;'>";
             htmlContent += viewGraph::initCirularProgressBarGraph();
+
+           
             // Loop through each pin in the pinout data
             for (auto pin = pinoutData->begin(); pin != pinoutData->end(); ++pin)
             {

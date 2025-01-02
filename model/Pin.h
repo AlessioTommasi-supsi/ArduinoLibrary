@@ -29,7 +29,7 @@ public:
     void startRecording(int milliseconds);
     void stopRecording();
 
-    void recordingFunction(int milliseconds);
+    void recordingFunction();
 
     std::vector<float> getValuesVoltage();
 

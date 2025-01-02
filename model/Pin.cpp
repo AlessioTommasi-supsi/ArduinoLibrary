@@ -59,14 +59,15 @@ uint16_t Pin::read()
 }
 
 
-void Pin:: recordingFunction(int milliseconds)
+void Pin:: recordingFunction()
 {
+    
     while (true)
     {
         uint16_t value = read();
         Serial.println("Recording value: " + String(value) + " at pin " + String(number));
         valuesVoltage.push_back(value);
-        delay(milliseconds);
+        delay(timeToRecord);
     }
 }
 
@@ -79,7 +80,7 @@ void Pin::startRecording(int milliseconds)
         xTaskCreatePinnedToCore(
             [](void* parameter) {
                 Pin* pin = static_cast<Pin*>(parameter);
-                pin->recordingFunction(timeToRecord);
+                pin->recordingFunction();
             },
             "recordingTask",
             stackSize,

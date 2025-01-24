@@ -3,13 +3,13 @@
 Esp32_38pinBoard::Esp32_38pinBoard() {
     Serial.println("Costruttore Esp32_38pinBoard");
     initializePins();
-    Serial.println("Inizializzazione dei pin effettuata!");
+    Serial.println("Inizializzazione Esp32_38pinBoard effettuata!");
 }
 
 void Esp32_38pinBoard::initializePins()
 {
     //richiama metodo padre
-    Esp32_38pin::initializePins();
+    //Esp32_38pin::initializePins();
     //utilizza setdi metodo padre per modificare i pin
     Pin &readedPin = getPin(23);
 

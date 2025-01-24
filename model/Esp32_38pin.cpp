@@ -446,7 +446,7 @@ Pin& Esp32_38pin::getPin(int GPIOPin) {
             return pin;
         }
     }
-    static Pin defaultPin(GPIOPin, PinType::UNKNOWN, false, "Pin not found");
+    static Pin defaultPin(GPIOPin, PinType::UNKNOWN, true/*di default i pin sono in lettura, cosi non ho problemi se ci metto tensione all inizio*/, "Pin not found");
     Serial.println("Pin " + String(GPIOPin) + " not found");
     return defaultPin;
 }

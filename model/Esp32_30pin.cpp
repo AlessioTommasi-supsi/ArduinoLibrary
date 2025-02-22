@@ -1,28 +1,30 @@
-#include "Esp32_38pin.h"
+#include "Esp32_30pin.h"
 #include <Arduino.h>
 #include <sstream>
 
-
-Esp32_38pin::Esp32_38pin() {
-    Serial.println("Costruttore Esp32_38pin");
+Esp32_30pin::Esp32_30pin()
+{
+    Serial.println("Costruttore Esp32_30pin");
     initializePins();
     Serial.println("Inizializzazione dei pin effettuata!");
 }
 
-std::vector<Pin> Esp32_38pin::getPins() {
+std::vector<Pin> Esp32_30pin::getPins()
+{
     return pins;
 }
 
-
-std::vector<int> Esp32_38pin::getPinNumbers() {
+std::vector<int> Esp32_30pin::getPinNumbers()
+{
     std::vector<int> pinNumbers;
-    for (const auto& pin : pins) {
+    for (const auto &pin : pins)
+    {
         pinNumbers.push_back(pin.number);
     }
     return pinNumbers;
 }
 
-void Esp32_38pin::initializePins()
+void Esp32_30pin::initializePins()
 {
     try
     {
@@ -39,7 +41,7 @@ void Esp32_38pin::initializePins()
         adc0Pin.number = 36;
         adc0Pin.type = PinType::ADC;
         adc0Pin.isInput = true;
-        sprintf(adc0Pin.note, "ADC0 - SENSOR_VP");
+        sprintf(adc0Pin.note, "ADC0 - SENSOR_VP input only");
         addPin(adc0Pin);
 
         Pin &i2cSclPin = getPin(22);
@@ -53,7 +55,7 @@ void Esp32_38pin::initializePins()
         adc3Pin.number = 39;
         adc3Pin.type = PinType::ADC;
         adc3Pin.isInput = true;
-        sprintf(adc3Pin.note, "ADC3 - SENSOR_VN");
+        sprintf(adc3Pin.note, "ADC3 - SENSOR_VN input only");
         addPin(adc3Pin);
 
         Pin &uartTxd0Pin = getPin(1);
@@ -67,7 +69,7 @@ void Esp32_38pin::initializePins()
         adc6Pin.number = 34;
         adc6Pin.type = PinType::ADC;
         adc6Pin.isInput = true;
-        sprintf(adc6Pin.note, "ADC6 - Input only");
+        sprintf(adc6Pin.note, "ADC6 - Input only input only");
         addPin(adc6Pin);
 
         Pin &uartRxd0Pin = getPin(3);
@@ -149,26 +151,12 @@ void Esp32_38pin::initializePins()
         sprintf(adc17Pin.note, "ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
         addPin(adc17Pin);
 
-        Pin &uartRxd1Pin = getPin(17);
-        uartRxd1Pin.number = 17;
-        uartRxd1Pin.type = PinType::UART;
-        uartRxd1Pin.isInput = true;
-        sprintf(uartRxd1Pin.note, "UART RXD1");
-        addPin(uartRxd1Pin);
-
         Pin &adc16Pin = getPin(14);
         adc16Pin.number = 14;
         adc16Pin.type = PinType::ADC;
         adc16Pin.isInput = false;
         sprintf(adc16Pin.note, "ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
         addPin(adc16Pin);
-
-        Pin &uartTxd2Pin = getPin(16);
-        uartTxd2Pin.number = 16;
-        uartTxd2Pin.type = PinType::UART;
-        uartTxd2Pin.isInput = true;
-        sprintf(uartTxd2Pin.note, "UART TXD2");
-        addPin(uartTxd2Pin);
 
         Pin &adc15Pin = getPin(12);
         adc15Pin.number = 12;
@@ -205,48 +193,7 @@ void Esp32_38pin::initializePins()
         sprintf(adc12Pin.note, "ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
         addPin(adc12Pin);
 
-        // Add pins using the new structure
-        Pin &sdD2Pin = getPin(9);
-        sdD2Pin.number = 9;
-        sdD2Pin.type = PinType::DIGITAL;
-        sdD2Pin.isInput = true;
-        sprintf(sdD2Pin.note, "SD D2");
-        addPin(sdD2Pin);
 
-        Pin &sdD3Pin = getPin(10);
-        sdD3Pin.number = 10;
-        sdD3Pin.type = PinType::DIGITAL;
-        sdD3Pin.isInput = true;
-        sprintf(sdD3Pin.note, "SD D3");
-        addPin(sdD3Pin);
-
-        Pin &sd2SpiwpPin = getPin(8);
-        sd2SpiwpPin.number = 8;
-        sd2SpiwpPin.type = PinType::DIGITAL;
-        sd2SpiwpPin.isInput = true;
-        sprintf(sd2SpiwpPin.note, "SD2 SPIWP HS1 DATA 1");
-        addPin(sd2SpiwpPin);
-
-        Pin &spics0CmdPin = getPin(11);
-        spics0CmdPin.number = 11;
-        spics0CmdPin.type = PinType::DIGITAL;
-        spics0CmdPin.isInput = true;
-        sprintf(spics0CmdPin.note, "SPICS0 CMD");
-        addPin(spics0CmdPin);
-
-        Pin &sd0SpiqPin = getPin(7);
-        sd0SpiqPin.number = 7;
-        sd0SpiqPin.type = PinType::DIGITAL;
-        sd0SpiqPin.isInput = true;
-        sprintf(sd0SpiqPin.note, "SD0 SPIQ HS1 DATA 0");
-        addPin(sd0SpiqPin);
-
-        Pin &sd0SpidPin = getPin(6);
-        sd0SpidPin.number = 6;
-        sd0SpidPin.type = PinType::DIGITAL;
-        sd0SpidPin.isInput = true;
-        sprintf(sd0SpidPin.note, "segnale di clock temporizzato");
-        addPin(sd0SpidPin);
     }
     catch (...)
     {
@@ -256,81 +203,86 @@ void Esp32_38pin::initializePins()
     printPinsOnSerial();
 }
 
-void Esp32_38pin::addPin(const Pin& pin) {
+void Esp32_30pin::addPin(const Pin &pin)
+{
     try
     {
         pins.push_back(pin);
     }
-    catch(...)
+    catch (...)
     {
         Serial.println("Errore durante l'aggiunta del pin: " + pin.toString());
     }
-    
 }
 
-
-void Esp32_38pin::printPinsOnSerial() {
+void Esp32_30pin::printPinsOnSerial()
+{
     Serial.println("Pinout ESP32 38 pin:");
 
     try
     {
-        for (const auto& pin : pins) {
+        for (const auto &pin : pins)
+        {
             Serial.println(pin.toString());
         }
     }
-    catch(const std::exception& e)
+    catch (const std::exception &e)
     {
         Serial.println("Errore durante la stampa dei pin: " + String(e.what()));
     }
-    
 }
 
-
-
-void Esp32_38pin::readPins() {
-    for (auto& pin : pins) {
+void Esp32_30pin::readPins()
+{
+    for (auto &pin : pins)
+    {
         uint16_t value = pin.read();
 
         // Stampa il valore letto per il debug
-        //Serial.println("readed value: "); 
-        //Serial.println(pin.toString());
-        
+        // Serial.println("readed value: ");
+        // Serial.println(pin.toString());
     }
 }
 
-
-Pin& Esp32_38pin::getPin(int GPIOPin) {
-    for (auto& pin : pins) {
-        if (pin.number == GPIOPin) {
+Pin &Esp32_30pin::getPin(int GPIOPin)
+{
+    for (auto &pin : pins)
+    {
+        if (pin.number == GPIOPin)
+        {
             return pin;
         }
     }
-    static Pin defaultPin(GPIOPin, PinType::UNKNOWN, true/*di default i pin sono in lettura, cosi non ho problemi se ci metto tensione all inizio*/, "Pin not found");
+    static Pin defaultPin(GPIOPin, PinType::UNKNOWN, true /*di default i pin sono in lettura, cosi non ho problemi se ci metto tensione all inizio*/, "Pin not found");
     Serial.println("Pin " + String(GPIOPin) + " not found");
     return defaultPin;
 }
 
-
-
-std::vector<Pin>::iterator Esp32_38pin::begin() {
+std::vector<Pin>::iterator Esp32_30pin::begin()
+{
     return pins.begin();
 }
 
-std::vector<Pin>::iterator Esp32_38pin::end() {
+std::vector<Pin>::iterator Esp32_30pin::end()
+{
     return pins.end();
 }
 
-std::vector<Pin>::const_iterator Esp32_38pin::begin() const {
+std::vector<Pin>::const_iterator Esp32_30pin::begin() const
+{
     return pins.begin();
 }
 
-std::vector<Pin>::const_iterator Esp32_38pin::end() const {
+std::vector<Pin>::const_iterator Esp32_30pin::end() const
+{
     return pins.end();
 }
 
-std::string Esp32_38pin::toString() const {
+std::string Esp32_30pin::toString() const
+{
     std::ostringstream oss;
-    for (const auto& pin : pins) {
+    for (const auto &pin : pins)
+    {
         oss << pin.toString() << "\n";
     }
     return oss.str();

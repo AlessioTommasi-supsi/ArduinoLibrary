@@ -44,23 +44,27 @@ void Routes::defineRoutes(AsyncWebServer &server)
         pinoutData->readPins();
         for (auto pin = pinoutData->begin(); pin != pinoutData->end(); ++pin)
         {
-            content += pin->toString();
-            content += "<br>";
-            content += "<form action='/startRecordingPin' method='get' style='display: inline;'>";
-            content += "  <input type='hidden' name='pin' value='" + String(pin->number) + "'>";
-            content += "  <label for='milliseconds'>Milliseconds:</label>";
-            content += "  <input type='text' id='milliseconds' name='milliseconds' required value='1000'>";
-            content += "  <button type='submit' style='padding: 5px; background-color: red; color: white; border: none; border-radius: 4px; cursor: pointer;'>Start Recording</button>";
-            content += "</form>";
-            content += "<form action='/stopRecordingPin' method='get' style='display: inline; margin-left: 10px;'>";
-            content += "  <input type='hidden' name='pin' value='" + String(pin->number ) + "'>";
-            content += "  <button type='submit' style='padding: 5px; background-color: grey; color: white; border: none; border-radius: 4px; cursor: pointer;'>Stop Recording</button>";
-            content += "</form>";
-            content += "<form action='/editPin' method='get' style='display: inline; margin-left: 10px;'>";
-            content += "  <input type='hidden' name='pin' value='" + String(pin->number) + "'>";
-            content += "  <button type='submit' style='padding: 5px; background-color: blue; color: white; border: none; border-radius: 4px; cursor: pointer;'>Edit</button>";
-            content += "</form>";
-            content += "<br><br>";
+            content += "<div class=\"pin-container\">";
+            content += "    <div class=\"pin-info\">";
+            content += "        Pin number: " + String(pin->number) + ", Type: " + pin->getType() + ", Voltage: " + String(pin->voltage / 1000.0, 3) + " V, Input: " + (pin->isInput ? "Yes" : "No") + ", Note: " + String(pin->note);
+            content += "    </div>";
+            content += "    <div class=\"pin-actions\">";
+            content += "        <form action=\"/startRecordingPin\" method=\"get\">";
+            content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->number) + "\">";
+            content += "            <label for=\"milliseconds\">Milliseconds:</label>";
+            content += "            <input type=\"text\" id=\"milliseconds\" name=\"milliseconds\" required value=\"1000\">";
+            content += "            <button type=\"submit\" class=\"start\">Start Recording</button>";
+            content += "        </form>";
+            content += "        <form action=\"/stopRecordingPin\" method=\"get\">";
+            content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->number) + "\">";
+            content += "            <button type=\"submit\" class=\"stop\">Stop Recording</button>";
+            content += "        </form>";
+            content += "        <form action=\"/editPin\" method=\"get\">";
+            content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->number) + "\">";
+            content += "            <button type=\"submit\" class=\"edit\">Edit</button>";
+            content += "        </form>";
+            content += "    </div>";
+            content += "</div>";
         }
         request->send(200, "text/html", content);
     });

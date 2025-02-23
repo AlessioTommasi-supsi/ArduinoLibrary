@@ -28,6 +28,7 @@ public:
 
     void startRecording(int milliseconds);
     void stopRecording();
+    String getType();
 
     void recordingFunction();
 
@@ -35,9 +36,6 @@ public:
 
     size_t getUsedStackInWords();
     size_t getStackSizeInWords();
-
-    
-
 
 };
 

@@ -1,91 +1,121 @@
 <!DOCTYPE html>
-<html>
+<html lang="it">
 
 <head>
-    <title>Current Register</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pinout</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
+            line-height: 1.6;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin: 0;
         }
 
-        .form-container {
-            background-color: white;
+        .pin-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin-top: 100px;
-            /* Aggiunto margine superiore */
-        }
-
-        label {
-            margin-bottom: 5px;
-        }
-
-        input[type="number"],
-        input[type="text"],
-        input[type="submit"],
-        select {
-            margin-bottom: 15px;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        input[type="submit"] {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        input[type="submit"]:hover {
-            background-color: #45a049;
-        }
-
-        .container {
+            margin-bottom: 20px;
             width: 80%;
             max-width: 600px;
-            margin-top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        h2 {
-            margin: 0;
+        .pin-info {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .pin-note {
+            font-style: italic;
+            color: #555;
+        }
+
+        .pin-actions form {
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .pin-actions button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .pin-actions button.start {
+            background-color: rgba(255, 0, 0, 0.7);
+            color: white;
+        }
+
+        .pin-actions button.stop {
+            background-color: rgba(128, 128, 128, 0.7);
+            color: white;
+        }
+
+        .pin-actions button.edit {
+            background-color: rgba(0, 0, 255, 0.7);
+            color: white;
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <div class="form-container">
-            <form action="modbusMaster" method="get">
-                <label for="registerAddress">Register Address:</label>
-                <input type="text" id="registerAddress" name="registerAddress" value="123" required>
-                <label for="registerType">Register Type:</label>
-                <select id="registerType" name="registerType" required>
-                    <option value="int">int</option>
-                    <option value="float">float</option>
-                </select>
-                <button type="submit">Monitor</button>
+    <div class="pin-container">
+        <div class="pin-info">Pin number: 23, Type: SPI, Voltage: 0.000 V, Input: Yes, Note: VSPI MOSI or input digital
+        </div>
+        <div class="pin-actions">
+            <form action="/startRecordingPin" method="get">
+                <input type="hidden" name="pin" value="23">
+                <label for="milliseconds">Milliseconds:</label>
+                <input type="text" id="milliseconds" name="milliseconds" required value="1000">
+                <button type="submit" class="start">Start Recording</button>
             </form>
-        </div>
-        <div style="text-align: center; margin-top: 20px;">
-            <h2>Register Value: 45.67</h2>
-        </div>
-        <div class="form-container" style="margin-top: 20px; text-align: center;">
-            <form action="/storevalue" method="get">
-                <input type="hidden" name="registerValue" value="45.67">
-                <input type="hidden" name="registerAddress" value="123">
-                <button type="submit"
-                    style="padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Store
-                    Register Value</button>
+            <form action="/stopRecordingPin" method="get">
+                <input type="hidden" name="pin" value="23">
+                <button type="submit" class="stop">Stop Recording</button>
+            </form>
+            <form action="/editPin" method="get">
+                <input type="hidden" name="pin" value="23">
+                <button type="submit" class="edit">Edit</button>
             </form>
         </div>
     </div>
+
+    <!-- Ripeti per gli altri pin -->
+    <div class="pin-container">
+        <div class="pin-info">Pin number: 0, Type: ADC, Voltage: 3.300 V, Input: No, Note: ADC2 is in use by Wi-Fi.
+            Please see <a
+                href="https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations"
+                target="_blank">this link</a> for more info.</div>
+        <div class="pin-actions">
+            <form action="/startRecordingPin" method="get">
+                <input type="hidden" name="pin" value="0">
+                <label for="milliseconds">Milliseconds:</label>
+                <input type="text" id="milliseconds" name="milliseconds" required value="1000">
+                <button type="submit" class="start">Start Recording</button>
+            </form>
+            <form action="/stopRecordingPin" method="get">
+                <input type="hidden" name="pin" value="0">
+                <button type="submit" class="stop">Stop Recording</button>
+            </form>
+            <form action="/editPin" method="get">
+                <input type="hidden" name="pin" value="0">
+                <button type="submit" class="edit">Edit</button>
+            </form>
+        </div>
+    </div>
+    <!-- Aggiungi altri pin qui -->
 </body>
 
 </html>

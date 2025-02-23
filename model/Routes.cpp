@@ -56,6 +56,10 @@ void Routes::defineRoutes(AsyncWebServer &server)
             content += "  <input type='hidden' name='pin' value='" + String(pin->number ) + "'>";
             content += "  <button type='submit' style='padding: 5px; background-color: grey; color: white; border: none; border-radius: 4px; cursor: pointer;'>Stop Recording</button>";
             content += "</form>";
+            content += "<form action='/editPin' method='get' style='display: inline; margin-left: 10px;'>";
+            content += "  <input type='hidden' name='pin' value='" + String(pin->number) + "'>";
+            content += "  <button type='submit' style='padding: 5px; background-color: blue; color: white; border: none; border-radius: 4px; cursor: pointer;'>Edit</button>";
+            content += "</form>";
             content += "<br><br>";
         }
         request->send(200, "text/html", content);

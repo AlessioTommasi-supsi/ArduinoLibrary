@@ -22,11 +22,55 @@ void Pin::setNote(const char* newNote) {
     note[sizeof(note) - 1] = '\0';   // Assicura la terminazione null
 }
 
-String Pin::toString() const {
-    String result = "Pin number: " + String(number) + ", Type: " + String(static_cast<int>(type)) 
-                    + ", Voltage: " + String(voltage / 1000.0, 3) + " V"  // Converte da mV a V per la stampa
-                    + ", Input: " + (isInput ? "Yes" : "No") 
-                    + ", Note: " + String(note);
+String pinTypeToString(PinType type)
+{
+    switch (type)
+    {
+    case PinType::ANALOGIC:
+        return "ANALOGIC";
+    case PinType::DIGITAL:
+        return "DIGITAL";
+    case PinType::VIN:
+        return "VIN";
+    case PinType::VOUT:
+        return "VOUT";
+    case PinType::GND:
+        return "GND";
+    case PinType::EN:
+        return "EN";
+    case PinType::ADC:
+        return "ADC";
+    case PinType::DAC:
+        return "DAC";
+    case PinType::PWM:
+        return "PWM";
+    case PinType::TOUCH:
+        return "TOUCH";
+    case PinType::UART:
+        return "UART";
+    case PinType::SPI:
+        return "SPI";
+    case PinType::I2C:
+        return "I2C";
+    case PinType::UNKNOWN:
+        return "UNKNOWN";
+    default:
+        return "UNKNOWN";
+    }
+}
+
+String Pin::getType()
+{
+    return pinTypeToString(type);
+}
+
+String Pin::toString() const
+{
+    String result = "Pin number: " + String(number) + 
+        ", Type: " + pinTypeToString(type) 
+        +", Voltage: " + String(voltage / 1000.0, 3) + " V" // Converte da mV a V per la stampa
+        + ", Input: " + (isInput ? "Yes" : "No") + 
+        ", Note: " + String(note);
     return result;
 }
 

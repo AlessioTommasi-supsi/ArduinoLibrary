@@ -13,7 +13,7 @@
 #include "viewConfig.h"
 #include "viewWifiSuccessChange.h"
 #include "viewGeneric.h"
-
+#include "viewHome.h"
 //#include "WiFiManager.h"
 #include "SystemState.h"
 

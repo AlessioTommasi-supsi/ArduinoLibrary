@@ -62,7 +62,7 @@ String viewGeneric::addCss()
     css += "padding: 10px 0;";
     css += "position: fixed;";
     css += "top: 0;";
-    css += "z-index: 1000;"; // Assicurati che la navbar sia sempre in cima
+    css += "z-index: 2000;"; // Assicurati che la navbar sia sempre in cima
     css += "}";
     css += ".navbar a {";
     css += "color: white;";
@@ -70,6 +70,7 @@ String viewGeneric::addCss()
     css += "text-align: center;";
     css += "text-decoration: none;";
     css += "font-size: 17px;";
+
     css += "}";
     css += ".navbar a:hover {";
     css += "background-color: #ddd;";
@@ -77,6 +78,25 @@ String viewGeneric::addCss()
     css += "}";
     // Puoi mantenere gli altri stili se necessari...
     return css;
+}
+
+String viewGeneric::defaultPorfolioCss(){
+    String porfolioCss = R"(
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Porfolio - Alessio Tommasi</title>
+            <link rel="icon" href="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/logo.png" type="image/png">
+            <link rel="stylesheet" href="http://alessiotommasi.com/view/css/style.css">
+            <link rel="stylesheet" href="http://alessiotommasi.com/view/css/gear.css">
+            <link rel="stylesheet" href="http://alessiotommasi.com/view/css/logo.css">
+            <link rel="stylesheet" href="http://alessiotommasi.com/view/css/glass_effect.css">
+            <link rel="stylesheet" href="http://alessiotommasi.com/view/css/autoType.css">
+            <link rel="stylesheet" href="http://alessiotommasi.com/view/css/buttons.css">
+            <link rel="stylesheet" href="http://alessiotommasi.com/view/css/dashboard.css">
+            <link rel="stylesheet" href="http://alessiotommasi.com/view/css/particle_style.css">
+            
+    )";
+    return porfolioCss;
 }
 
 String viewGeneric::addNavbar()

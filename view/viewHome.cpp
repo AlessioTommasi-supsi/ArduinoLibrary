@@ -31,7 +31,7 @@ String viewHome::pageContent()
 
     html+= viewGeneric::addNavbar();
 
-    html+= R"(
+    html += R"(
     <div id="textTypingContainer">
                 <div id="textTypingAnimation" class="glassEffect"></div>
             </div>
@@ -65,7 +65,7 @@ String viewHome::pageContent()
                                     <img class="project_maxwidth responsive_img"
                                         src="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/c.png" alt="Description of the image">
                                     <div class="project_maxwidth responsive_text">
-                                        <h3>iot Project </h3>
+                                        <h3>ALPHA </h3>
                                         <p>
                                             <button class="knowledge-button">C++</button>
                                             <button class="knowledge-button">ESP32</button>
@@ -73,11 +73,17 @@ String viewHome::pageContent()
                                             <button class="knowledge-button">CSS</button>
                                         </p>
                                         <p>
-                                            iotProject developed in SUPSI Master in Computer Science course IoT, focusing on ESP32, ESAM, and
-                                            Modbus Protocol.
+                                            Acquisizione Locale di Parametri con Hardware Avanzato
                                         </p>
-                                        <a href="https://github.com/AlessioTommasi-supsi/iotProject"> <button
-                                                class="download-button">docs</button> </a>
+                                        <p>
+                                            Il progetto ALPHA `e stato sviluppato nel corso di IoT del Master in Informatica presso SUPSI. Il focus principale `e sull’ESP32 e il protocollo Modbus
+                                        </p>
+                                        <a href="https://github.com/AlessioTommasi-supsi/iotProject/blob/main/docs/tesi.pdf"> <button
+                                                class="download-button">official</button> </a>
+                                        <a href="https://github.com/AlessioTommasi-supsi/iotProject/tree/main/docs"> <button
+                                            class="download-button">ghithub docs</button> </a>
+                                        <a href="https://github.com/AlessioTommasi-supsi/iotProject/tree/main"> <button
+                                            class="download-button">official repo</button> </a>
                                     </div>
                                 </div>
                             </div>

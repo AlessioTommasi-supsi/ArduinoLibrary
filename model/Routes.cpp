@@ -210,7 +210,7 @@ void Routes::defineRoutes(AsyncWebServer &server)
                 request->send(200, "text/html", htmlContentPtr); 
     });
 
-    server.on("/editPin", HTTP_GET, [](AsyncWebServerRequest *request){
+    server.on("/editPin", HTTP_GET, [](AsyncWebServerRequest *request){        
         if (!request->hasParam("pin")) {
             String htmlContent = viewEditPin::generateHTML();
             const char *htmlContentPtr = htmlContent.c_str();
@@ -218,8 +218,36 @@ void Routes::defineRoutes(AsyncWebServer &server)
         }else
         {
             String pinNumber = request->getParam("pin")->value();
-            String htmlContent = viewEditPin::generateHTML(pinNumber.toInt());
+            String htmlContent = "";
+
+            if (request->hasParam("pinType") && request->hasParam("isInput") && request->hasParam("outputValue") && request->hasParam("pinNote")) {
+                String pinType = request->getParam("pinType")->value();
+                bool isInput = request->getParam("isInput")->value() == "true";
+                uint8_t pinMode = isInput ? INPUT : OUTPUT;
+                float outputValue = request->getParam("outputValue")->value().toFloat();
+                bool goHigh = outputValue > 0;
+                String pinNote = request->getParam("pinNote")->value();
+                
+                Pin *pin = &SystemState::getInstance()->pinoutData->getPin(pinNumber.toInt());
+
+                pin->setType(pinType);
+                pin->setMode(pinMode);
+
+                if (!isInput) {
+                    pin->write(goHigh);
+                }
+
+                //aggiungo popup script con scritto salvataggio avvenuto!
+                String script = "showPopup('Pin " + pinNumber + " saved!');";
+                script += viewEditPin::addDefaultScript();
+                htmlContent = viewEditPin::generateHTML(pinNumber.toInt(), script);
+            }else{
+                htmlContent = viewEditPin::generateHTML(pinNumber.toInt());
+            }
+
+            
             const char *htmlContentPtr = htmlContent.c_str();
+
             request->send(200, "text/html", htmlContentPtr);
         }
     });

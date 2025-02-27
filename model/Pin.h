@@ -22,10 +22,12 @@ public:
     Pin(uint8_t num, PinType t, uint8_t input, const char* n, uint16_t volt = 0);
 
     void setMode(uint8_t input);
+    bool write(bool goHigh); //false == LOW, true == HIGH 
     void setNote(const char* newNote);  // Metodo per cambiare la nota
     String toString() const;
     uint16_t read();
-
+    PinType StringToPinType(String type);
+    void setType(String type);
     void startRecording(int milliseconds);
     void stopRecording();
     String getType();

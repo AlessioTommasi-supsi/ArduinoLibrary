@@ -17,6 +17,12 @@ void Pin::setMode(uint8_t input) {
     }
 }
 
+bool Pin::write(bool goHigh) {
+    setMode(OUTPUT);
+    digitalWrite(number, goHigh ? HIGH : LOW);
+    return true;
+}
+
 void Pin::setNote(const char* newNote) {
     strncpy(note, newNote, sizeof(note));
     note[sizeof(note) - 1] = '\0';   // Assicura la terminazione null
@@ -57,6 +63,71 @@ String Pin::pinTypeToString(PinType type)
     default:
         return "UNKNOWN";
     }
+}
+
+PinType Pin::StringToPinType(String type)
+{
+    if(type == "ANALOGIC")
+    {
+        return PinType::ANALOGIC;
+    }
+    else if(type == "DIGITAL")
+    {
+        return PinType::DIGITAL;
+    }
+    else if(type == "VIN")
+    {
+        return PinType::VIN;
+    }
+    else if(type == "VOUT")
+    {
+        return PinType::VOUT;
+    }
+    else if(type == "GND")
+    {
+        return PinType::GND;
+    }
+    else if(type == "EN")
+    {
+        return PinType::EN;
+    }
+    else if(type == "ADC")
+    {
+        return PinType::ADC;
+    }
+    else if(type == "DAC")
+    {
+        return PinType::DAC;
+    }
+    else if(type == "PWM")
+    {
+        return PinType::PWM;
+    }
+    else if(type == "TOUCH")
+    {
+        return PinType::TOUCH;
+    }
+    else if(type == "UART")
+    {
+        return PinType::UART;
+    }
+    else if(type == "SPI")
+    {
+        return PinType::SPI;
+    }
+    else if(type == "I2C")
+    {
+        return PinType::I2C;
+    }
+    else
+    {
+        return PinType::UNKNOWN;
+    }
+}
+
+void Pin::setType(String type)
+{
+    this->type = StringToPinType(type);
 }
 
 String Pin::getType()

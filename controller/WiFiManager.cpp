@@ -99,10 +99,14 @@ void WiFiManager::connect()
     
 
     }
-    catch(const std::exception& e)
+    catch(...)
     {
         Serial.println("Errore durante la connessione alla rete Wi-Fi!");
         //throw new std::runtime_error("Errore durante la connessione alla rete Wi-Fi!");
+        this->ssid = "ESP32-Access-Point";
+        this->password = "123456789";
+        this->setupAP();
+        isAP = true;
     }
     
     

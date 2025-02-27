@@ -37,39 +37,63 @@ void Routes::defineRoutes(AsyncWebServer &server)
 
     */
     server.on("/pinout", HTTP_GET, [](AsyncWebServerRequest *request){
-        String htmlContent = Pinout::generateHTML();
-        const char *htmlContentPtr = htmlContent.c_str();
-        request->send(200, "text/html", htmlContentPtr); });
+        try
+        {
+            String htmlContent = Pinout::generateHTML();
+            const char *htmlContentPtr = htmlContent.c_str();
+            request->send(200, "text/html", htmlContentPtr);
+        }
+        catch(const std::exception& e)
+        {
+            request->send(500, "text/html", "Error: " + String(e.what()));
+        }
+        catch(...)
+        {
+            request->send(500, "text/html", "Unknown error occurred");
+        }
+        
+    });
 
     server.on("/pinoutContent", HTTP_GET, [](AsyncWebServerRequest *request){
-        String content = "";
-        PinoutData *pinoutData = SystemState::getInstance()->pinoutData;
-        pinoutData->readPins();
-        for (auto pin = pinoutData->begin(); pin != pinoutData->end(); ++pin)
+        try
         {
-            content += "<div class=\"pin-container\">";
-            content += "    <div class=\"pin-info\">";
-            content += "        Pin number: " + String(pin->number) + ", Type: " + pin->getType() + ", Voltage: " + String(pin->voltage / 1000.0, 3) + " V, Input: " + (pin->isInput ? "Yes" : "No") + ", Note: " + String(pin->note);
-            content += "    </div>";
-            content += "    <div class=\"pin-actions\">";
-            content += "        <form action=\"/startRecordingPin\" method=\"get\">";
-            content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->number) + "\">";
-            content += "            <label for=\"milliseconds\">Milliseconds:</label>";
-            content += "            <input type=\"text\" id=\"milliseconds\" name=\"milliseconds\" required value=\"1000\">";
-            content += "            <button type=\"submit\" class=\"start\">Start Recording</button>";
-            content += "        </form>";
-            content += "        <form action=\"/stopRecordingPin\" method=\"get\">";
-            content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->number) + "\">";
-            content += "            <button type=\"submit\" class=\"stop\">Stop Recording</button>";
-            content += "        </form>";
-            content += "        <form action=\"/editPin\" method=\"get\">";
-            content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->number) + "\">";
-            content += "            <button type=\"submit\" class=\"edit\">Edit</button>";
-            content += "        </form>";
-            content += "    </div>";
-            content += "</div>";
+            String content = "";
+            PinoutData *pinoutData = SystemState::getInstance()->pinoutData;
+            pinoutData->readPins();
+            for (auto pin = pinoutData->begin(); pin != pinoutData->end(); ++pin)
+            {
+                content += "<div class=\"pin-container\">";
+                content += "    <div class=\"pin-info\">";
+                content += "        Pin number: " + String(pin->number) + ", Type: " + pin->getType() + ", Voltage: " + String(pin->voltage / 1000.0, 3) + " V, Input: " + (pin->isInput ? "Yes" : "No") + ", Note: " + String(pin->note);
+                content += "    </div>";
+                content += "    <div class=\"pin-actions\">";
+                content += "        <form action=\"/startRecordingPin\" method=\"get\">";
+                content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->number) + "\">";
+                content += "            <label for=\"milliseconds\">Milliseconds:</label>";
+                content += "            <input type=\"text\" id=\"milliseconds\" name=\"milliseconds\" required value=\"1000\">";
+                content += "            <button type=\"submit\" class=\"start\">Start Recording</button>";
+                content += "        </form>";
+                content += "        <form action=\"/stopRecordingPin\" method=\"get\">";
+                content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->number) + "\">";
+                content += "            <button type=\"submit\" class=\"stop\">Stop Recording</button>";
+                content += "        </form>";
+                content += "        <form action=\"/editPin\" method=\"get\">";
+                content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->number) + "\">";
+                content += "            <button type=\"submit\" class=\"edit\">Edit</button>";
+                content += "        </form>";
+                content += "    </div>";
+                content += "</div>";
+            }
+            request->send(200, "text/html", content);
         }
-        request->send(200, "text/html", content);
+        catch(const std::exception& e)
+        {
+            request->send(500, "text/html", "Error: " + String(e.what()));
+        }
+        catch(...)
+        {
+            request->send(500, "text/html", "Unknown error occurred");
+        }
     });
 
     server.on("/startRecordingPin", HTTP_GET, [](AsyncWebServerRequest *request){

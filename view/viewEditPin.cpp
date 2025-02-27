@@ -3,23 +3,30 @@
 String viewEditPin::html = "";
 Pin *viewEditPin::selectedPin = nullptr;
 
+/********************************************************************************
+ * il pin che viene passato deve essere un pin valido ovvero precedentemente    *
+ *  aggiunto al pinout altrimenti si prendera un defaultpin ma le modifiche     *
+ * non verraanno salvate poiche non saranno piu accessibili da pinout!          *
+ * ******************************************************************************/
+ 
+
 String viewEditPin::generateForm( int pinNumber)
 {
     String form;
-
+    selectedPin = &SystemState::getInstance()->pinoutData->getPin(pinNumber);
     form += R"(
         <div class="form-container">
         <form id="configurePinForm" action="action_submit_button" method="get">
             <p style="text-align: center;">Configure Pin<br>
-                <label for="pinNumber">Number: )"+String(pinNumber)+R"(;
+                <label for="pinNumber">Number: )" +
+            String(pinNumber) + R"(;
                 </label>
                 <br><br><br>
             </p>
             <label for="pinNumber">Pin Number:</label>
-            <input type="text" id="pinNumber" name="pinNumber" value="23" required>
+            <input type="text" id="pinNumber" name="pinNumber" value=")" +String(pinNumber) + R"("required>
             <label for="pinType">Pin Type:</label>
             <select id="pinType" name="pinType" required> )";
-    selectedPin = &SystemState::getInstance()->pinoutData->getPin(pinNumber);
     for (int i = 0; i < static_cast<int>(PinType::SIZE); ++i)
     {
         String pin_type = selectedPin->pinTypeToString(static_cast<PinType>(i));
@@ -103,12 +110,12 @@ String viewEditPin::addDefaultScript(){
             }
 
             function applyConfig() {
-                document.getElementById("configurePinForm").action = "form.html";
+                document.getElementById("configurePinForm").action = "editPin";
                 document.getElementById("configurePinForm").submit();
             }
 
             function saveConfig() {
-                document.getElementById("configurePinForm").action = "pinout_page";
+                document.getElementById("configurePinForm").action = "pinout";
                 document.getElementById("configurePinForm").submit();
             }
         </script>

@@ -15,7 +15,10 @@ enum class PinType {
     UART,     // Universal Asynchronous Receiver-Transmitter, comunicazione seriale asincrona
     SPI,      // Serial Peripheral Interface, protocollo di comunicazione seriale sincrona
     I2C,      // Inter-Integrated Circuit, protocollo di comunicazione seriale sincrona per corto raggio
-    UNKNOWN   // Tipo di pin sconosciuto
+    UNKNOWN,   // Tipo di pin sconosciuto
+
+
+    SIZE      // restituisce la dimensione dell'enum deve essere sempre l'ultimo elemento
 };
 
 #endif // PINTYPE_H

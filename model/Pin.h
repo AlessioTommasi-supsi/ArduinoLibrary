@@ -37,6 +37,8 @@ public:
     size_t getUsedStackInWords();
     size_t getStackSizeInWords();
 
+    static String pinTypeToString(PinType type);
+
 };
 
 #endif // PIN_H

@@ -1,8 +1,9 @@
 #include "viewEditPin.h"
 
 String viewEditPin::html = "";
+Pin *viewEditPin::selectedPin = nullptr;
 
-String viewEditPin::generateForm()
+String viewEditPin::generateForm( int pinNumber)
 {
     String form;
 
@@ -10,19 +11,21 @@ String viewEditPin::generateForm()
         <div class="form-container">
         <form id="configurePinForm" action="action_submit_button" method="get">
             <p style="text-align: center;">Configure Pin<br>
-                <label for="pinNumber">Number: 23</label>
+                <label for="pinNumber">Number: )"+String(pinNumber)+R"(;
+                </label>
                 <br><br><br>
             </p>
             <label for="pinNumber">Pin Number:</label>
             <input type="text" id="pinNumber" name="pinNumber" value="23" required>
             <label for="pinType">Pin Type:</label>
-            <select id="pinType" name="pinType" required>
-                <option value="DIGITAL">Digital</option>
-                <option value="SPI">SPI</option>
-                <option value="I2C">I2C</option>
-                <option value="UART">UART</option>
-                <option value="ADC">ADC</option>
-                <option value="DAC">DAC</option>
+            <select id="pinType" name="pinType" required> )";
+    selectedPin = &SystemState::getInstance()->pinoutData->getPin(pinNumber);
+    for (int i = 0; i < static_cast<int>(PinType::SIZE); ++i)
+    {
+        String pin_type = selectedPin->pinTypeToString(static_cast<PinType>(i));
+        form += "<option value=\"" + pin_type + "\">" + pin_type + "</option>";
+    }
+    form += R"(
             </select>
             <label for="isInput">Is Input:</label>
             <select id="isInput" name="isInput" required onchange="showOutputValue() ">
@@ -73,7 +76,7 @@ String viewEditPin::generateHTML(int pinNumber, String script)
     String html = viewGeneric::defaultCssHeader("Edit Pin");
 
     // Aggiunta del contenitore principale per form e valore del registro
-    html+= viewEditPin::generateForm();
+    html+= viewEditPin::generateForm(pinNumber);
     html+= viewEditPin::addCustomScript(script);
 
     // Aggiunta del footer

@@ -22,7 +22,7 @@ void Pin::setNote(const char* newNote) {
     note[sizeof(note) - 1] = '\0';   // Assicura la terminazione null
 }
 
-String pinTypeToString(PinType type)
+String Pin::pinTypeToString(PinType type)
 {
     switch (type)
     {

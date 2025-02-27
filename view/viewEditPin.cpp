@@ -23,8 +23,8 @@ String viewEditPin::generateForm( int pinNumber)
                 </label>
                 <br><br><br>
             </p>
-            <label for="pinNumber">Pin Number:</label>
-            <input type="text" id="pinNumber" name="pinNumber" value=")" +String(pinNumber) + R"("required>
+            <label for="pin">Pin Number:</label>
+            <input type="text" id="pin" name="pin" value=")" +String(pinNumber) + R"("required>
             <label for="pinType">Pin Type:</label>
             <select id="pinType" name="pinType" required> )";
     for (int i = 0; i < static_cast<int>(PinType::SIZE); ++i)
@@ -63,7 +63,7 @@ String viewEditPin::generateHTML() // codice generato solo la prima volta quando
     html = viewGeneric::defaultCssHeader("Edit Pin");
 
     html += R"(passaggio parametri non corretto! <br> 
-        Devi passare il parametro PinNumber come se fosse un intero!
+        Devi passare il parametro Pin come se fosse un intero!
     )";
 
     html += viewGeneric::defaultFooter();

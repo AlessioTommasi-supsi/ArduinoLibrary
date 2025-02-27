@@ -186,6 +186,20 @@ void Routes::defineRoutes(AsyncWebServer &server)
                 request->send(200, "text/html", htmlContentPtr); 
     });
 
+    server.on("/editPin", HTTP_GET, [](AsyncWebServerRequest *request){
+        if (!request->hasParam("pin")) {
+            String htmlContent = viewEditPin::generateHTML();
+            const char *htmlContentPtr = htmlContent.c_str();
+            request->send(200, "text/html", htmlContentPtr);
+        }else
+        {
+            String pinNumber = request->getParam("pin")->value();
+            String htmlContent = viewEditPin::generateHTML(pinNumber.toInt());
+            const char *htmlContentPtr = htmlContent.c_str();
+            request->send(200, "text/html", htmlContentPtr);
+        }
+    });
+
     server.on("/modbusMaster", HTTP_GET, [](AsyncWebServerRequest *request){
                 String registerAddress = request->getParam("registerAddress")->value();
                 String registerType = request->getParam("registerType")->value();

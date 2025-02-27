@@ -77,6 +77,7 @@ String viewGeneric::addCss()
     css += "color: black;";
     css += "}";
     css += ".form-container {";
+    css += "width: 80%;";
     css += "background-color: white;";
     css += "padding: 20px;";
     css += "border-radius: 8px;";

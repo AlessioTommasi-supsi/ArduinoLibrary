@@ -14,6 +14,7 @@
 #include "viewWifiSuccessChange.h"
 #include "viewGeneric.h"
 #include "viewHome.h"
+#include "viewEditPin.h"
 //#include "WiFiManager.h"
 #include "SystemState.h"
 

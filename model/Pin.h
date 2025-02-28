@@ -10,7 +10,7 @@ public:
     uint8_t number;      // Usa uint8_t per ridurre la dimensione
     PinType type;
     uint16_t voltage;
-    uint8_t isInput;     // Usa uint8_t per risparmiare spazio
+    bool isInput;     
     char note[200];       // Usa array di char per gestire le note
 
     size_t stackSize = 10000; //e la dimensione del thread recordingTask in Parole ovvero 1 parola = 4 byte
@@ -21,7 +21,7 @@ public:
 
     Pin(uint8_t num, PinType t, uint8_t input, const char* n, uint16_t volt = 0);
 
-    void setMode(uint8_t input);
+    void setMode(uint8_t mode);
     bool write(bool goHigh); //false == LOW, true == HIGH 
     void setNote(const char* newNote);  // Metodo per cambiare la nota
     String toString() const;
@@ -31,7 +31,7 @@ public:
     void startRecording(int milliseconds);
     void stopRecording();
     String getType();
-
+    bool getIsInput();
     void recordingFunction();
 
     std::vector<float> getValuesVoltage();

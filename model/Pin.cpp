@@ -10,10 +10,10 @@ Pin::Pin(uint8_t num, PinType t, uint8_t input, const char* n, uint16_t volt)
     }
 }
 
-void Pin::setMode(uint8_t input) {
-    isInput = input;
+void Pin::setMode(uint8_t mode) {
+    isInput = mode == INPUT;
     if (number != static_cast<uint8_t>(-1)) {
-        pinMode(number, input ? INPUT : OUTPUT);
+        pinMode(number, mode);
     }
 }
 
@@ -21,6 +21,11 @@ bool Pin::write(bool goHigh) {
     setMode(OUTPUT);
     digitalWrite(number, goHigh ? HIGH : LOW);
     return true;
+}
+
+bool Pin::getIsInput()
+{
+    return isInput == true;
 }
 
 void Pin::setNote(const char* newNote) {

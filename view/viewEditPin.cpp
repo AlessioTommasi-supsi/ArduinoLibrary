@@ -27,19 +27,25 @@ String viewEditPin::generateForm( int pinNumber)
             <input type="text" id="pin" name="pin" value=")" +String(pinNumber) + R"("required>
             <label for="pinType">Pin Type:</label>
             <select id="pinType" name="pinType" required> )";
+    String current_type = selectedPin->pinTypeToString(selectedPin->type);
     for (int i = 0; i < static_cast<int>(PinType::SIZE); ++i)
     {
         String pin_type = selectedPin->pinTypeToString(static_cast<PinType>(i));
-        form += "<option value=\"" + pin_type + "\">" + pin_type + "</option>";
+        form += "<option value=\"" + pin_type + "\" " + (current_type == pin_type ? "selected" : "") + ">" + pin_type + "</option>";
     }
     form += R"(
             </select>
             <label for="isInput">Is Input:</label>
             <select id="isInput" name="isInput" required onchange="showOutputValue() ">
-                <option value="true">True</option>
-                <option value="false">False</option>
+                <option value="true" >True</option>
+                <option value="false" )";
+    form += (!selectedPin->getIsInput()? "selected" : "");
+    form += R"(
+                >False</option>
             </select>
-            <div id="outputValueContainer" style="display: none;">
+            <div id="outputValueContainer" style="display: )" ;
+    form+= (selectedPin->isInput ? "none" : "block");
+    form+= R"(">
                 <label for="outputValue">Output Value:</label>
                 <select id="outputValue" name="outputValue">
                     <option value="0">0V</option>

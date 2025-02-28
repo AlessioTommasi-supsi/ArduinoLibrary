@@ -222,7 +222,7 @@ void Routes::defineRoutes(AsyncWebServer &server)
 
             if (request->hasParam("pinType") && request->hasParam("isInput") && request->hasParam("outputValue") && request->hasParam("pinNote")) {
                 String pinType = request->getParam("pinType")->value();
-                bool isInput = request->getParam("isInput")->value() == "true";
+                bool isInput = request->getParam("isInput")->value() == "true" ? true : false;
                 uint8_t pinMode = isInput ? INPUT : OUTPUT;
                 float outputValue = request->getParam("outputValue")->value().toFloat();
                 bool goHigh = outputValue > 0;
@@ -230,15 +230,18 @@ void Routes::defineRoutes(AsyncWebServer &server)
                 
                 Pin *pin = &SystemState::getInstance()->pinoutData->getPin(pinNumber.toInt());
 
+                Serial.println("Saving pin " + pinNumber + " with type " + pinType + ", isInput " + String(isInput) + ", pinMode " + String(pinMode) + ", outputValue " + String(outputValue) + ", pinNote " + pinNote);
+                pin->isInput = isInput;
                 pin->setType(pinType);
                 pin->setMode(pinMode);
+                pin->setNote(pinNote.c_str());
 
                 if (!isInput) {
                     pin->write(goHigh);
                 }
 
                 //aggiungo popup script con scritto salvataggio avvenuto!
-                String script = "showPopup('Pin " + pinNumber + " saved!');";
+                String script = "Pin " + pinNumber + " saved!";
                 script += viewEditPin::addDefaultScript();
                 htmlContent = viewEditPin::generateHTML(pinNumber.toInt(), script);
             }else{

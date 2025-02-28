@@ -53,7 +53,9 @@ String viewEditPin::generateForm( int pinNumber)
                 </select>
             </div>
             <label for="pinNote">Note:</label>
-            <input type="text" id="pinNote" name="pinNote">
+            <input type="text" id="pinNote" name="pinNote" value=")";
+    form += selectedPin->note;
+    form += R"(">
             <button type="button" onclick="applyConfig() ">Apply</button>
             <label> </label> <!-- Add a space between the two buttons -->
             <button type="button" onclick="saveConfig() ">Save</button>

@@ -61,7 +61,7 @@ void Routes::defineRoutes(AsyncWebServer &server)
 
                 if (!isInput)
                 {
-                    pin->write(goHigh);
+                    pin->write(goHigh); 
                 }
             }
             else

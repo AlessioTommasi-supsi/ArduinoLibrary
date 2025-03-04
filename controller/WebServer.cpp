@@ -6,18 +6,18 @@ WebServer::WebServer(const char *ssid, const char *password) : ssid(ssid), passw
 
 void WebServer::begin()
 {
-    /*
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(ssid, password);
+    
+    //WiFi.mode(WIFI_STA);
+    //WiFi.begin(ssid, password);
     if (WiFi.waitForConnectResult() != WL_CONNECTED)
     {
         Serial.println("WiFi Failed!");
-        return;
+        //return;
     }
     
     Serial.print("IP Address: ");
     Serial.println(WiFi.localIP());
-    */
+    
    
     server.onNotFound([this](AsyncWebServerRequest *request)
                       { this->notFound(request); });

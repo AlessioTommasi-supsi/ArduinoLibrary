@@ -49,7 +49,10 @@ String viewEditPin::generateForm( int pinNumber)
                 <label for="outputValue">Output Value:</label>
                 <select id="outputValue" name="outputValue">
                     <option value="0">0V</option>
-                    <option value="3.3">3.3V</option>
+                    <option value="3.3" )";
+    form += (selectedPin->voltage != 0  ? "selected" : "");
+    form += R"(
+                        >3.3V</option>
                 </select>
             </div>
             <label for="pinNote">Note:</label>

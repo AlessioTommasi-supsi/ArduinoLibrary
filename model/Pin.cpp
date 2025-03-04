@@ -18,6 +18,8 @@ void Pin::setMode(uint8_t mode) {
 }
 
 bool Pin::write(bool goHigh) {
+    isInput = false;
+    voltage = goHigh ? 3300 : 0;
     setMode(OUTPUT);
     digitalWrite(number, goHigh ? HIGH : LOW);
     return true;

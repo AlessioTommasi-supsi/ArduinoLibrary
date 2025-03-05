@@ -93,7 +93,7 @@ void Routes::defineRoutes(AsyncWebServer &server)
             while (!SystemState::isPinoutContentAvaible) // risolto parzialmente cosi ma dovro implementare mutex!
             {
                 delay(10000);
-            }
+            }// numero massimo client con questa configurazione e* 4
             SystemState::isPinoutContentAvaible = false;
             
             String content = "";

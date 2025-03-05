@@ -17,7 +17,8 @@
 #include "viewEditPin.h"
 //#include "WiFiManager.h"
 #include "SystemState.h"
-
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
 
 //per monitor metriche
 #include <esp_heap_caps.h>

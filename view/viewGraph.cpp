@@ -94,7 +94,7 @@ String viewGraph::generateGraph(std::vector<int> addresses, String apiFetch, Str
     var_html += "}";
     var_html += "document.addEventListener('DOMContentLoaded', () => {";
     var_html += "  updateGraph();";                  // Per caricare il grafico all'avvio
-    var_html += "  setInterval(updateGraph, 3000);"; // Aggiorna il grafico ogni 3 secondi
+    var_html += "  setInterval(updateGraph, 1000);"; // Aggiorna il grafico ogni 5 secondi
     var_html += "});";
     var_html += "</script>";
 

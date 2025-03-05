@@ -89,14 +89,7 @@ void Routes::defineRoutes(AsyncWebServer &server)
 
     server.on("/pinoutContent", HTTP_GET, [](AsyncWebServerRequest *request){
         try
-        {   /*il problema qui e concorrenza!*/
-            /*
-            while (!SystemState::isPinoutContentAvaible) // risolto parzialmente cosi ma dovro implementare mutex!
-            {
-                delay(10000);
-            }// numero massimo client con questa configurazione e* 4
-            */
-            SystemState::isPinoutContentAvaible = false;
+        {  
             
             String content = "";
             PinoutData *pinoutData = SystemState::getInstance()->pinoutData;
@@ -126,7 +119,6 @@ void Routes::defineRoutes(AsyncWebServer &server)
                 content += "</div>";
             }
             request->send(200, "text/html", content);
-            SystemState::isPinoutContentAvaible = true;
         }
         catch(const std::exception& e)
         {
@@ -415,7 +407,14 @@ void Routes::defineRoutes(AsyncWebServer &server)
             {
                 String pin = request->getParam("pin")->value();
 
+                // SystemState::getInstance()->pinoutData->getPin(pin.toInt())  ritrna sempre qualcosa al massimo default p[in con pinnumber= -1!!]
                 std::vector<float> values = SystemState::getInstance()->pinoutData->getPin(pin.toInt()).getValuesVoltage();
+
+                if (values.size() == 0 ) 
+                {
+                    return request->send(200, "application/json", "[]");
+                }
+                
 
                 String json = "[";
                 for (size_t i = 0; i < values.size(); ++i)
@@ -430,7 +429,7 @@ void Routes::defineRoutes(AsyncWebServer &server)
             }
             catch(...)
             {
-                request->send(200, "application/json", "{\"error\":\"Pin not found\"}");
+                request->send(200, "application/json", "[]" );
             }
             
             

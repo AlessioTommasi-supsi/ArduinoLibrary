@@ -12,7 +12,6 @@ PinoutData *SystemState::pinoutData = nullptr;
 
 int SystemState::sd_pin = 0;
 
-bool SystemState::isPinoutContentAvaible = false;
 
 char * SystemState::error_message = "";
 
@@ -179,8 +178,6 @@ void SystemState::setPinoutData(PinoutData *pinout)
     {
         masterModbus->registerPins(pinoutData);
     }
-
-    isPinoutContentAvaible = true;
     
 }
 

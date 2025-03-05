@@ -34,7 +34,7 @@ String Pinout::pageContent()
     html += "        .then(data => {";
     html += "          document.getElementById('pinData').innerHTML = data;";
     html += "        });";
-    html += "    }, 2000);"; // Aggiorna ogni 2 secondi (puoi cambiare il valore a k*1000 per k secondi)
+    html += "    }, 5000);"; // Aggiorna ogni 5 secondi (puoi cambiare il valore a k*1000 per k secondi)
     html += "  };";
     html += "  const stopInterval = () => {";
     html += "    clearInterval(intervalId);";

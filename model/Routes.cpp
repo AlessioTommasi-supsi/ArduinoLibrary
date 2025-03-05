@@ -89,7 +89,13 @@ void Routes::defineRoutes(AsyncWebServer &server)
 
     server.on("/pinoutContent", HTTP_GET, [](AsyncWebServerRequest *request){
         try
-        {
+        {   /*il problema qui e concorrenza!*/
+            while (!SystemState::isPinoutContentAvaible) // risolto parzialmente cosi ma dovro implementare mutex!
+            {
+                delay(10000);
+            }
+            SystemState::isPinoutContentAvaible = false;
+            
             String content = "";
             PinoutData *pinoutData = SystemState::getInstance()->pinoutData;
             pinoutData->readPins();
@@ -118,14 +124,15 @@ void Routes::defineRoutes(AsyncWebServer &server)
                 content += "</div>";
             }
             request->send(200, "text/html", content);
+            SystemState::isPinoutContentAvaible = true;
         }
         catch(const std::exception& e)
         {
-            request->send(500, "text/html", "Error: " + String(e.what()));
+            request->send(200, "text/html", "Error: " + String(e.what()));
         }
         catch(...)
         {
-            request->send(500, "text/html", "Unknown error occurred");
+            request->send(200, "text/html", "Unknown error occurred");
         }
     });
 

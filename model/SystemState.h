@@ -61,6 +61,8 @@ private:
 public:
     
      /*pinout attribute*/
+
+    static bool isPinoutContentAvaible;
     static PinoutData *pinoutData;
 
     static MasterModbus *masterModbus;

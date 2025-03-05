@@ -213,8 +213,9 @@ void Pin::startRecording(int milliseconds)
     }
     else
     {
-        stopRecording();
-        startRecording(milliseconds);
+        /** Do nothing registration alredy in progress! */
+        //stopRecording();
+        //startRecording(milliseconds);
     }
 }
 

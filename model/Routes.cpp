@@ -37,7 +37,7 @@ void Routes::defineRoutes(AsyncWebServer &server)
 
     */
     server.on("/pinout", HTTP_GET, [](AsyncWebServerRequest *request){
-        String htmlContent ="";
+        String htmlContent =""; 
         if (request->hasParam("pin")) 
         {
             String pinNumber = request->getParam("pin")->value();

@@ -6,15 +6,15 @@ WebServer::WebServer(const char *ssid, const char *password) : ssid(ssid), passw
 
 void WebServer::begin()
 {
-    
-    //WiFi.mode(WIFI_STA);
-    //WiFi.begin(ssid, password);
+    /* se non si vuole usare il wifi manager
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(ssid, password);
     if (WiFi.waitForConnectResult() != WL_CONNECTED)
     {
         Serial.println("WiFi Failed!");
         //return;
     }
-    
+    */
     Serial.print("IP Address: ");
     Serial.println(WiFi.localIP());
     
@@ -22,8 +22,20 @@ void WebServer::begin()
     server.onNotFound([this](AsyncWebServerRequest *request)
                       { this->notFound(request); });
 
-
-    Routes::defineRoutes(server);
+lbl_defineRoutes:
+    try
+    {
+        Routes::defineRoutes(server);
+    }
+    catch(...)
+    {
+        Serial.println("Errore nella definizione delle rotte");
+        //in tutte le eorre ritorno messaggui du errore
+        server.reset();//non sicuro che sia corretta
+        goto lbl_defineRoutes;
+    }
+    
+    
     server.begin();
     Serial.println("Server started");
 }

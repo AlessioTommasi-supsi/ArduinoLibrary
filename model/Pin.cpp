@@ -183,14 +183,23 @@ uint16_t Pin::read()
 
 void Pin:: recordingFunction()
 {
-    
-    while (true)
+    try
     {
-        uint16_t value = read();
-        Serial.println("Recording value: " + String(value) + " at pin " + String(number));
-        valuesVoltage.push_back(value);
-        delay(timeToRecord);
+        while (true)
+        {
+            uint16_t value = read();
+            Serial.println("Recording value: " + String(value) + " at pin " + String(number));
+            valuesVoltage.push_back(value);
+            delay(timeToRecord);
+        }
     }
+    catch(...)
+    {
+        Serial.println("Errore nella registrazione del pin " + String(number));
+        stopRecording();
+    }
+    
+   
 }
 
 

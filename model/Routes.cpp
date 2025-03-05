@@ -90,10 +90,12 @@ void Routes::defineRoutes(AsyncWebServer &server)
     server.on("/pinoutContent", HTTP_GET, [](AsyncWebServerRequest *request){
         try
         {   /*il problema qui e concorrenza!*/
+            /*
             while (!SystemState::isPinoutContentAvaible) // risolto parzialmente cosi ma dovro implementare mutex!
             {
                 delay(10000);
             }// numero massimo client con questa configurazione e* 4
+            */
             SystemState::isPinoutContentAvaible = false;
             
             String content = "";
@@ -409,19 +411,31 @@ void Routes::defineRoutes(AsyncWebServer &server)
 
     server.on("/getPinValues", HTTP_GET, [](AsyncWebServerRequest *request){
         if (request->hasParam("pin")) {
-            String pin = request->getParam("pin")->value();
-            std::vector<float> values = SystemState::getInstance()->pinoutData->getPin(pin.toInt()).getValuesVoltage();
+            try
+            {
+                String pin = request->getParam("pin")->value();
 
-            String json = "[";
-            for (size_t i = 0; i < values.size(); ++i) {
-                if (i > 0) json += ",";
-                json += String(values[i]);
+                std::vector<float> values = SystemState::getInstance()->pinoutData->getPin(pin.toInt()).getValuesVoltage();
+
+                String json = "[";
+                for (size_t i = 0; i < values.size(); ++i)
+                {
+                    if (i > 0)
+                        json += ",";
+                    json += String(values[i]);
+                }
+                json += "]";
+
+                request->send(200, "application/json", json);
             }
-            json += "]";
-
-            request->send(200, "application/json", json);
+            catch(...)
+            {
+                request->send(200, "application/json", "{\"error\":\"Pin not found\"}");
+            }
+            
+            
         } else {
-            request->send(400, "application/json", "{\"error\":\"Pin parameter missing\"}");
+            request->send(200, "application/json", "{\"error\":\"Pin parameter missing\"}");
         } 
     });
 

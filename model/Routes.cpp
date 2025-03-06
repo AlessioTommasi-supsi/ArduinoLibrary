@@ -269,7 +269,7 @@ void Routes::defineRoutes(AsyncWebServer &server)
                 pin->setType(pinType);
                 pin->setMode(pinMode);
                 pin->setNote(pinNote.c_str());
-
+                
                 if (!isInput) {
                     pin->write(goHigh);
                 }

@@ -37,9 +37,9 @@ bool Pin::write(bool goHigh)
     {
         isInput = false;
         voltage = goHigh ? 3300 : 0;
+        xSemaphoreGive(isPinUsable_Mutex); // devo rilasciarlo prima di fare chiamata a funzione se no blocca sicuro!
         setMode(OUTPUT);
         digitalWrite(number, goHigh ? HIGH : LOW);
-        xSemaphoreGive(isPinUsable_Mutex);
         return true;
     }
     return false;

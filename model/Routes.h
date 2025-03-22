@@ -1,30 +1,26 @@
 #ifndef ROUTES_H
 #define ROUTES_H
 
-#include "RoutesInterface.h"
 #include <ESPAsyncWebSrv.h>
 #include <Arduino.h>
 #include <vector>
 #include <string>
 
-#include "viewCurrentRegister.h"
-#include "viewHistory.h"
-#include "Pinout.h"
+
 #include "viewGraph.h"
 #include "viewConfig.h"
 #include "viewWifiSuccessChange.h"
 #include "viewGeneric.h"
 #include "viewHome.h"
-#include "viewEditPin.h"
+
 //#include "WiFiManager.h"
 #include "SystemState.h"
-#include <freertos/FreeRTOS.h>
-#include <freertos/semphr.h>
 
-//per monitor metriche
-#include <esp_heap_caps.h>
-
+#include "RoutesInterface.h"
 #include "pinoutRoutes.h"
+#include "modbusRoutes.h"
+#include "wifiRoutes.h"
+#include "monitorResource.h"
 
 class Routes : public RoutesInterface
 {

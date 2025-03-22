@@ -1,6 +1,6 @@
+#ifndef MODBUSROUTES_H
+#define MODBUSROUTES_H
 
-#ifndef PINOUTROUTES_H
-#define PINOUTROUTES_H
 
 #include "RoutesInterface.h"
 #include <ESPAsyncWebSrv.h>
@@ -8,10 +8,11 @@
 #include <vector>
 #include <string>
 
-#include "Pinout.h"
+
+
 #include "viewGraph.h"
 #include "viewGeneric.h"
-#include "viewEditPin.h"
+#include "viewHistory.h"
 #include "viewCurrentRegister.h"
 
 #include "SystemState.h"
@@ -19,11 +20,10 @@
 #include <freertos/semphr.h>
 
 
-
-class pinoutRoutes : public RoutesInterface
+class ModbusRoutes
 {
 public:
     void defineRoutes(AsyncWebServer &server);
 };
 
-#endif // PINOUTROUTES_H
+#endif // MODBUSROUTES_H

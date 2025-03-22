@@ -151,4 +151,51 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(500, "text/html", htmlContentPtr);
     } });
+
+
+    
+    server.on("/editPin", HTTP_GET, [](AsyncWebServerRequest *request){        
+        if (!request->hasParam("pin")) {
+            String htmlContent = viewEditPin::generateHTML();
+            const char *htmlContentPtr = htmlContent.c_str();
+            request->send(200, "text/html", htmlContentPtr);
+        }else
+        {
+            String pinNumber = request->getParam("pin")->value();
+            String htmlContent = "";
+
+            if (request->hasParam("pinType") && request->hasParam("isInput") && request->hasParam("outputValue") && request->hasParam("pinNote")) {
+                String pinType = request->getParam("pinType")->value();
+                bool isInput = request->getParam("isInput")->value() == "true" ? true : false;
+                uint8_t pinMode = isInput ? INPUT : OUTPUT;
+                float outputValue = request->getParam("outputValue")->value().toFloat();
+                bool goHigh = outputValue > 0;
+                String pinNote = request->getParam("pinNote")->value();
+                
+                Pin *pin = &SystemState::getInstance()->pinoutData->getPin(pinNumber.toInt());
+
+                Serial.println("Saving pin " + pinNumber + " with type " + pinType + ", isInput " + String(isInput) + ", pinMode " + String(pinMode) + ", outputValue " + String(outputValue) + ", pinNote " + pinNote);
+                pin->isInput = isInput;
+                pin->setType(pinType);
+                pin->setMode(pinMode);
+                pin->setNote(pinNote.c_str());
+                
+                if (!isInput) {
+                    pin->write(goHigh);
+                }
+
+                //aggiungo popup script con scritto salvataggio avvenuto!
+                String script = "Pin " + pinNumber + " saved!";
+                script += viewEditPin::addDefaultScript();
+                htmlContent = viewEditPin::generateHTML(pinNumber.toInt(), script);
+            }else{
+                htmlContent = viewEditPin::generateHTML(pinNumber.toInt());
+            }
+
+            
+            const char *htmlContentPtr = htmlContent.c_str();
+
+            request->send(200, "text/html", htmlContentPtr);
+        }
+    });
 }

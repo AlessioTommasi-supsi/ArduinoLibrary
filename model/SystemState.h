@@ -18,6 +18,11 @@
 #include <chrono>
 #include <map>
 
+//multithread
+
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
+
 
 
 class WiFiManager;
@@ -51,14 +56,18 @@ private:
 
     std::map<int, std::thread> recordingThreads;
     std::map<int, std::atomic<bool>> recordingActive;
-    std::mutex recordingMutex;
-
+    
     
     static int sd_pin;
 
-    SystemState() {}
+    SystemState() {
+        // Inizializza il mutex per la sincronizzazione
+        modbus_mutex = xSemaphoreCreateMutex();
+    }
 
 public:
+    SemaphoreHandle_t modbus_mutex; // Mutex per sincronizzazione thread-safe
+
     static PinoutData *pinoutData;
 
     static MasterModbus *masterModbus;

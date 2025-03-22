@@ -24,6 +24,8 @@
 //per monitor metriche
 #include <esp_heap_caps.h>
 
+#include "pinoutRoutes.h"
+
 class Routes : public RoutesInterface
 {
 public:

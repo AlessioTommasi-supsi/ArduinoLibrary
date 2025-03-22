@@ -29,7 +29,6 @@ void WiFiManager::setupAP()
         this->ip_address = IP.toString().c_str();
 
         my_webServer = new WebServer(ssid, password);
-        my_webServer->begin();
     }
     catch(...)
     {
@@ -89,7 +88,6 @@ void WiFiManager::connect()
         }
 
         my_webServer = new WebServer(ssid, password);
-        my_webServer->begin();
 
         Serial.println("Connessione Wi-Fi stabilita!");
         Serial.print("Indirizzo IP: ");

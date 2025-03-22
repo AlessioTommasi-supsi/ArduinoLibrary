@@ -30,9 +30,8 @@ void ModbusRTUComm::begin(unsigned long baud, uint32_t config) {
     _charTimeout = (bitsPerChar * 1000000) / baud + 750;
     _frameTimeout = (bitsPerChar * 1000000) / baud + 1750;
   }
-  #if defined(ARDUINO_UNOR4_MINIMA) || defined(ARDUINO_UNOR4_WIFI) || defined(ARDUINO_GIGA) || (defined(ARDUINO_NANO_RP2040_CONNECT) && defined(ARDUINO_ARCH_MBED))
-  _postDelay = ((bitsPerChar * 1000000) / baud) + 2;
-  #endif
+  _bytePeriod = (bitsPerChar * 1000000) / baud;
+  _postDelay = ((bitsPerChar * 1000000) + 1500000) / baud;
   if (_dePin >= 0) {
     pinMode(_dePin, OUTPUT);
     digitalWrite(_dePin, LOW);
@@ -83,15 +82,41 @@ ModbusRTUCommError ModbusRTUComm::readAdu(ModbusADU& adu) {
 }
 
 bool ModbusRTUComm::writeAdu(ModbusADU& adu) {
+  uint16_t i = 0;
+  uint16_t j = 0;
+  bool transmitting = true;
+  bool verified = false;
   adu.updateCrc();
+  uint16_t len = adu.getRtuLen();
   if (_dePin >= 0) digitalWrite(_dePin, HIGH);
-  _serial.write(adu.rtu, adu.getRtuLen());
-  _serial.flush();
-  delayMicroseconds(_postDelay);
-  if (_dePin >= 0) digitalWrite(_dePin, LOW);
-  for (uint16_t i = 0; i < adu.getRtuLen(); i++) {
-    if (!_serial.available()) return false;
-    if (_serial.read() != adu.rtu[i]) return false;
+  unsigned long microsNow= micros();
+  unsigned long txStartMicros = microsNow;
+  unsigned long rxStartMicros = microsNow;
+  while (true) {
+    microsNow = micros();
+    if (transmitting) {
+      if (i == 0 || (i < len && microsNow - txStartMicros >= _bytePeriod)) {
+        txStartMicros = microsNow;
+        _serial.write(adu.rtu[i]);
+        _serial.flush();
+        i++;
+      }
+      if (i == len && microsNow - txStartMicros >= _postDelay) {
+        if (_dePin >= 0) digitalWrite(_dePin, LOW);
+        transmitting = false;
+      }
+    }
+    if (_serial.available()) {
+      rxStartMicros = microsNow;
+      uint8_t value = _serial.read();
+      if (j == 0) verified = true;
+      if (j < len && value != adu.rtu[j]) verified = false;
+      j++;
+    }
+    if (!transmitting && (microsNow - rxStartMicros) > _charTimeout) {
+      if (j != len) verified = false;
+      break;
+    }
   }
-  return true;
+  return verified;
 }

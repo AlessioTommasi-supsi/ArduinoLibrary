@@ -3,39 +3,34 @@ This library provides some core functions for implementing Modbus RTU communicat
 It is not a full implementation of Modbus RTU. Other libraries are available for that purpose: see [ModbusRTUSlave](https://github.com/CMB27/ModbusRTUSlave) and [ModbusRTUMaster](https://github.com/CMB27/ModbusRTUMaster).
 
 
-
 ## Compatibility
 This library has been tested with the following boards and cores:
 
-| Board Name                  | Core                                                                 | Works   |
-| :-------------------------- | :------------------------------------------------------------------- | :-----: |
-| Arduino Due                 | **Arduino SAM Boards (32-bits ARM Cortex-M3)** by Arduino `1.6.12`   | Yes     |
-| Arduino Giga                | **Arduino Mbed OS GIGA Boards** by Arduino `4.1.5`                   | Yes     |
-| Arduino Leonardo            | **Arduino AVR Boards** by Arduino `1.8.6`                            | Yes     |
-| Arduino Make Your UNO       | **Arduino AVR Boards** by Arduino `1.8.6`                            | Yes     |
-| Arduino Mega 2560           | **Arduino AVR Boards** by Arduino `1.8.6`                            | Yes     |
-| Arduino Nano                | **Arduino AVR Boards** by Arduino `1.8.6`                            | Yes     |
-| Arduino Nano 33 BLE         | **Arduino Mbed OS Nano Boards** by Arduino `4.1.5`                   | Yes     |
-| Arduino Nano 33 IoT         | **Arduino SAMD Boards (32-bits ARM Cortex-M0+)** by Arduino `1.8.14` | Yes     |
-| Arduino Nano ESP32          | **Arduino ESP32 Boards** by Arduino `2.0.13`                         | Yes     |
-| Arduino Nano ESP32          | **esp32** by Espressif Systems `3.0.4`                               | Yes     |
-| Arduino Nano Every          | **Arduino megaAVR Boards** by Arduino `1.8.8`                        | Yes     |
-| Arduino Nano Matter         | **Silicon Labs** by Silicon Labs `2.1.0`                             | No [^1] |
-| Arduino Nano RP2040 Connect | **Arduino Mbed OS Nano Boards** by Arduino `4.1.5`                   | No [^2] |
-| Arduino Nano RP2040 Connect | **Raspberry Pi Pico/RP2040** by Earle F. Philhower, III `4.0.1`      | Yes     |
-| Arduino UNO R3 SMD          | **Arduino AVR Boards** by Arduino `1.8.6`                            | Yes     |
-| Arduino UNO R4 Minima       | **Arduino UNO R4 Boards** by Arduino `1.2.0`                         | Yes     |
+| Board Name                  | Core                                                                 | Works    |
+| :-------------------------- | :------------------------------------------------------------------- | :------: |
+| Arduino Due                 | **Arduino SAM Boards (32-bits ARM Cortex-M3)** by Arduino `1.6.12`   | Yes      |
+| Arduino Giga                | **Arduino Mbed OS GIGA Boards** by Arduino `4.2.1`                   | Yes      |
+| Arduino Leonardo            | **Arduino AVR Boards** by Arduino `1.8.6`                            | Yes      |
+| Arduino Make Your UNO       | **Arduino AVR Boards** by Arduino `1.8.6`                            | Yes      |
+| Arduino Mega 2560           | **Arduino AVR Boards** by Arduino `1.8.6`                            | Yes      |
+| Arduino Nano                | **Arduino AVR Boards** by Arduino `1.8.6`                            | Yes      |
+| Arduino Nano 33 BLE         | **Arduino Mbed OS Nano Boards** by Arduino `4.2.1`                   | Yes      |
+| Arduino Nano 33 IoT         | **Arduino SAMD Boards (32-bits ARM Cortex-M0+)** by Arduino `1.8.14` | Yes      |
+| Arduino Nano ESP32          | **Arduino ESP32 Boards** by Arduino `2.0.13`                         | Yes      |
+| Arduino Nano ESP32          | **esp32** by Espressif Systems `3.0.7`                               | Yes      |
+| Arduino Nano Every          | **Arduino megaAVR Boards** by Arduino `1.8.8`                        | Yes      |
+| Arduino Nano Matter         | **Silicon Labs** by Silicon Labs `2.2.0`                             | Yes      |
+| Arduino Nano RP2040 Connect | **Arduino Mbed OS Nano Boards** by Arduino `4.2.1`                   | No [^1]  |
+| Arduino Nano RP2040 Connect | **Raspberry Pi Pico/RP2040** by Earle F. Philhower, III `4.4.0`      | Yes      |
+| Arduino UNO R3 SMD          | **Arduino AVR Boards** by Arduino `1.8.6`                            | Yes      |
+| Arduino UNO R4 Minima       | **Arduino UNO R4 Boards** by Arduino `1.3.2`                         | Yes      |
+| Arduino UNO R4 WiFi         | **Arduino UNO R4 Boards** by Arduino `1.3.2`                         | Yes      |
+| ST NUCLEO-F103RB            | **STM32 MCU based boards** by STMicroelectronics `2.9.0`             | Yes      |
+| ST NUCLEO-F411RE            | **STM32 MCU based boards** by STMicroelectronics `2.9.0`             | Yes      |
 
 [^1]: **Arduino Nano RP2040 Connect**  
-This board has trouble receiving Modbus messages when using the **Arduino Mbed OS Nano Boards** core by Arduino.  
-There seems to be some sort of timing issue.  
-It can technically be made to work if you tell the library that it is operating at a lower baud rate than the serial port assigned to the library is actually operating at.
-However, this would cause the library to operate with unknown timing tolerances, possibly well outside the Modbus specification.
-
-[^2]: **Arduino Nano Matter**  
-As of this writing (2024-09-07), `flush()` is not properly implemented with `Serial1` on this board.  
-This library depends on `flush()` to know when to set the DE pin LOW after a message is sent.
-
+This board has trouble receiving Modbus messages when using the `Arduino Mbed OS Nano Boards` core by Arduino.  
+It seems that there is some issue with how the timing of `Serial.read()` works with this core.
 
 
 ## Methods
@@ -177,7 +172,8 @@ Writes serial data from a `ModbusADU` object.
 - `adu`: a `ModbusADU` object.
 
 ### Returns
-`1` or `true` when the transmitted message is verified as having been sent, `0` or `false` otherwise. Data type: `bool`.
+- `true` when the transmitted message has been verified as having been sent.
+- `false` if the transmission could not be verified.
 
 *This will only return `true` if some sort of loopback mechanism is in place where all the transmitted data is also received.
 This can easily be done with an RS-485 transceiver by connecting the RE pin to GND.*

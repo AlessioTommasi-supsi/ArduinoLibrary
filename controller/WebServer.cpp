@@ -2,7 +2,10 @@
 
 
 
-WebServer::WebServer(const char *ssid, const char *password) : ssid(ssid), password(password) {}
+WebServer::WebServer(const char *ssid, const char *password) : ssid(ssid), password(password) {
+    this->begin();
+    Serial.println("WebServer constructor invoked");
+}
 
 void WebServer::begin()
 {
@@ -18,11 +21,11 @@ void WebServer::begin()
     Serial.print("IP Address: ");
     Serial.println(WiFi.localIP());
     
-   
+    
     server.onNotFound([this](AsyncWebServerRequest *request)
                       { this->notFound(request); });
     
-
+    
     routes = new Routes();
 
 lbl_defineRoutes:
@@ -37,9 +40,9 @@ lbl_defineRoutes:
         server.reset();//non sicuro che sia corretta
         goto lbl_defineRoutes;
     }
-    
-    
-    server.begin();
+
+    server.begin();//e' questo che da errore!
+
     Serial.println("Server started");
 }
 

@@ -40,8 +40,18 @@ lbl_defineRoutes:
         server.reset();//non sicuro che sia corretta
         goto lbl_defineRoutes;
     }
-
-    server.begin();//e' questo che da errore!
+lbl_startServer:
+    try
+    {
+        server.begin();
+    }
+    catch (...)
+    {
+        Serial.println("Errore durante l'avvio del server: ");
+        //in tutte le eorre ritorno messaggui du errore
+        server.reset();//non sicuro che sia corretta
+        goto lbl_startServer;
+    }
 
     Serial.println("Server started");
 }

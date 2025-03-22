@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Impostazione Parametri</title>
+  <style>
+    /* CSS definito in viewGeneric::addCss() */
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+      padding-top: 60px; /* Per evitare la sovrapposizione della navbar */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .pin-container {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 20px;
+      margin-bottom: 20px;
+      width: 80%;
+      max-width: 600px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .pin-info {
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+    .pin-actions form {
+      display: inline-block;
+      margin-right: 10px;
+    }
+    .pin-actions button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .pin-actions button.start {
+      background-color: rgba(255, 0, 0, 0.7);
+      color: white;
+    }
+    .pin-actions button.stop {
+      background-color: rgba(128, 128, 128, 0.7);
+      color: white;
+    }
+    .pin-actions button.edit {
+      background-color: rgba(0, 0, 255, 0.7);
+      color: white;
+    }
+    .navbar {
+      display: flex;
+      justify-content: center;
+      background-color: #333;
+      width: 100%;
+      padding: 10px 0;
+      position: fixed;
+      top: 0;
+      z-index: 2000;
+    }
+    .navbar a {
+      color: white;
+      padding: 14px 20px;
+      text-align: center;
+      text-decoration: none;
+      font-size: 17px;
+    }
+    .navbar a:hover {
+      background-color: #ddd;
+      color: black;
+    }
+    .form-container {
+      width: 80%;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin-top: 60px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      margin-bottom: 5px;
+    }
+    input, select {
+      margin-bottom: 15px;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .history-table {
+      width: 80%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 18px;
+      text-align: left;
+    }
+    .history-table th, .history-table td {
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+    }
+    .history-table th {
+      background-color: #f2f2f2;
+    }
+    .history-table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    .history-table tr:nth-child(odd) {
+      background-color: #fff;
+    }
+    canvas {
+      max-width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar (opzionale, per un tocco in più di eleganza e navigazione) -->
+  <nav class="navbar">
+    <a href="#">Home</a>
+    <a href="#">Parametri</a>
+    <a href="#">Contatti</a>
+  </nav>
+
+  <!-- Contenitore con effetto glass -->
+  <div class="pin-container">
+    <h2 style="text-align: center; margin-bottom: 20px;">Acquisizione e Parametri</h2>
+    <form action="#" method="post">
+      
+      <!-- Sezione: Acquisizione dei segnali analogici -->
+      <fieldset style="border: none; margin: 0; padding: 0; margin-bottom: 20px;">
+        <legend style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px;">Acquisizione dei segnali analogici</legend>
+        
+        <div>
+          <input type="checkbox" id="tensione" name="acquisizione[]" value="tensione">
+          <label for="tensione">Tensione</label>
+        </div>
+        <div>
+          <input type="checkbox" id="corrente" name="acquisizione[]" value="corrente">
+          <label for="corrente">Corrente</label>
+        </div>
+        <div>
+          <input type="checkbox" id="resistenza" name="acquisizione[]" value="resistenza">
+          <label for="resistenza">Resistenza</label>
+        </div>
+        <div>
+          <input type="checkbox" id="termocoppia" name="acquisizione[]" value="termocoppia">
+          <label for="termocoppia">Termocoppia</label>
+        </div>
+        <div>
+          <input type="checkbox" id="pt100" name="acquisizione[]" value="pt100">
+          <label for="pt100">Pt100</label>
+        </div>
+      </fieldset>
+      
+      <!-- Sezione: Impostazione dei parametri -->
+      <fieldset style="border: none; margin: 0; padding: 0; margin-bottom: 20px;">
+        <legend style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px;">Impostazione dei parametri</legend>
+        
+        <!-- Ingresso in Tensione -->
+        <h3>Ingresso in Tensione</h3>
+        <label for="tensione_inizio">Inizio scala:</label>
+        <input type="number" id="tensione_inizio" name="tensione_inizio" placeholder="Inserisci inizio scala">
+        <label for="tensione_fondo">Fondo scala:</label>
+        <input type="number" id="tensione_fondo" name="tensione_fondo" placeholder="Inserisci fondo scala">
+        
+        <!-- Ingresso in Corrente -->
+        <h3>Ingresso in Corrente</h3>
+        <label for="corrente_inizio">Inizio scala:</label>
+        <input type="number" id="corrente_inizio" name="corrente_inizio" placeholder="Inserisci inizio scala">
+        <label for="corrente_fondo">Fondo scala:</label>
+        <input type="number" id="corrente_fondo" name="corrente_fondo" placeholder="Inserisci fondo scala">
+        
+        <!-- Ingresso in Termocoppia -->
+        <h3>Ingresso in Termocoppia</h3>
+        <label for="tipo_termocoppia">Tipo di termocoppia:</label>
+        <select id="tipo_termocoppia" name="tipo_termocoppia">
+          <option value="K">Tipo K</option>
+          <option value="J">Tipo J</option>
+          <option value="T">Tipo T</option>
+          <option value="E">Tipo E</option>
+        </select>
+        
+        <!-- Ingresso RTD (es. Pt100) -->
+        <h3>Ingresso RTD (es. Pt100)</h3>
+        <label for="tipo_rtd">Tipo di termo resistenza:</label>
+        <select id="tipo_rtd" name="tipo_rtd">
+          <option value="pt100">Pt100</option>
+          <option value="pt1000">Pt1000</option>
+        </select>
+      </fieldset>
+      
+      <button type="submit">Invia Parametri</button>
+    </form>
+  </div>
+  
+</body>
+</html>

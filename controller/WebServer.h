@@ -13,6 +13,7 @@
 #include <SPIFFS.h>
 
 #include "Routes.h"
+#include "RoutesInterface.h"
 #include <stdexcept>
 
 
@@ -20,6 +21,7 @@ class WebServer
 {
 private:
     AsyncWebServer server{80};
+    
     const char *ssid;
     const char *password;
     const char *PARAM_MESSAGE = "message";
@@ -27,7 +29,13 @@ private:
     void notFound(AsyncWebServerRequest *request);
 
 public:
+    RoutesInterface *routes = nullptr;
+
     WebServer(const char *ssid, const char *password);
+    ~WebServer();
+
+    void SafeDeleteAllRoutes();
+
     void begin();
 };
 

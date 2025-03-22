@@ -21,11 +21,14 @@ void WebServer::begin()
    
     server.onNotFound([this](AsyncWebServerRequest *request)
                       { this->notFound(request); });
+    
+
+    routes = new Routes();
 
 lbl_defineRoutes:
     try
     {
-        Routes::defineRoutes(server);
+        routes->defineRoutes(server);
     }
     catch(...)
     {
@@ -43,4 +46,20 @@ lbl_defineRoutes:
 void WebServer::notFound(AsyncWebServerRequest *request)
 {
     request->send(404, "text/plain", "Not found");
+}
+
+void WebServer::SafeDeleteAllRoutes()
+{
+    if (routes != nullptr)
+    {
+        delete routes;
+        routes = nullptr; // Buona pratica: resettare il puntatore
+    }
+}
+
+WebServer::~WebServer()
+{
+    SafeDeleteAllRoutes();
+    server.end();
+    Serial.println("Server distructor invoked");
 }

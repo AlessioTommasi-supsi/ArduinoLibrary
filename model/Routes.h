@@ -1,6 +1,7 @@
 #ifndef ROUTES_H
 #define ROUTES_H
 
+#include "RoutesInterface.h"
 #include <ESPAsyncWebSrv.h>
 #include <Arduino.h>
 #include <vector>
@@ -23,10 +24,10 @@
 //per monitor metriche
 #include <esp_heap_caps.h>
 
-class Routes
+class Routes : public RoutesInterface
 {
 public:
-    static void defineRoutes(AsyncWebServer &server);
+    void defineRoutes(AsyncWebServer &server);
 };
 
 #endif // ROUTES_H

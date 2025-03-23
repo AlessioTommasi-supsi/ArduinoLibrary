@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Navbar con Emoji</title>
+  <title>Navbar con Effetto Onda</title>
   <style>
-    /* Base styling */
+    /* Stile per il body */
     body {
       margin: 0;
       padding: 0;
       font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #ece9e6, #ffffff);
+      background-color: #f4f4f4;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
@@ -18,10 +18,10 @@
       height: 100vh;
     }
 
-    /* Navbar container */
+    /* Navbar */
     .navbar {
       display: flex;
-      justify-content: space-around;
+      justify-content: center;
       align-items: center;
       background-color: #333;
       padding: 15px 0;
@@ -32,53 +32,89 @@
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
-    /* Individual navbar items */
+    /* Singoli link della navbar */
     .navbar a {
-      color: white;
       text-decoration: none;
-      font-size: 14px;
+      color: white;
       text-align: center;
-      transition: all 0.3s ease;
-    }
-
-    /* Icon box with emoji */
-    .icon {
-      width: 50px;
-      height: 50px;
-      margin-bottom: 5px;
-      background: linear-gradient(145deg, #4CAF50, #45a049);
-      border-radius: 50%;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
-      font-size: 30px; /* Emoji size */
+      padding: 10px;
       transition: all 0.3s ease-in-out;
     }
 
-    /* Hover effect for icons */
-    .navbar a:hover .icon {
-      background: linear-gradient(145deg, #ff7f50, #ff6347);
-      transform: scale(1.1);
-      box-shadow: 0px 8px 12px rgba(0, 0, 0, 0.4);
+    /* Icone emoji grandi */
+    .navbar .icon {
+      width: 100px; /* Dimensione raddoppiata rispetto a prima */
+      height: 100px;
+      margin-bottom: 5px;
+      background-color: white;
+      border-radius: 15px; /* Quadrati con angoli leggermente arrotondati */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 50px; /* Dimensione emoji maggiore */
+      color: #333;
+      transition: transform 0.2s ease, background-color 0.3s ease, box-shadow 0.2s ease;
+      box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
     }
 
-    /* Description text below icons */
+    /* Effetto onda al passaggio del mouse */
+    .navbar a:hover .icon {
+      transform: scale(1.6); /* Molto più grande al passaggio del mouse */
+      background-color: #4CAF50;
+      color: white;
+      box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4); /* Ombra più pronunciata */
+    }
+
+    /* Effetto onda sulle icone vicine */
+    .navbar a:hover ~ a .icon,
+    .navbar a:hover .icon ~ .icon {
+      transform: scale(1.3); /* Ingrandisce leggermente anche le vicine */
+    }
+
+    /* Testo descrittivo */
     .navbar span {
-      font-size: 12px;
+      font-size: 16px;
       color: white;
       opacity: 0.9;
       transition: color 0.3s ease;
     }
 
     .navbar a:hover span {
-      color: #ff7f50;
+      color: #4CAF50;
+    }
+
+    /* Design responsivo per dispositivi più piccoli */
+    @media (max-width: 768px) {
+      .navbar .icon {
+        width: 80px;
+        height: 80px;
+        font-size: 40px; /* Icone leggermente più piccole per schermi medi */
+      }
+
+      .navbar span {
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .navbar .icon {
+        width: 60px;
+        height: 60px;
+        font-size: 30px; /* Icone compatte per smartphone */
+      }
+
+      .navbar span {
+        font-size: 12px;
+      }
     }
   </style>
 </head>
 <body>
 
-  <!-- Navbar with custom emoji icons -->
+  <!-- Navbar Responsive con Effetto Onda -->
   <div class="navbar">
     <a href="/monitor">
       <div class="icon">🖥️</div>

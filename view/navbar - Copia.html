@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Navbar con Effetto Glass Grigio</title>
+  <title>Navbar Scorrevole Responsive</title>
   <style>
     /* Stile per il body */
     body {
@@ -29,13 +29,42 @@
       -webkit-backdrop-filter: blur(12px); /* Compatibilità Safari */
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); /* Ombra per effetto 3D */
       border-radius: 15px; /* Angoli arrotondati */
-      padding: 10px 20px; /* Spaziatura interna */
-      position: fixed;
-      top: 15px; /* Posizionato dall'alto */
-      left: 50%; /* Centrato orizzontalmente */
-      transform: translateX(-50%); /* Correzione per centratura */
+      padding: 10px 20px;
       z-index: 2000;
-      max-width: calc(100% - 30px); /* Limita la larghezza */
+      position: fixed;
+    }
+
+    /* Posizionamento per desktop e tablet: navbar laterale sinistra */
+    @media (min-width: 1500px) {
+      .navbar {
+        flex-direction: column; /* Disposizione verticale */
+        top: 50%; /* Centrato verticalmente */
+        left: 15px; /* A sinistra dello schermo */
+        transform: translateY(-50%); /* Correzione per centratura verticale */
+        height: auto; /* Adattamento verticale */
+        padding: 20px 10px;
+        width: auto;
+      }
+    }
+
+    /* Posizionamento per dispositivi mobili: navbar in basso con scorrimento */
+    @media (max-width: 1499px) {
+      .navbar {
+        position: fixed;
+        bottom: 15px; /* Posizionato in basso */
+        left: 0;
+        right: 0;
+        flex-direction: row; /* Layout orizzontale */
+        overflow-x: auto; /* Abilita scorrimento orizzontale */
+        scroll-behavior: smooth; /* Scorrimento fluido */
+        padding: 10px 0;
+        gap: 10px;
+      }
+
+      /* Rimuove la scrollbar visibile per estetica */
+      .navbar::-webkit-scrollbar {
+        display: none;
+      }
     }
 
     /* Singoli link della navbar */
@@ -68,7 +97,7 @@
 
     /* Testo descrittivo sotto */
     .navbar span {
-      font-size: 16px; /* Dimensione testo */
+      font-size: 16px;
       margin-top: 8px;
       color: white;
       transition: transform 0.3s ease, color 0.3s ease;
@@ -86,43 +115,23 @@
       color: #4CAF50;
     }
 
-    /* Responsive per tablet e desktop */
-    @media (min-width: 900px) {
-      .navbar {
-        flex-direction: column; /* Navbar verticale */
-        top: 50%; /* Centrato verticalmente */
-        left: 15px; /* Posizionato a sinistra */
-        transform: translateY(-50%); /* Correzione per centratura verticale */
-        padding: 20px 10px; /* Aggiunta spaziatura verticale */
-        height: auto;
-      }
-
-      .navbar a {
-        margin-bottom: 15px;
-      }
-
-      .navbar span {
-        font-size: 12px; /* Testo più piccolo per layout laterale */
-      }
-    }
-
     /* Responsive per smartphone */
     @media (max-width: 480px) {
       .navbar .icon {
         width: 60px;
         height: 60px;
-        font-size: 30px;
+        font-size: 30px; /* Icone compatte */
       }
 
       .navbar span {
-        font-size: 10px;
+        font-size: 10px; /* Testo più piccolo */
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- Navbar Responsive con Stile macOS -->
+  <!-- Navbar Responsive con Scorrimento Orizzontale -->
   <div class="navbar">
     <a href="/monitor">
       <div class="icon">🖥️</div>
@@ -148,37 +157,21 @@
       <div class="icon">📶</div>
       <span>Config</span>
     </a>
-    <a href="/config">
-        <div class="icon">📶</div>
-        <span>Config</span>
-      </a>
-      <a href="/config">
-        <div class="icon">📶</div>
-        <span>Config</span>
-      </a>
-      <a href="/config">
-        <div class="icon">📶</div>
-        <span>Config</span>
-      </a>
-      <a href="/config">
-        <div class="icon">📶</div>
-        <span>Config</span>
-      </a>
-      <a href="/config">
-        <div class="icon">📶</div>
-        <span>Config</span>
-      </a>
-      <a href="/config">
-        <div class="icon">📶</div>
-        <span>Config</span>
-      </a>
+    <a href="/extra1">
+      <div class="icon">⚙️</div>
+      <span>Extra</span>
+    </a>
+    <a href="/extra2">
+      <div class="icon">📱</div>
+      <span>Mobile</span>
+    </a>
   </div>
 
   <!-- Content Area -->
   <div style="margin-left: 130px; padding: 20px;">
     <h1>Benvenuto!</h1>
     <p>Questa è un'area dimostrativa del contenuto principale.</p>
-    <p>Ridimensiona la finestra per vedere la navbar adattarsi da mobile a desktop!</p>
+    <p>Ridimensiona la finestra per vedere come la navbar cambia posizione e layout!</p>
   </div>
 
 </body>

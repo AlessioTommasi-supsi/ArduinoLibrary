@@ -79,7 +79,7 @@ float MasterModbus::readHoldingFloatRegisters(uint16_t address)
         uint32_t combined = ((uint32_t)holdingRegisters[0] << 16) | holdingRegisters[1];
         memcpy(&value, &combined, sizeof(value));
 
-        Serial.print(F("Read value of "));
+        Serial.print(F("Read Float value of "));
         Serial.print(value, 6);
         Serial.print(F(" from holding register address "));
         Serial.println(address);
@@ -97,7 +97,7 @@ int MasterModbus::readHoldingIntRegisters(uint16_t address)
     uint8_t success = modbus.readHoldingRegisters(1, address - 1, &holdingRegister, 1);
     if (success)
     {
-        Serial.print(F("Read value of "));
+        Serial.print(F("Read Int value of "));
         Serial.print(holdingRegister);
         Serial.print(F(" from holding register address "));
         Serial.println(address);

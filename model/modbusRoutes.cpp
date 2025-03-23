@@ -80,9 +80,9 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
             if(registerType == "int")
             {
                 float registerValue = SystemState::masterModbus->readHoldingIntRegisters(registerAddress.toInt());
-                String htmlContent = viewCurrentRegister::generateHTML(registerAddress, registerValue);
-                const char *htmlContentPtr = htmlContent.c_str();
-                request->send(200, "text/html", htmlContentPtr); 
+                //String htmlContent = viewCurrentRegister::generateHTML(registerAddress, registerValue);
+                const char *htmlContentPtr = viewCurrentRegister::generateHTML(registerAddress, registerValue).c_str();
+                request->send(200, "text/html", htmlContentPtr);
             }
             else if(registerType == "float")
             {

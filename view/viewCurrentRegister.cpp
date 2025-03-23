@@ -43,7 +43,10 @@ String viewCurrentRegister::generateHTML(String registerAddress, float registerV
 String viewCurrentRegister::generateHTML(String registerAddress, float registerValue, String popupScript = "")
 {
     // Creazione dell'header HTML con il foglio di stile CSS
-    String html = viewGeneric::defaultCssHeader("Current Register");
+    String css = viewGeneric::defaultCssHeader("Current Register");
+    css += viewGeneric::addFormCss();
+    String html; 
+
 
     // Aggiunta del contenitore principale per form e valore del registro
     html += "<div class=\"container\">";
@@ -118,7 +121,7 @@ String viewCurrentRegister::generateHTML(String registerAddress, float registerV
         html += "</script>";
     }
 
-    return html;
+    return css + html;
 }
 String viewCurrentRegister::generateHTMLConfirm(String registerAddress, float registerValue)
 {

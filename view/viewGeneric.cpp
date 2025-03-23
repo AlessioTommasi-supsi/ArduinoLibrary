@@ -15,145 +15,292 @@ String viewGeneric::addCss(){
         flex-direction: column;
         align-items: center;
     }
-    .pin-container {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 15px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        padding: 20px;
-        margin-bottom: 20px;
-        width: 80%;
-        max-width: 600px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    .pin-info {
-        margin-bottom: 10px;
-        font-weight: bold;
-    }
-    .pin-actions form {
-        display: inline-block;
-        margin-right: 10px;
-    }
-    .pin-actions button {
-        padding: 10px 15px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-weight: bold;
-    }
-    .pin-actions button.start {
-        background-color: rgba(255, 0, 0, 0.7);
-        color: white;
-    }
-    .pin-actions button.stop {
-        background-color: rgba(128, 128, 128, 0.7);
-        color: white;
-    }
-    .pin-actions button.edit {
-        background-color: rgba(0, 0, 255, 0.7);
-        color: white;
-    }
-    .navbar {
-        display: flex;
-        justify-content: space-evenly;
-        align-items: center;
-        background: rgba(48, 48, 48, 0.6); /* Grigio traslucido glass effect */
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-        border-radius: 15px;
-        padding: 10px 20px;
-        z-index: 2000;
-        position: fixed;
-    }
-    .navbar a {
-        text-decoration: none;
-        color: white;
-        text-align: center;
-        display: inline-flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 10px;
-        transition: transform 0.2s ease-in-out, color 0.3s ease;
-    }
-    .navbar .icon {
-        width: 80px;
-        height: 80px;
-        background-color: rgba(255, 255, 255, 0.752); /* Fondo traslucido */
-        border-radius: 8px; /* Angoli arrotondati */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 40px; /* Emoji grande */
-        color: #333;
-        transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
-        box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.2), 0 4px 8px rgba(0, 0, 0, 0.4);
-    }
-    .navbar span {
-        font-size: 16px;
-        margin-top: 8px;
-        color: white;
-        transition: transform 0.3s ease, color 0.3s ease;
-    }
-    .navbar a:hover .icon {
-        transform: scale(1.3); /* Ingrandisce l'icona */
-        background-color: rgba(161, 255, 167, 0.7); /* Verde traslucido per hover */
-        color: white;
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
-    }
-    .navbar a:hover span {
-        color: #4CAF50;
-    }
-    /* Per desktop e tablet: navbar verticale */
-    @media (min-width: 1500px) {
+    )";
+    return css+ viewGeneric::addNavbarCss();
+}
+
+String viewGeneric::addNavbarCss(){
+    String addNavbarCss = R"(
         .navbar {
-            flex-direction: column;
-            top: 50%;
-            left: 15px;
-            transform: translateY(-50%);
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            background: rgba(48, 48, 48, 0.6); /* Grigio traslucido glass effect */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 10px 20px;
+            z-index: 2000;
             position: fixed;
-            height: auto;
-            padding: 20px 10px;
-            width: auto;
         }
         .navbar a {
-            margin-bottom: 15px;
+            text-decoration: none;
+            color: white;
+            text-align: center;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            transition: transform 0.2s ease-in-out, color 0.3s ease;
         }
-        .navbar span {
-            font-size: 12px; /* Testo più piccolo per layout laterale */
-        }
-    }
-    /* Per dispositivi mobili: navbar in basso con scorrimento */
-    @media (max-width: 1499px) {
-        .navbar {
-            position: fixed;
-            bottom: 15px;
-            left: 0;
-            right: 0;
-            flex-direction: row;
-            overflow-x: auto; /* Scorrimento orizzontale */
-            scroll-behavior: smooth; /* Scorrimento fluido */
-            padding: 10px 0;
-            gap: 10px;
-        }
-        .navbar::-webkit-scrollbar {
-            display: none; /* Rimuove la scrollbar visibile */
-        }
-    }
-    @media (max-width: 480px) {
         .navbar .icon {
-            width: 60px;
-            height: 60px;
-            font-size: 30px; /* Icone compatte */
+            width: 80px;
+            height: 80px;
+            background-color: rgba(255, 255, 255, 0.752); /* Fondo traslucido */
+            border-radius: 8px; /* Angoli arrotondati */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px; /* Emoji grande */
+            color: #333;
+            transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.2), 0 4px 8px rgba(0, 0, 0, 0.4);
         }
         .navbar span {
-            font-size: 10px; /* Testo più piccolo */
+            font-size: 16px;
+            margin-top: 8px;
+            color: white;
+            transition: transform 0.3s ease, color 0.3s ease;
         }
-    }
+        .navbar a:hover .icon {
+            transform: scale(1.3); /* Ingrandisce l'icona */
+            background-color: rgba(161, 255, 167, 0.7); /* Verde traslucido per hover */
+            color: white;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+        }
+        .navbar a:hover span {
+            color: #4CAF50;
+        }
+        /* Per desktop e tablet: navbar verticale */
+        @media (min-width: 1500px) {
+            .navbar {
+                flex-direction: column;
+                top: 50%;
+                left: 15px;
+                transform: translateY(-50%);
+                position: fixed;
+                height: auto;
+                padding: 20px 10px;
+                width: auto;
+            }
+            .navbar a {
+                margin-bottom: 15px;
+            }
+            .navbar span {
+                font-size: 12px; /* Testo più piccolo per layout laterale */
+            }
+        }
+        /* Per dispositivi mobili: navbar in basso con scorrimento */
+        @media (max-width: 1499px) {
+            .navbar {
+                position: fixed;
+                bottom: 15px;
+                left: 0;
+                right: 0;
+                flex-direction: row;
+                overflow-x: auto; /* Scorrimento orizzontale */
+                scroll-behavior: smooth; /* Scorrimento fluido */
+                padding: 10px 0;
+                gap: 10px;
+            }
+            .navbar::-webkit-scrollbar {
+                display: none; /* Rimuove la scrollbar visibile */
+            }
+        }
+        @media (max-width: 480px) {
+            .navbar .icon {
+                width: 60px;
+                height: 60px;
+                font-size: 30px; /* Icone compatte */
+            }
+            .navbar span {
+                font-size: 10px; /* Testo più piccolo */
+            }
+        }
     )" ;
-    return css;
+    return addNavbarCss;
+}
+
+String viewGeneric::addPinCss(){
+    String pinCss = R"(
+
+        .pin-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 20px;
+            margin-bottom: 20px;
+            width: 80%;
+            max-width: 600px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .pin-info {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .pin-actions form {
+            display: inline-block;
+            margin-right: 10px;
+        }
+        .pin-actions button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .pin-actions button.start {
+            background-color: rgba(255, 0, 0, 0.7);
+            color: white;
+        }
+        .pin-actions button.stop {
+            background-color: rgba(128, 128, 128, 0.7);
+            color: white;
+        }
+        .pin-actions button.edit {
+            background-color: rgba(0, 0, 255, 0.7);
+            color: white;
+        }
+    )";
+    return pinCss;
+}
+
+String viewGeneric::addPinStyleCss(){
+    String pinStyleCss ="<style>";
+    pinStyleCss += viewGeneric::addPinCss();
+    pinStyleCss += "</style>";
+    return pinStyleCss;
+}
+
+String viewGeneric::addFormStyleCss(){
+    String formStyleCss = "<style>";
+    formStyleCss += viewGeneric::addFormCss();
+    formStyleCss += "</style>";
+    return formStyleCss;
+}
+
+String viewGeneric::addFormCss(){
+    String formCss = R"(
+        .form-container {
+            width: 80%; /* Adatta larghezza */
+            background: rgba(255, 255, 255, 0.85); /* Sfondo semi-trasparente */
+            padding: 20px;
+            border-radius: 15px; /* Angoli arrotondati */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Ombra leggera */
+            margin-top: 20px;
+            backdrop-filter: blur(10px); /* Effetto glass */
+            -webkit-backdrop-filter: blur(10px); /* Compatibilità Safari */
+            border: 1px solid rgba(255, 255, 255, 0.2); /* Bordo traslucido */
+            max-width: 600px; /* Imposta una larghezza massima */
+        }
+
+        form {
+            display: flex;
+            flex-direction: column; /* Allineamento verticale */
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 8px; /* Spaziatura inferiore */
+            color: #333; /* Colore del testo */
+        }
+
+        input, select {
+            margin-bottom: 15px; 
+            padding: 10px; 
+            border: 1px solid #ccc; 
+            border-radius: 8px; /* Angoli arrotondati */
+            font-size: 16px; /* Dimensione del testo */
+            width: 100%; /* Larghezza piena */
+            box-sizing: border-box; /* Include padding nei calcoli di larghezza */
+        }
+
+        button {
+            padding: 12px;
+            font-size: 16px; /* Testo leggibile */
+            background-color: #4CAF50; /* Colore verde */
+            color: white; /* Testo bianco */
+            border: none;
+            border-radius: 5px; /* Angoli arrotondati */
+            cursor: pointer;
+            transition: background-color 0.3s ease; /* Transizione per hover */
+        }
+
+        button:hover {
+            background-color: #45a049; /* Verde più scuro per hover */
+        }
+
+        /* Tabelle per visualizzare dati */
+        .history-table {
+            width: 80%;
+            border-collapse: collapse; /* Rimuove spazi tra celle */
+            margin: 20px 0;
+            font-size: 18px;
+            text-align: left;
+        }
+
+        .history-table th, .history-table td {
+            padding: 12px 15px; /* Spaziatura interna */
+            border: 1px solid #ddd; /* Bordo sottile */
+        }
+
+        .history-table th {
+            background-color: #f2f2f2; /* Sfondo per intestazioni */
+        }
+
+        .history-table tr:nth-child(even) {
+            background-color: #f9f9f9; /* Riga pari */
+        }
+
+        .history-table tr:nth-child(odd) {
+            background-color: #fff; /* Riga dispari */
+        }
+
+        canvas {
+            max-width: 100%; /* Adattabile */
+            height: auto;
+        }
+
+        /* Responsive Form Container */
+        @media (max-width: 768px) {
+            .form-container {
+                width: 90%; /* Riduce larghezza per schermi medi */
+                padding: 15px; /* Riduce padding */
+            }
+
+            input, select, button {
+                font-size: 14px; /* Riduce font */
+                padding: 8px; /* Adatta padding */
+            }
+
+            button {
+                font-size: 14px; /* Testo più piccolo */
+            }
+        }
+        @media (max-width: 480px) {
+            .form-container {
+                width: 100%; /* Adatta completamente */
+                padding: 10px;
+            }
+
+            label {
+                font-size: 14px; /* Riduce dimensione dei label */
+            }
+
+            input, select, button {
+                font-size: 12px; /* Testo più piccolo */
+            }
+
+            button {
+                padding: 8px; /* Spaziatura interna ridotta */
+            }
+        }
+    )";
+    return formCss;
 }
 
 String viewGeneric::defaultPorfolioCss(){

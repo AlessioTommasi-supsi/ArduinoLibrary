@@ -17,6 +17,11 @@ class viewGeneric
         static String defaultPorfolioCss();
         static String defaultFooter();
         static String addCss();
+        static String addFormCss();
+        static String addFormStyleCss();
+        static String addPinCss();
+        static String addPinStyleCss();
+        static String addNavbarCss();
         static String addNavbar();
         static String dynamicUpdateContent(String divId, String api, int timeToUpdate);
 

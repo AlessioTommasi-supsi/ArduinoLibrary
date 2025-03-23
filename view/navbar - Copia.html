@@ -3,106 +3,105 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Navbar Personalizzata</title>
+  <title>Navbar con Emoji</title>
   <style>
-    /* Stile per il body */
+    /* Base styling */
     body {
       margin: 0;
       padding: 0;
       font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
+      background: linear-gradient(135deg, #ece9e6, #ffffff);
       display: flex;
       flex-direction: column;
+      justify-content: flex-start;
       align-items: center;
-      justify-content: center;
       height: 100vh;
     }
 
-    /* Navbar */
+    /* Navbar container */
     .navbar {
       display: flex;
-      justify-content: center;
+      justify-content: space-around;
+      align-items: center;
       background-color: #333;
-      padding: 10px 0;
+      padding: 15px 0;
       width: 100%;
       position: fixed;
       top: 0;
       z-index: 2000;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
-    /* Singoli link della navbar */
+    /* Individual navbar items */
     .navbar a {
-      text-decoration: none;
       color: white;
+      text-decoration: none;
+      font-size: 14px;
       text-align: center;
-      padding: 10px 15px;
+      transition: all 0.3s ease;
+    }
+
+    /* Icon box with emoji */
+    .icon {
+      width: 50px;
+      height: 50px;
+      margin-bottom: 5px;
+      background: linear-gradient(145deg, #4CAF50, #45a049);
+      border-radius: 50%;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       align-items: center;
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+      font-size: 30px; /* Emoji size */
       transition: all 0.3s ease-in-out;
     }
 
-    /* Effetto hover */
-    .navbar a:hover {
-      color: #4CAF50;
-      transform: translateY(-3px);
-    }
-
-    /* Icone simulate */
-    .navbar .icon {
-      width: 30px;
-      height: 30px;
-      margin-bottom: 5px;
-      background-color: white;
-      border-radius: 5px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      color: #333;
-      transition: background-color 0.3s ease;
-    }
-
-    /* Cambia il colore dell'icona al passaggio del mouse */
+    /* Hover effect for icons */
     .navbar a:hover .icon {
-      background-color: #4CAF50;
-      color: white;
+      background: linear-gradient(145deg, #ff7f50, #ff6347);
+      transform: scale(1.1);
+      box-shadow: 0px 8px 12px rgba(0, 0, 0, 0.4);
     }
 
-    /* Stile testo descrittivo */
+    /* Description text below icons */
     .navbar span {
       font-size: 12px;
-      opacity: 0.8;
+      color: white;
+      opacity: 0.9;
+      transition: color 0.3s ease;
+    }
+
+    .navbar a:hover span {
+      color: #ff7f50;
     }
   </style>
 </head>
 <body>
 
-  <!-- Navbar con icone simulate -->
+  <!-- Navbar with custom emoji icons -->
   <div class="navbar">
     <a href="/monitor">
-      <div class="icon">M</div>
+      <div class="icon">🖥️</div>
       <span>Monitor</span>
     </a>
     <a href="/pinout">
-      <div class="icon">P</div>
+      <div class="icon">🔌</div>
       <span>Pinout</span>
     </a>
     <a href="/currentregister">
-      <div class="icon">R</div>
+      <div class="icon">📋</div>
       <span>Register</span>
     </a>
     <a href="/history">
-      <div class="icon">H</div>
+      <div class="icon">⏳</div>
       <span>History</span>
     </a>
     <a href="/graph">
-      <div class="icon">G</div>
+      <div class="icon">📈</div>
       <span>Graph</span>
     </a>
     <a href="/config">
-      <div class="icon">C</div>
+      <div class="icon">📶</div>
       <span>Config</span>
     </a>
   </div>

@@ -9,12 +9,14 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
         String htmlContent = viewGraph::generateHTML();
         const char *htmlContentPtr = htmlContent.c_str();
         request->send(200, "text/html", htmlContentPtr); 
+         
     });
     
     server.on("/history", HTTP_GET, [](AsyncWebServerRequest *request){
         String htmlContent = viewHistory::generateHTML();
         const char *htmlContentPtr = htmlContent.c_str();
         request->send(200, "text/html", htmlContentPtr); 
+         
     });
 
     server.on("/getHistoryContent", HTTP_GET, [](AsyncWebServerRequest *request){
@@ -55,6 +57,7 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
             String htmlContent = viewHistory::generateHTML();
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(200, "text/html", htmlContentPtr); 
+             
     });
 
     server.on("/editRegister", HTTP_GET, [](AsyncWebServerRequest *request){
@@ -64,12 +67,14 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
             String htmlContent = viewHistory::generateHTML();
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(200, "text/html", htmlContentPtr); 
+             
     });
 
     server.on("/currentregister", HTTP_GET, [](AsyncWebServerRequest *request){
             String htmlContent = viewCurrentRegister::generateHTML();
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(200, "text/html", htmlContentPtr); 
+             
     });
 
 
@@ -99,6 +104,7 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
             String htmlContent = viewCurrentRegister::generateHTML();
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(200, "text/html", htmlContentPtr); 
+             
     });
 
     server.on("/storevalue", HTTP_GET, [](AsyncWebServerRequest *request){
@@ -110,6 +116,7 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
             String htmlContent = viewCurrentRegister::generateHTMLConfirm(registerAddress, registerValue.toFloat());
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(200, "text/html", htmlContentPtr); 
+             
     });
 
     server.on("/startRecording", HTTP_GET, [](AsyncWebServerRequest *request){
@@ -126,6 +133,7 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
         String htmlContent = viewCurrentRegister::generateHTML(registerAddress, 0.0, popupScript);
         const char *htmlContentPtr = htmlContent.c_str();
         request->send(200, "text/html", htmlContentPtr);
+         
     } catch (const std::exception &e) {
         String errorMessage = "Error: ";
         errorMessage += e.what();
@@ -150,6 +158,7 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
         String htmlContent = viewCurrentRegister::generateHTML(registerAddress, 0.0, popupScript);
         const char *htmlContentPtr = htmlContent.c_str();
         request->send(200, "text/html", htmlContentPtr);
+         
     } catch (const std::exception &e) {
         String errorMessage = "Error: ";
         errorMessage += e.what();
@@ -180,6 +189,7 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
         json += "]";
 
         request->send(200, "application/json", json);
+         
     } else {
         request->send(400, "application/json", "{\"error\":\"Address parameter missing\"}");
     } 
@@ -210,15 +220,18 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
             json += "]";
 
             request->send(200, "application/json", json);
+             
         }
         catch(...)
         {
             request->send(200, "application/json", "[]" );
+             
         }
         
         
     } else {
         request->send(200, "application/json", "{\"error\":\"Pin parameter missing\"}");
+         
     } 
     });
 }

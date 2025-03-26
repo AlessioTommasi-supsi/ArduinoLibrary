@@ -10,6 +10,7 @@ void WifiRoutes::defineRoutes(AsyncWebServer &server)
         String htmlContent = viewConfig::generateHTML(SystemState::getInstance()->wifiManager->scanNetworks());
         const char *htmlContentPtr = htmlContent.c_str();
         request->send(200, "text/html", htmlContentPtr);
+         
     });
 
     server.on("/switch_wifi", HTTP_GET, [](AsyncWebServerRequest *request){
@@ -23,6 +24,7 @@ void WifiRoutes::defineRoutes(AsyncWebServer &server)
                 String htmlContent = viewWifiSuccessChange::generateHTML(SystemState::getInstance()->wifiManager->ip_address);
                 const char *htmlContentPtr = htmlContent.c_str();
                 request->send(200, "text/html", htmlContentPtr);
+                 
                 //request->send(200, "text/html", "success Switch wifi page");
             }
             catch(...)

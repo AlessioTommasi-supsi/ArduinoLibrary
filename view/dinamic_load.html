@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Caricamento Dinamico con ESP32</title>
+  <style>
+    /* Stile per il body */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Stile per il messaggio di caricamento */
+    #loading {
+      font-size: 24px;
+      color: #555;
+      text-align: center;
+    }
+
+    /* Stile per il contenuto della pagina */
+    #content {
+      display: none; /* Nasconde il contenuto fino a quando non viene caricato */
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Messaggio iniziale di caricamento -->
+  <div id="loading">Caricamento della pagina in corso...</div>
+
+  <!-- Contenuto dinamico -->
+  <div id="content"></div>
+
+  <script>
+    // Funzione per caricare il contenuto dinamicamente dal backend ESP32
+    async function loadPageContent() {
+      try {
+        // Effettua la richiesta GET al server ESP32
+        const response = await fetch('http://192.168.178.144/pinoutContent');
+
+        // Controlla se la risposta è valida
+        if (!response.ok) {
+          throw new Error('Errore durante il caricamento dei dati: ' + response.status);
+        }
+
+        // Recupera il contenuto testuale dalla risposta
+        const content = await response.text();
+
+        // Mostra il contenuto e nasconde il messaggio di caricamento
+        document.getElementById('content').innerHTML = content;
+        document.getElementById('content').style.display = 'block';
+        document.getElementById('loading').style.display = 'none';
+      } catch (error) {
+        // Gestisce gli errori e mostra un messaggio all'utente
+        document.getElementById('loading').innerText = 'Errore durante il caricamento dei dati';
+        console.error(error);
+      }
+    }
+
+    // Chiama la funzione per caricare il contenuto dopo il caricamento della pagina
+    window.onload = loadPageContent;
+  </script>
+
+</body>
+</html>

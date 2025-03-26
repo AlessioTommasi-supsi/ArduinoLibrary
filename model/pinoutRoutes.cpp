@@ -45,6 +45,7 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
             htmlContent = Pinout::generateHTML();
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(200, "text/html", htmlContentPtr);
+             
         }
         catch (const std::exception &e)
         {
@@ -87,7 +88,12 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
                 content += "    </div>";
                 content += "</div>";
             }
-            request->send(200, "text/html", content);
+            
+            // Prepara la risposta includendo gli header e il contenuto
+            AsyncWebServerResponse *response = request->beginResponse(200, "text/html", content);
+            response->addHeader("Access-Control-Allow-Origin", "*"); // Aggiungi header CORS
+            request->send(response); // Invia la risposta al client
+             
         }
         catch(const std::exception& e)
         {
@@ -112,6 +118,7 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
             String htmlContent = Pinout::generateHTML(popupScript);
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(200, "text/html", htmlContentPtr);
+             
         } catch (const std::exception &e) {
             String errorMessage = "Error: ";
             errorMessage += e.what();
@@ -138,6 +145,7 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
             String htmlContent = Pinout::generateHTML(popupScript);
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(200, "text/html", htmlContentPtr);
+             
         } catch (const std::exception &e) {
             String errorMessage = "Error: ";
             errorMessage += e.what();
@@ -159,6 +167,7 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
             String htmlContent = viewEditPin::generateHTML();
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(200, "text/html", htmlContentPtr);
+             
         }else
         {
             String pinNumber = request->getParam("pin")->value();

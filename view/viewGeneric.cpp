@@ -440,10 +440,12 @@ String viewGeneric::dynamicUpdateContent(String divId/*una stringa univoca nella
     var_html += " });";
     var_html += "}";
     var_html += "document.addEventListener('DOMContentLoaded', () => {";
-    var_html += " updateContent('" + api + "', '" + divId + "');";
-    var_html += " setInterval(() => {";
-    var_html += " updateContent('" + api + "', '" + divId + "');";
-    var_html += " }, " + String(timeToUpdate) + ");";
+    var_html += " updateContent('" + api + "', '" + divId + "');"; // Caricamento iniziale
+    var_html += " if (" + String(timeToUpdate) + " > 0) {"; // Controllo del valore di timeToUpdate
+    var_html += "   setInterval(() => {";
+    var_html += "     updateContent('" + api + "', '" + divId + "');";
+    var_html += "   }, " + String(timeToUpdate) + ");";
+    var_html += " }";
     var_html += "});";
     var_html += "</script>";
     return var_html;

@@ -44,7 +44,6 @@ String viewCurrentRegister::generateHTML(String registerAddress, float registerV
 {
     // Creazione dell'header HTML con il foglio di stile CSS
     String css = viewGeneric::defaultCssHeader("Current Register");
-    css += viewGeneric::addFormCss();
     String html; 
 
 

@@ -46,7 +46,7 @@
     }
 
     /* Stile dei contenuti */
-    #content_to_add {
+    .content {
       width: 100%;
       margin-bottom: 20px;
     }
@@ -56,9 +56,6 @@
 
   <!-- Messaggio di caricamento -->
   <div id="loading">Caricamento in corso...</div>
-  
-  <!-- Div iniziale per il primo contenuto -->
-  <div id="content_to_add"></div>
   
   <!-- Pulsante per aggiungere contenuto -->
   <button id="loadButton">Aggiungi Contenuto</button>
@@ -84,21 +81,16 @@
         // Recupera il contenuto testuale dalla risposta
         const content = await response.text();
 
-        // Trova il div con id "content_to_add"
-        const contentDiv = document.getElementById('content_to_add');
-
-        // Aggiungi il contenuto al div corrente
-        contentDiv.innerHTML = content;
-
-        // Cambia l'ID del div corrente per assegnare un indice univoco
-        contentDiv.id = `contentAdd_${contentIndex}`;
+        // Crea un nuovo div per il contenuto
+        const newContentDiv = document.createElement('div');
+        newContentDiv.id = `contentAdd_${contentIndex}`;
+        newContentDiv.className = 'content';
+        newContentDiv.innerHTML = content;
         contentIndex++;
 
-        // Crea un nuovo div "content_to_add" sotto il contenuto appena aggiunto
-        const newContentDiv = document.createElement('div');
-        newContentDiv.id = 'content_to_add'; // Nuovo div con ID riutilizzabile
-        newContentDiv.style.marginTop = '20px'; // Margine per separare i div
-        document.body.appendChild(newContentDiv); // Aggiunge il nuovo div alla fine del body
+        // Posiziona il nuovo contenuto prima del pulsante
+        const loadButton = document.getElementById('loadButton');
+        document.body.insertBefore(newContentDiv, loadButton);
 
         // Nasconde il messaggio di caricamento
         document.getElementById('loading').style.display = 'none';
@@ -109,11 +101,11 @@
       }
     }
 
-    // Carica il contenuto all'avvio della pagina
-    window.onload = loadPageContent;
-
     // Associa la funzione al pulsante
     document.getElementById('loadButton').addEventListener('click', loadPageContent);
+
+    // Carica il primo contenuto all'avvio della pagina
+    window.onload = loadPageContent;
   </script>
 
 </body>

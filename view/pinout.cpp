@@ -15,7 +15,7 @@ String Pinout::generateHTML()
 
 String Pinout::pageContent()
 {
-    html += pageContentCss();
+    //html += pageContentCss(); //Gia fatto in defaultCssHeader
     html += "<h1>Pinout</h1>";
 
     // Inserisco un'immagine presa da internet:

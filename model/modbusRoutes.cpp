@@ -79,12 +79,15 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
 
 
     server.on("/modbusMaster", HTTP_GET, [](AsyncWebServerRequest *request){
+        try
+        {
             String registerAddress = request->getParam("registerAddress")->value();
             String registerType = request->getParam("registerType")->value();
 
             if(registerType == "int")
             {
-                float registerValue = SystemState::masterModbus->readHoldingIntRegisters(registerAddress.toInt());
+                //float registerValue = SystemState::masterModbus->readHoldingIntRegisters(registerAddress.toInt());
+                float registerValue = 1.0;
                 //String htmlContent = viewCurrentRegister::generateHTML(registerAddress, registerValue);
                 const char *htmlContentPtr = viewCurrentRegister::generateHTML(registerAddress, registerValue).c_str();
                 request->send(200, "text/html", htmlContentPtr);
@@ -104,7 +107,34 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
             String htmlContent = viewCurrentRegister::generateHTML();
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(200, "text/html", htmlContentPtr); 
-             
+        }
+        catch(...)
+        {
+            Serial.println("Error during get modbusMaster");
+            request->send(200, "text/html", "Error: An error occurred");
+        }  
+    });
+
+    server.on("/modbusMasterPageContent", HTTP_GET, [](AsyncWebServerRequest *request){
+        try
+        {
+            String content = "";
+            Serial.println("modbusMasterPageContent");
+            /*
+            String registerAddress = request->getParam("registerAddress")->value();
+            float registerValue = request->getParam("registerValue")->value().toFloat();
+
+            content += viewCurrentRegister::pageContent(registerAddress, registerValue);
+            */
+            content += "TEst to see if this works";
+            const char *htmlContentPtr = content.c_str();
+            request->send(200, "text/html", htmlContentPtr);
+        }
+        catch(...)
+        {
+            Serial.println("Error during get modbusMasterPageContent");
+            request->send(200, "text/html", "Error: An error occurred");
+        }          
     });
 
     server.on("/storevalue", HTTP_GET, [](AsyncWebServerRequest *request){

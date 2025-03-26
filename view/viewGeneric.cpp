@@ -384,7 +384,7 @@ String viewGeneric::defaultHeader()
     return html;
 }
 
-String viewGeneric::defaultCssHeader(String title)
+String viewGeneric::basicHeader(String title)
 {
     html = "<!DOCTYPE html>";
     html += "<html>";
@@ -403,7 +403,26 @@ String viewGeneric::defaultCssHeader(String title)
     html += "</style>";
     html += "</head>";
     html += "<body>";
+    
+    return html;
+}
+
+String viewGeneric::defaultCssHeader(String title)
+{
+    html = basicHeader(title);
     html += addNavbar();
+    /**
+     * Aggiungo il css comune a tutti i documenti anche se potrei farlo nelle singole viste per ottimizzare
+     */
+    String css ="";
+
+    css += viewGeneric::dynamicUpdateContentScript(); //aggiungo script per aggiornamento dinamico
+    css += viewGeneric::dynamicUpdateContent("", "/formStyle", -1); //aggiungo script per aggiornamento dinamico
+    css += viewGeneric::dynamicUpdateContent("", "/pinStyle", -1); //aggiungo script per aggiornamento dinamico
+    css += viewGeneric::dynamicUpdateContent("", "/navbarStyle", -1); //aggiungo script per aggiornamento dinamico
+
+    html += css;
+
     return html;
 }
 

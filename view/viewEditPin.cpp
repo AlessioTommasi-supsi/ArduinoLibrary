@@ -93,6 +93,20 @@ String viewEditPin::generateHTML(int pinNumber, String script)
     // Creazione dell'header HTML con il foglio di stile CSS
     String html = viewGeneric::defaultCssHeader("Edit Pin");
 
+    String css ="";
+
+    css += viewGeneric::dynamicUpdateContentScript(); //aggiungo script per aggiornamento dinamico
+
+    /**
+     * Aggiungo Css effettivo
+     */
+
+    css += viewGeneric::dynamicUpdateContent("", "/formStyle", -1); //aggiungo script per aggiornamento dinamico
+    css += viewGeneric::dynamicUpdateContent("", "/pinStyle", -1); //aggiungo script per aggiornamento dinamico
+    css += viewGeneric::dynamicUpdateContent("", "/navbarStyle", -1); //aggiungo script per aggiornamento dinamico
+
+    html += css;
+
     // Aggiunta del contenitore principale per form e valore del registro
     html+= viewEditPin::generateForm(pinNumber);
     html+= viewEditPin::addCustomScript(script);

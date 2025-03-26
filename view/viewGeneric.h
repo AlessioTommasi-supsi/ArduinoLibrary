@@ -13,6 +13,7 @@ class viewGeneric
         
         static String defaultHeader();
         static String defaultHeader(String title);
+        static String basicHeader(String title);
         static String defaultCssHeader(String title);
         static String defaultPorfolioCss();
         static String defaultFooter();

@@ -20,6 +20,8 @@ public:
     static String generateHTML(String registerAddress, float registerValue);
     static String generateHTMLConfirm(String registerAddress, float registerValue);
     static String generateHTML(String registerAddress, float registerValue, String popupScript);
+    static String pageContent(String registerAddress, float registerValue);
+
 };
 
 

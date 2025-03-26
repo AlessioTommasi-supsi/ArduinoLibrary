@@ -63,50 +63,67 @@
   <script>
     // Variabile globale per tenere traccia dell'indice dei contenuti aggiunti
     let contentIndex = 0;
-
+  
     // Funzione per caricare il contenuto dinamicamente dal backend ESP32
     async function loadPageContent() {
       try {
-        // Mostra il messaggio di caricamento
-        document.getElementById('loading').style.display = 'block';
-
+        // Mostra il messaggio di caricamento (se esiste)
+        const loadingDiv = document.getElementById('loading');
+        if (loadingDiv) {
+          loadingDiv.style.display = 'block';
+        }
+  
         // Effettua la richiesta GET al server ESP32
         const response = await fetch('http://192.168.178.144/pinoutContent');
-
+  
         // Controlla se la risposta è valida
         if (!response.ok) {
           throw new Error('Errore durante il caricamento dei dati: ' + response.status);
         }
-
+  
         // Recupera il contenuto testuale dalla risposta
         const content = await response.text();
-
+  
         // Crea un nuovo div per il contenuto
         const newContentDiv = document.createElement('div');
         newContentDiv.id = `contentAdd_${contentIndex}`;
         newContentDiv.className = 'content';
         newContentDiv.innerHTML = content;
         contentIndex++;
-
-        // Posiziona il nuovo contenuto prima del pulsante
+  
+        // Posiziona il nuovo contenuto prima del pulsante (se il pulsante esiste)
         const loadButton = document.getElementById('loadButton');
-        document.body.insertBefore(newContentDiv, loadButton);
-
-        // Nasconde il messaggio di caricamento
-        document.getElementById('loading').style.display = 'none';
+        if (loadButton) {
+          document.body.insertBefore(newContentDiv, loadButton);
+        } else {
+          // Se il pulsante non esiste, aggiungi il contenuto alla fine del body
+          document.body.appendChild(newContentDiv);
+        }
+  
+        // Nasconde il messaggio di caricamento (se esiste)
+        if (loadingDiv) {
+          loadingDiv.style.display = 'none';
+        }
       } catch (error) {
-        // Gestisce gli errori e mostra un messaggio all'utente
-        document.getElementById('loading').innerText = 'Errore durante il caricamento dei dati';
+        // Gestisce gli errori e mostra un messaggio (se esiste)
+        const loadingDiv = document.getElementById('loading');
+        if (loadingDiv) {
+          loadingDiv.innerText = 'Errore durante il caricamento dei dati';
+        }
         console.error(error);
       }
     }
-
-    // Associa la funzione al pulsante
-    document.getElementById('loadButton').addEventListener('click', loadPageContent);
-
+  
+    // Associa la funzione al pulsante (se esiste)
+    const loadButton = document.getElementById('loadButton');
+    if (loadButton) {
+      loadButton.addEventListener('click', loadPageContent);
+    }
+  
     // Carica il primo contenuto all'avvio della pagina
     window.onload = loadPageContent;
   </script>
+  
 
 </body>
 </html>

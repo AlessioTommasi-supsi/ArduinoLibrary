@@ -41,6 +41,9 @@ void Routes::defineRoutes(AsyncWebServer &server)
 
     */
 
+    cssRoutes css;
+    css.defineRoutes(server);
+
     pinoutRoutes pinout;
     pinout.defineRoutes(server);
 
@@ -52,6 +55,8 @@ void Routes::defineRoutes(AsyncWebServer &server)
 
     MonitorResource monitor;
     monitor.defineRoutes(server);
+
+    
 
     
 

@@ -22,9 +22,11 @@ class viewGeneric
         static String addPinCss();
         static String addPinStyleCss();
         static String addNavbarCss();
+        static String addNavbarStyleCss();
         static String addNavbar();
         static String dynamicUpdateContent(String divId, String api, int timeToUpdate);
-
+        static String dynamicUpdateContentScript();
+        static String fetchContentScript();
 };
 
 #endif // !VIEWGENERIC_H#define VIEWGENERIC_H

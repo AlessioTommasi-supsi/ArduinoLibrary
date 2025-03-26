@@ -21,6 +21,7 @@
 #include "modbusRoutes.h"
 #include "wifiRoutes.h"
 #include "monitorResource.h"
+#include "cssRoutes.h"
 
 class Routes : public RoutesInterface
 {

@@ -14,6 +14,6 @@ public:
     static String generateHTML();
     static String generateHTML(String popupScript); 
     static String pageContent();
+    static String pageContentCss();
 };
-
 #endif

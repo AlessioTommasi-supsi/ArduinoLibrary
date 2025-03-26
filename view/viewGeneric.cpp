@@ -16,8 +16,15 @@ String viewGeneric::addCss(){
         align-items: center;
     }
     )";
-    return css+ viewGeneric::addNavbarCss();
+    //return css+ viewGeneric::addNavbarCss();
+    return css;
 }
+
+String viewGeneric::addNavbarStyleCss(){
+    String navbarStyleCss ="<style>";
+    navbarStyleCss += viewGeneric::addNavbarCss();
+    return navbarStyleCss;
+};
 
 String viewGeneric::addNavbarCss(){
     String addNavbarCss = R"(
@@ -422,31 +429,123 @@ String viewGeneric::defaultFooter()
     return html;
 }
 
+/*
+    MetteContenutoNuovo Sotto al Contenuto vecchio
+    timeToUpdate > 0 il contenuto nuovo deve essere messo AL posto di quello vecchio alrimenti sotto 
 
-String viewGeneric::dynamicUpdateContent(String divId/*una stringa univoca nella pagina*/, String api, int timeToUpdate)
+    String divId: stringa dell elemento univoco da sostituira con il nuovo contenuto se timeToUpdate > 0
+                  se timeToUpdate < 0 non serve e non verra considerata 
+*/
+String viewGeneric::dynamicUpdateContent(String divId/*una stringa univoca nella pagina*/, String api, int timeToUpdate /* - 1 per dire refresh automatico disattivato altrimenti millisecondi dopo i quali fare refresh*/)
 {
     String var_html = "";
-    var_html += "<div id='" + divId + "'></div>";
-    var_html += "<script>";
-    var_html += "function updateContent(api, divId) {";
-    var_html += " fetch(api)";
-    var_html += " .then(response => response.text())";
-    var_html += " .then(data => {";
-    var_html += " document.getElementById(divId).innerHTML = data;";
-    var_html += " })";
-    var_html += " .catch(error => {";
-    var_html += " console.error('Errore durante il recupero dei dati:', error);";
-    var_html += " document.getElementById(divId).innerHTML = '<p>Errore durante il recupero dei dati</p>';";
-    var_html += " });";
-    var_html += "}";
-    var_html += "document.addEventListener('DOMContentLoaded', () => {";
-    var_html += " updateContent('" + api + "', '" + divId + "');"; // Caricamento iniziale
-    var_html += " if (" + String(timeToUpdate) + " > 0) {"; // Controllo del valore di timeToUpdate
-    var_html += "   setInterval(() => {";
-    var_html += "     updateContent('" + api + "', '" + divId + "');";
-    var_html += "   }, " + String(timeToUpdate) + ");";
-    var_html += " }";
-    var_html += "});";
-    var_html += "</script>";
+    var_html += R"(
+    <script> 
+        // Esegue il caricamento iniziale
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPageContent(')" + api + R"(', ')" + divId + R"(', )" + String(timeToUpdate) + R"();
+        });
+    </script>
+    )";
     return var_html;
 }
+
+
+String viewGeneric::fetchContentScript()
+{
+    String script = R"(
+        <script>
+             // Funzione per caricare dinamicamente i dati dal backend
+            async function fetchContent(api) {
+                try {
+                    // Mostra il messaggio di caricamento (se esiste)
+                    const loadingDiv = document.getElementById('loading');
+                    if (loadingDiv) loadingDiv.style.display = 'block';
+
+                    // Effettua la richiesta GET
+                    const response = await fetch(api);
+                    if (!response.ok) {
+                        throw new Error('Errore durante il caricamento dei dati: ' + response.status);
+                    }
+                    return await response.text(); // Restituisce il contenuto della risposta
+                } catch (error) {
+                    console.error(error);
+                    const loadingDiv = document.getElementById('loading');
+                    if (loadingDiv) {
+                        loadingDiv.innerText = 'Errore durante il caricamento dei dati';
+                    }
+                    return null; // In caso di errore, restituisce null
+                }
+            }
+        </script>
+    )";
+
+    return script;
+}
+
+/*
+    MetteContenutoNuovo Sotto al Contenuto vecchio
+    timeToUpdate > 0 il contenuto nuovo deve essere messo AL posto di quello vecchio alrimenti sotto 
+*/
+String viewGeneric::dynamicUpdateContentScript()
+{
+    String script = "";
+    
+    script += fetchContentScript();
+
+    script += R"(
+        <script>
+            // Variabile globale per tenere traccia dell'indice dei contenuti aggiunti
+            let contentIndex = 0;
+            // Funzione per gestire l'aggiunta o la sostituzione del contenuto
+            function updateContent(divId, content, replace) {
+                if (replace) {
+                    // Sostituisci il contenuto del div esistente
+                    const existingDiv = document.getElementById(divId);
+                    if (existingDiv) {
+                        existingDiv.innerHTML = content;
+                    } else {
+                        console.error('Div con ID ' + divId + ' non trovato per la sostituzione.');
+                    }
+                } else {
+                    // Aggiungi un nuovo div con contenuto sotto
+                    const newContentDiv = document.createElement('div');
+                    newContentDiv.id = `contentAdd_${contentIndex}`;
+                    newContentDiv.className = 'content';
+                    newContentDiv.innerHTML = content;
+                    contentIndex++;
+
+                    const loadButton = document.getElementById('loadButton');
+                    if (loadButton) {
+                        document.body.insertBefore(newContentDiv, loadButton);
+                    } else {
+                        document.body.appendChild(newContentDiv);
+                    }
+                }
+            }
+
+            // Funzione per inizializzare il caricamento
+            async function loadPageContent(api, divId, timeToUpdate) {
+                const content = await fetchContent(api);
+                if (content) {
+                    updateContent(divId, content, timeToUpdate > 0);
+                }
+
+                // Se il refresh è attivo, imposta un intervallo
+                if (timeToUpdate > 0) {
+                    setInterval(async () => {
+                        const refreshedContent = await fetchContent(api);
+                        if (refreshedContent) {
+                            updateContent(divId, refreshedContent, true); // Sostituisce il contenuto
+                        }
+                    }, timeToUpdate);
+                }
+            }
+        </script>
+    )";
+
+    return script;
+}
+
+
+

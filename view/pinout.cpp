@@ -15,6 +15,7 @@ String Pinout::generateHTML()
 
 String Pinout::pageContent()
 {
+    html += pageContentCss();
     html += "<h1>Pinout</h1>";
 
     // Inserisco un'immagine presa da internet:
@@ -61,6 +62,23 @@ String Pinout::pageContent()
 
     return html;
 }
+
+String Pinout::pageContentCss(){
+    String css ="";
+
+    css += viewGeneric::dynamicUpdateContentScript(); //aggiungo script per aggiornamento dinamico
+
+    /**
+     * Aggiungo Css effettivo
+     */
+
+    css += viewGeneric::dynamicUpdateContent("", "/formStyle", -1); //aggiungo script per aggiornamento dinamico
+    css += viewGeneric::dynamicUpdateContent("", "/pinStyle", -1); //aggiungo script per aggiornamento dinamico
+    css += viewGeneric::dynamicUpdateContent("", "/navbarStyle", -1); //aggiungo script per aggiornamento dinamico
+
+    return css;
+}
+
 
 String Pinout::generateHTML(String popupScript)
 {

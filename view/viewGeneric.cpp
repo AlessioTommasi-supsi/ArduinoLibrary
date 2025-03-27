@@ -428,7 +428,7 @@ String viewGeneric::defaultCssHeader(String title)
     String css ="";
 
     css += viewGeneric::dynamicUpdateContentScript(); //aggiungo script per aggiornamento dinamico
-    //css += viewGeneric::dynamicUpdateContent("", "/formStyle", -1); //aggiungo script per aggiornamento dinamico
+    css += viewGeneric::dynamicUpdateContent("", "/formStyle", -1); //aggiungo script per aggiornamento dinamico
     css += viewGeneric::dynamicUpdateContent("", "/pinStyle", -1); //aggiungo script per aggiornamento dinamico
     css += viewGeneric::dynamicUpdateContent("", "/navbarStyle", -1); //aggiungo script per aggiornamento dinamico
 

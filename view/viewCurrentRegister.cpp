@@ -45,8 +45,8 @@ String viewCurrentRegister::generateHTML(String registerAddress, float registerV
     // Creazione dell'header HTML con il foglio di stile CSS
     String css = viewGeneric::basicHeader("Current Register"); 
     css += viewGeneric::dynamicUpdateContentScript(); //aggiungo script per aggiornamento dinamico
-    //css += viewGeneric::dynamicUpdateContent("", "/navbarStyle", -1); //aggiungo script per aggiornamento dinamico
-    //css += viewGeneric::dynamicUpdateContent("", "/formStyle", -1); //aggiungo script per aggiornamento dinamico
+    css += viewGeneric::dynamicUpdateContent("", "/navbarStyle", -1); //aggiungo script per aggiornamento dinamico
+    //css += viewGeneric::dynamicUpdateContent("", "/formStyle", -1); //aggiungo script per aggiornamento dinamico //NON FUNZIONANTE SE LO METTO CRASH!
 
     //String page_content = pageContent(registerAddress, registerValue);
 

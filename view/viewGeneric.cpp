@@ -28,105 +28,116 @@ String viewGeneric::addNavbarStyleCss(){
 
 String viewGeneric::addNavbarCss(){
     String addNavbarCss = R"(
-        .navbar {
-            display: flex;
-            justify-content: space-evenly;
-            align-items: center;
-            background: rgba(48, 48, 48, 0.6); /* Grigio traslucido glass effect */
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-            border-radius: 15px;
-            padding: 10px 20px;
-            z-index: 2000;
-            position: fixed;
-        }
-        .navbar a {
-            text-decoration: none;
-            color: white;
-            text-align: center;
-            display: inline-flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 10px;
-            transition: transform 0.2s ease-in-out, color 0.3s ease;
-        }
-        .navbar .icon {
-            width: 80px;
-            height: 80px;
-            background-color: rgba(255, 255, 255, 0.752); /* Fondo traslucido */
-            border-radius: 8px; /* Angoli arrotondati */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px; /* Emoji grande */
-            color: #333;
-            transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
-            box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.2), 0 4px 8px rgba(0, 0, 0, 0.4);
-        }
-        .navbar span {
-            font-size: 16px;
-            margin-top: 8px;
-            color: white;
-            transition: transform 0.3s ease, color 0.3s ease;
-        }
-        .navbar a:hover .icon {
-            transform: scale(1.3); /* Ingrandisce l'icona */
-            background-color: rgba(161, 255, 167, 0.7); /* Verde traslucido per hover */
-            color: white;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
-        }
-        .navbar a:hover span {
-            color: #4CAF50;
-        }
-        /* Per desktop e tablet: navbar verticale */
-        @media (min-width: 1500px) {
-            .navbar {
-                flex-direction: column;
-                top: 50%;
-                left: 15px;
-                transform: translateY(-50%);
-                position: fixed;
-                height: auto;
-                padding: 20px 10px;
-                width: auto;
-            }
-            .navbar a {
-                margin-bottom: 15px;
-            }
-            .navbar span {
-                font-size: 12px; /* Testo più piccolo per layout laterale */
-            }
-        }
-        /* Per dispositivi mobili: navbar in basso con scorrimento */
-        @media (max-width: 1499px) {
-            .navbar {
-                position: fixed;
-                bottom: 15px;
-                left: 0;
-                right: 0;
-                flex-direction: row;
-                overflow-x: auto; /* Scorrimento orizzontale */
-                scroll-behavior: smooth; /* Scorrimento fluido */
-                padding: 10px 0;
-                gap: 10px;
-            }
-            .navbar::-webkit-scrollbar {
-                display: none; /* Rimuove la scrollbar visibile */
-            }
-        }
-        @media (max-width: 480px) {
-            .navbar .icon {
-                width: 60px;
-                height: 60px;
-                font-size: 30px; /* Icone compatte */
-            }
-            .navbar span {
-                font-size: 10px; /* Testo più piccolo */
-            }
-        }
-    )" ;
+        /* Versione Mobile (default): navbar in basso, più piccola */
+    .navbar {
+      display: flex;
+      justify-content: space-evenly;
+      align-items: center;
+      background: rgba(48, 48, 48, 0.6); /* Grigio traslucido */
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+      border-radius: 15px;
+      padding: 8px 16px; /* padding ridotto */
+      z-index: 2000;
+      
+      /* Posizionata in basso e centrata */
+      position: fixed;
+      bottom: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80vw; /* ridotta dal 90vw all'80vw */
+      
+      flex-direction: row;
+      overflow-x: auto; /* scroll orizzontale */
+      scroll-behavior: smooth;
+      gap: 8px; /* gap ridotto */
+    }
+
+    /* Rimuove la scrollbar per estetica */
+    .navbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Link della navbar */
+    .navbar a {
+      text-decoration: none;
+      color: white;
+      text-align: center;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 8px; /* padding interno leggermente ridotto */
+      transition: transform 0.2s ease-in-out, color 0.3s ease;
+    }
+
+    /* Icone della navbar, dimensioni ridotte */
+    .navbar .icon {
+      width: 50px;   /* diminuito rispetto ai 60px */
+      height: 50px;  /* diminuito rispetto ai 60px */
+      background-color: rgba(255, 255, 255, 0.752);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;  /* ridotto rispetto ai 30px */
+      color: #333;
+      transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.2), 0 4px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Testo sotto le icone, dimensione ridotta */
+    .navbar span {
+      font-size: 12px;  /* ridotto rispetto ai 14px */
+      margin-top: 8px;
+      color: white;
+      transition: transform 0.3s ease, color 0.3s ease;
+    }
+
+    /* Effetto hover */
+    .navbar a:hover .icon {
+      transform: scale(1.3);
+      background-color: rgba(161, 255, 167, 0.7);
+      color: white;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+    }
+    .navbar a:hover span {
+      color: #4CAF50;
+    }
+
+    /* Responsive per smartphone */
+    @media (max-width: 480px) {
+      .navbar .icon {
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
+      }
+      .navbar span {
+        font-size: 10px;
+      }
+    }
+
+    /* Versione desktop/tablet: layout verticale (min-width >= 1500px) */
+    @media (min-width: 1500px) {
+      .navbar {
+        flex-direction: column;
+        top: 50%;
+        left: 15px;
+        transform: translateY(-50%);
+        bottom: auto;
+        right: auto;
+        
+        /* Limita l'altezza e la larghezza per non occupare troppo spazio */
+        max-height: 80vh;  /* ridotto dal 90vh all'80vh */
+        width: auto;
+        
+        overflow-y: auto;  /* scroll verticale */
+        overflow-x: hidden;
+        padding: 10px;     /* padding leggermente ridotto */
+      }
+    }
+    )"; 
     return addNavbarCss;
 }
 
@@ -417,7 +428,7 @@ String viewGeneric::defaultCssHeader(String title)
     String css ="";
 
     css += viewGeneric::dynamicUpdateContentScript(); //aggiungo script per aggiornamento dinamico
-    css += viewGeneric::dynamicUpdateContent("", "/formStyle", -1); //aggiungo script per aggiornamento dinamico
+    //css += viewGeneric::dynamicUpdateContent("", "/formStyle", -1); //aggiungo script per aggiornamento dinamico
     css += viewGeneric::dynamicUpdateContent("", "/pinStyle", -1); //aggiungo script per aggiornamento dinamico
     css += viewGeneric::dynamicUpdateContent("", "/navbarStyle", -1); //aggiungo script per aggiornamento dinamico
 

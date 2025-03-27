@@ -45,41 +45,23 @@ String viewCurrentRegister::generateHTML(String registerAddress, float registerV
     // Creazione dell'header HTML con il foglio di stile CSS
     String css = viewGeneric::basicHeader("Current Register"); 
     css += viewGeneric::dynamicUpdateContentScript(); //aggiungo script per aggiornamento dinamico
-    
+    //css += viewGeneric::dynamicUpdateContent("", "/navbarStyle", -1); //aggiungo script per aggiornamento dinamico
+    //css += viewGeneric::dynamicUpdateContent("", "/formStyle", -1); //aggiungo script per aggiornamento dinamico
+
     //String page_content = pageContent(registerAddress, registerValue);
 
     String page_content = "";
-    /*
-    page_content += "<div class=\"container\">";
-
-    // Creazione del primo form per monitorare il registro
-    /*
-    page_content += "<div class=\"form-container\">";
+    page_content += viewGeneric::addNavbar();
     
-    page_content += "    <form action=\"modbusMaster\" method=\"get\">";
-    page_content += "        <label for=\"registerAddress\">Register Address:</label>";
-    page_content += "        <input type=\"text\" id=\"registerAddress\" name=\"registerAddress\" value=\"" + registerAddress + "\" required>";
-    page_content += "        <label for=\"registerType\">Register Type:</label>";
-    page_content += "        <select id=\"registerType\" name=\"registerType\" required>";
-    page_content += "            <option value=\"int\">int</option>";
-    page_content += "            <option value=\"float\">float</option>";
-    page_content += "        </select>";
-    page_content += "        <button type=\"submit\">Monitor</button>";
-    page_content += "    </form>";
-    
-    page_content += "</div>";
     
 
-    page_content += "</div>";
-    */
-
-    page_content += "porcoddeo dove essere ellole";
+    //page_content += "porcoddeo dove essere ellole";
     /**
      * Aggiungo il contenuto della pagina con una richiesta asincrona
      */
-    String api = "/modbusMasterPageContent";
-    page_content += viewGeneric::dynamicUpdateContent("", api, -1);
-    //page_content += viewGeneric::dynamicUpdateContent("", "/modbusMasterPageContent?registerAddress=" + registerAddress + "&registerValue=" + String(registerValue), -1);
+    //String api = "/modbusMasterPageContent";
+   // page_content += viewGeneric::dynamicUpdateContent("", api, -1);
+    page_content += viewGeneric::dynamicUpdateContent("", "/modbusMasterPageContent?registerAddress=" + registerAddress + "&registerValue=" + String(registerValue), -1);
 
     
 
@@ -101,16 +83,38 @@ String viewCurrentRegister::generateHTML(String registerAddress, float registerV
     }
 
     // Aggiunta del footer
-    //page_content += viewGeneric::defaultFooter();
+    page_content += viewGeneric::defaultFooter();
 
     return css + page_content;
 }
 
 String viewCurrentRegister::pageContent(String registerAddress, float registerValue)
 {
-    String page_content;
+    String page_content = "";
     // Aggiunta del contenitore principale per form e valore del registro
    
+    page_content += "<div class=\"container\">";
+
+    // Creazione del primo form per monitorare il registro
+    
+    page_content += "<div class=\"form-container\">";
+    
+    page_content += "    <form action=\"modbusMaster\" method=\"get\">";
+    page_content += "        <label for=\"registerAddress\">Register Address:</label>";
+    page_content += "        <input type=\"text\" id=\"registerAddress\" name=\"registerAddress\" value=\"" + registerAddress + "\" required>";
+    page_content += "        <label for=\"registerType\">Register Type:</label>";
+    page_content += "        <select id=\"registerType\" name=\"registerType\" required>";
+    page_content += "            <option value=\"int\">int</option>";
+    page_content += "            <option value=\"float\">float</option>";
+    page_content += "        </select>";\
+    page_content += "        <button type=\"submit\">Monitor</button>";
+    page_content += "    </form>";
+    
+    page_content += "</div>";
+    
+
+    page_content += "</div>";
+    
     // Aggiunta del valore del registro sotto il primo form
     page_content += "<div style=\"text-align: center; margin-top: 20px;\">";
     page_content += "    <h2>Register Value: " + String(registerValue) + "</h2>";
@@ -149,7 +153,7 @@ String viewCurrentRegister::pageContent(String registerAddress, float registerVa
     // Chiusura del contenitore principale
     page_content += "</div>";
     
-    return "";
+    return page_content;
 }
 String viewCurrentRegister::generateHTMLConfirm(String registerAddress, float registerValue)
 {

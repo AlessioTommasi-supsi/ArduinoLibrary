@@ -119,16 +119,20 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
         try
         {
             String content = "";
-            Serial.println("modbusMasterPageContent");
-            /*
+            Serial.println("request of modbusMasterPageContent");
+            
             String registerAddress = request->getParam("registerAddress")->value();
             float registerValue = request->getParam("registerValue")->value().toFloat();
-
+            Serial.println("vlaoriPassati: ");
+            Serial.print("registerAddress: " + registerAddress);
+            Serial.println("  registerValue: " + String(registerValue));
             content += viewCurrentRegister::pageContent(registerAddress, registerValue);
-            */
-            content += "TEst to see if this works";
-            const char *htmlContentPtr = content.c_str();
-            request->send(200, "text/html", htmlContentPtr);
+            Serial.println("generato il contenuto della pagina");
+            
+
+            AsyncWebServerResponse *response = request->beginResponse(200, "text/html", content);
+            response->addHeader("Access-Control-Allow-Origin", "*"); // Aggiungi header CORS
+            request->send(response);
         }
         catch(...)
         {

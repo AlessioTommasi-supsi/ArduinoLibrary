@@ -17,6 +17,13 @@ void cssRoutes::defineRoutes(AsyncWebServer &server)
         response->addHeader("Access-Control-Allow-Origin", "*"); // Aggiungi header CORS
         request->send(response); 
     });
+
+    server.on("/fieldFormStyle", HTTP_GET, [](AsyncWebServerRequest *request){
+        String css = viewGeneric::addFieldFormStyleCss();
+        AsyncWebServerResponse *response = request->beginResponse(200, "text/html", css);
+        response->addHeader("Access-Control-Allow-Origin", "*"); // Aggiungi header CORS
+        request->send(response); 
+    });
     
     server.on("/pinStyle", HTTP_GET, [](AsyncWebServerRequest *request){
         String css = viewGeneric::addPinStyleCss();

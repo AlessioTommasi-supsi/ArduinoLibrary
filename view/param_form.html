@@ -260,7 +260,7 @@
     // Aggiorna la visibilità in base al tipo di segnale selezionato
     function updateSignalSelection() {
       var signalType = document.getElementById("signalType").value;
-      if (signalType === "analogico") {
+      if (signalType === "digitale") {
         document.getElementById("analogSettingsField").style.display = "block";
       } else {
         document.getElementById("analogSettingsField").style.display = "none";
@@ -272,7 +272,7 @@
     function updateParameterSection() {
       var signalType = document.getElementById("signalType").value;
       var selectedType;
-      if (signalType === "analogico") {
+      if (signalType === "digitale") {
         selectedType = document.getElementById("analogType").value;
       } else {
         // Se digitale, assumiamo Tensione

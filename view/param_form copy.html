@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Configurazione Sistema - Segnali e Uscite</title>
+  <!-- Link a Font Awesome (CDN per le icone) -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+  
+  <style>
+    /* Stili di base e layout */
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #ece9e6, #ffffff);
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    
+    /* Contenitore con effetto glass */
+    .form-container {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+      padding: 30px;
+      margin-top: 100px;
+      width: 90%;
+      max-width: 700px;
+    }
+    
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    fieldset {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: 25px;
+      padding: 15px;
+    }
+    
+    legend {
+      font-size: 1.2em;
+      font-weight: bold;
+      padding: 0 10px;
+    }
+    
+    h3 {
+      margin: 15px 0 5px;
+      font-size: 1.1em;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    
+    input[type="number"],
+    input[type="text"],
+    select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+    
+    /* Bottone di invio */
+    button {
+      width: 100%;
+      padding: 15px;
+      font-size: 18px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  
+  <!-- Contenitore principale del form -->
+  <div class="form-container">
+    <h2>Configurazione Sistema</h2>
+    <form id="configForm" action="multiplex_graph" method="get">
+      
+      <!-- Sezione: Seleziona il tipo di segnale -->
+      <fieldset>
+        <legend>Seleziona il tipo di segnale</legend>
+        <label for="signalType">Tipo di segnale:</label>
+        <select id="signalType" name="signalType" onchange="updateSignalMessage()">
+          <option value="resistenza">Resistenza</option>
+          <option value="tensione_non_amplificato">Segnale di tensione non amplificato</option>
+          <option value="tensione_amp_331">Segnale di tensione con guadagno pari a 331</option>
+          <option value="tensione_amp_0.216">Segnale di tensione con guadagno pari a 0.216</option>
+        </select>
+      </fieldset>
+      
+      <!-- Messaggio che compare in base alla selezione -->
+      <div id="signalMessage" style="margin: 20px 0; font-weight: bold;"></div>
+      
+      <!-- Pulsante di invio -->
+      <button type="submit">Invia Configurazione</button>
+    </form>
+  </div>
+  
+  <script>
+    function updateSignalMessage() {
+      var signalType = document.getElementById("signalType").value;
+      var messageDiv = document.getElementById("signalMessage");
+      
+      switch (signalType) {
+        case "resistenza":
+          messageDiv.textContent = "La resistenza PT100 la devi collegare tra il morsetto 8 e il morsetto 2 della morsettiera CN2.";
+          break;
+        case "tensione_non_amplificato":
+          messageDiv.textContent = "Devi collegare segnale al morsetto 7 della morsettiera CN2.";
+          break;
+        case "tensione_amp_331":
+          messageDiv.textContent = "Collegare al morsetto 6 della morsettiera CN2: max signal readed +5v, -5v.";
+          break;
+        case "tensione_amp_0.216":
+          messageDiv.textContent = "Collegare al morsetto 1 dekka morsettiera CN2.";
+          break;
+        default:
+          messageDiv.textContent = "";
+      }
+    }
+    
+    document.addEventListener("DOMContentLoaded", function() {
+      updateSignalMessage();
+    });
+  </script>
+</body>
+</html>

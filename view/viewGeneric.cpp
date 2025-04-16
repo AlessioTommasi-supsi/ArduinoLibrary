@@ -149,7 +149,7 @@ String viewGeneric::addPinCss(){
             border-radius: 15px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            -webkit-bacfieldsetkdrop-filter: blur(10px);
             padding: 20px;
             margin-bottom: 20px;
             width: 80%;
@@ -321,6 +321,101 @@ String viewGeneric::addFormCss(){
     return formCss;
 }
 
+
+String viewGeneric::addFieldFormStyleCss(){
+    String formStyleCss = "<style>";
+    formStyleCss += viewGeneric::addFieldFormCss();
+    formStyleCss += "</style>";
+    return formStyleCss;
+}
+
+String viewGeneric::addFieldFormCss(){
+    String formCss = R"(
+        /* Stili di base e layout */
+        body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #ece9e6, #ffffff);
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        }
+        
+        /* Contenitore con effetto glass */
+        .form-container {
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        padding: 30px;
+        margin-top: 100px;
+        width: 90%;
+        max-width: 700px;
+        }
+        
+        h2 {
+        text-align: center;
+        margin-bottom: 30px;
+        }
+        
+        fieldset {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        padding: 15px;
+        }
+        
+        legend {
+        font-size: 1.2em;
+        font-weight: bold;
+        padding: 0 10px;
+        }
+        
+        h3 {
+        margin: 15px 0 5px;
+        font-size: 1.1em;
+        }
+        
+        label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        }
+        
+        input[type="number"],
+        input[type="text"],
+        select {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 16px;
+        }
+        
+        /* Bottone di invio */
+        button {
+        width: 100%;
+        padding: 15px;
+        font-size: 18px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        }
+        
+        button:hover {
+        background-color: #45a049;
+        }
+        )";
+    return formCss;
+}
+
+
 String viewGeneric::defaultPorfolioCss(){
     String porfolioCss = R"(
             <meta charset="UTF-8">
@@ -369,9 +464,9 @@ String viewGeneric::addNavbar()
             <div class="icon">📶</div>
             <span>WIfi Config</span>
             </a>
-            <a href="/paramConfig">
+            <a href="/multiplex_config">
             <div class="icon">⚙️</div>
-            <span>Extra</span>
+            <span>Multiplexer</span>
             </a>
             <a href="/extra">
             <div class="icon">📱</div>

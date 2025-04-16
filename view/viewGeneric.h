@@ -20,6 +20,8 @@ class viewGeneric
         static String addCss();
         static String addFormCss();
         static String addFormStyleCss();
+        static String addFieldFormCss();
+        static String addFieldFormStyleCss();
         static String addPinCss();
         static String addPinStyleCss();
         static String addNavbarCss();

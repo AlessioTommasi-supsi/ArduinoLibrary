@@ -1,4 +1,5 @@
 #include "viewGraph.h"
+#include <set> 
 
 String viewGraph::html = "";
 String viewGraph::generateHTML()
@@ -9,6 +10,12 @@ String viewGraph::generateHTML()
 
     
     std::vector<int> addresses = SystemState::getInstance()->getAllRegisterAddress();
+    int i = 0;
+    for (int addr : addresses)
+    {
+        addresses[i] += 1000; //operazione di shift
+    }
+    
     String apiFetch = "getRegisterValues";
     String apiFetchParam = "address";
 
@@ -28,17 +35,30 @@ String viewGraph::generateGraph(std::vector<int> addresses, String apiFetch, Str
     var_html += "<label for='           register-select'>Select Register Address: or gpio value</label>";
     var_html += "<select id='register-select' onchange='updateGraph()'>";
 
+    std::set<int> seen;
+
     for (int addr : addresses)
     {
-        if (addr > 0)
-        {
-            var_html += "<option value='" + String(addr) + "'>" + String(addr) + "</option>";
+        if (seen.find(addr) != seen.end()) {
+            // Se l'indirizzo è già stato aggiunto, salto la generazione dell'option.
+            continue;
         }
-        else
+        seen.insert(addr);
+
+        if (addr > 0 && addr < 1000) {
+            var_html += "<option value='" + String(addr) + "'>" + String(addr) + "</option>";
+        } else if (addr <= 0) 
         {
-            var_html += "<option value='" + String(addr) + "'>GPIO:" + String(-addr) + "</option>";
+            var_html += "<option value='" + String(addr) + "'>Multiplex:" + String(-addr) + "</option>";
+        }
+        else if (addr >= 1000 && addr < 2000) {
+            var_html += "<option value='" + String(addr - 1000) + "'>ModbusValue:" + String(addr - 1000) + "</option>";
+        
+        } else {
+            var_html += "<option value='" + String(addr) + "'>Errore inserimento!" + String(addr - 3000) + "</option>";
         }
     }
+
 
     var_html += "</select>";
 

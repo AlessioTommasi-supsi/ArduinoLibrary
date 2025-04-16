@@ -56,7 +56,9 @@ void Routes::defineRoutes(AsyncWebServer &server)
     MonitorResource monitor;
     monitor.defineRoutes(server);
 
-    
+
+    MultiplexRoutes multiplex;
+    multiplex.defineRoutes(server);
 
     
 

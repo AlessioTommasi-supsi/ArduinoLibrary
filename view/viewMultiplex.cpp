@@ -78,3 +78,32 @@ String viewMultiplex::pageContent(){
     return content;
 }
 
+/*Devo ancora modificare grafico, se prende in input un determinato numero di pin non mostra tutto menu a tendina ma fa diverso! solo signaltype!*/
+String viewMultiplex::pinStartAndStopForm(int PinNumber, String signalType){
+    String form = "";
+
+    //form+= viewGeneric::dynamicUpdateContent("", "/pinStyle", -1); //in teoria se uso graph normale dovrebbe gia esserci nella pagina!
+    
+
+    form += R"(
+        <div class="pin-container">
+            <h3>
+                <div class="pin-info">Tipo di segnale: )" + signalType + R"(</div>
+            </h3>
+            <div class="pin-actions">
+                <form action="/startPin" method="get">
+                    <input type="hidden" name="pinNumber" value=")" + String(PinNumber) + R"(">
+                    <button type="submit" class="start">Start</button>
+                </form>
+                <form action="/stopPin" method="get">
+                    <input type="hidden" name="pinNumber" value=")" + String(PinNumber) + R"(">
+                    <button type="submit" class="stop">Stop</button>
+                </form>
+            </div>
+        </div>
+    )";
+
+    
+    return form;
+
+}

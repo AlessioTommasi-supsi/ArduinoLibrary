@@ -127,7 +127,7 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
             Serial.print("registerAddress: " + registerAddress);
             Serial.println("  registerValue: " + String(registerValue));
             content += viewCurrentRegister::pageContent(registerAddress, registerValue);
-            Serial.println("generato il contenuto della pagina");
+            //Serial.println("generato il contenuto della pagina");
             
 
             AsyncWebServerResponse *response = request->beginResponse(200, "text/html", content);

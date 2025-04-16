@@ -14,6 +14,8 @@ public:
     static String Config();
 
     static String pageContent();
+
+    static String pinStartAndStopForm(int PinNumber, String signalType);
 };
 
 #endif

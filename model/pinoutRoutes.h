@@ -8,7 +8,7 @@
 #include <vector>
 #include <string>
 
-#include "Pinout.h"
+#include "pinout.h"
 #include "viewGraph.h"
 #include "viewGeneric.h"
 #include "viewEditPin.h"

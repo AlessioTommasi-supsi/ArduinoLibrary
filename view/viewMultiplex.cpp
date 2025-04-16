@@ -91,11 +91,13 @@ String viewMultiplex::pinStartAndStopForm(int PinNumber, String signalType){
                 <div class="pin-info">Tipo di segnale: )" + signalType + R"(</div>
             </h3>
             <div class="pin-actions">
-                <form action="/startPin" method="get">
+                <form action="/startRecordingPin" method="get">
+                    <label for="milliseconds">Milliseconds:</label>            
+                    <input type="text" id="milliseconds" name="milliseconds" required="" value="1000">
                     <input type="hidden" name="pinNumber" value=")" + String(PinNumber) + R"(">
                     <button type="submit" class="start">Start</button>
                 </form>
-                <form action="/stopPin" method="get">
+                <form action="/stopRecordingPin" method="get">
                     <input type="hidden" name="pinNumber" value=")" + String(PinNumber) + R"(">
                     <button type="submit" class="stop">Stop</button>
                 </form>

@@ -82,9 +82,7 @@ String viewMultiplex::pageContent(){
 String viewMultiplex::pinStartAndStopForm(int PinNumber, String signalType){
     String form = "";
 
-    //form+= viewGeneric::dynamicUpdateContent("", "/pinStyle", -1); //in teoria se uso graph normale dovrebbe gia esserci nella pagina!
-    
-
+    //form+= viewGeneric::dynamicUpdateContent("", "/pinStyle", -1); e richiesto da mettere al chiamante!
     form += R"(
         <div class="pin-container">
             <h3>

@@ -13,6 +13,7 @@
 #include "viewGeneric.h"
 #include "viewEditPin.h"
 #include "viewCurrentRegister.h"
+#include "viewHistory.h"
 
 #include "SystemState.h"
 #include <freertos/FreeRTOS.h>

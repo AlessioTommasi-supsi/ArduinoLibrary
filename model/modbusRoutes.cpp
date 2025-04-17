@@ -229,43 +229,4 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
     } 
     });
 
-    server.on("/getPinValues", HTTP_GET, [](AsyncWebServerRequest *request){
-    if (request->hasParam("pin")) {
-        try
-        {
-            String pin = request->getParam("pin")->value();
-
-            // SystemState::getInstance()->pinoutData->getPin(pin.toInt())  ritrna sempre qualcosa al massimo default p[in con pinnumber= -1!!]
-            std::vector<float> values = SystemState::getInstance()->pinoutData->getPin(pin.toInt()).getValuesVoltage();
-
-            if (values.size() == 0 ) 
-            {
-                return request->send(200, "application/json", "[]");
-            }
-            
-
-            String json = "[";
-            for (size_t i = 0; i < values.size(); ++i)
-            {
-                if (i > 0)
-                    json += ",";
-                json += String(values[i]);
-            }
-            json += "]";
-
-            request->send(200, "application/json", json);
-             
-        }
-        catch(...)
-        {
-            request->send(200, "application/json", "[]" );
-             
-        }
-        
-        
-    } else {
-        request->send(200, "application/json", "{\"error\":\"Pin parameter missing\"}");
-         
-    } 
-    });
 }

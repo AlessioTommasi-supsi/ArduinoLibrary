@@ -12,6 +12,8 @@ private:
 public:
     static String html;
     static String generateHTML();
+    static String modbusContent();
+    static String pinoutContent();
 };
 
 #endif

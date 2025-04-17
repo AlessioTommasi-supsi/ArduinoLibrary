@@ -91,19 +91,24 @@ String viewMultiplex::pinStartAndStopForm(int PinNumber, String signalType){
                 <div class="pin-info">Tipo di segnale: )" + signalType + R"(</div>
             </h3>
             <div class="pin-actions">
-                <form action="/startRecordingPin" method="get">
-                    <label for="milliseconds">Milliseconds:</label>            
+                <form action="/multiplex_graph" method="get">
+                    <label for="milliseconds">Milliseconds:</label>
                     <input type="text" id="milliseconds" name="milliseconds" required="" value="1000">
+                    <input type="hidden" name="signalType" value=")" + signalType + R"(">
                     <input type="hidden" name="pinNumber" value=")" + String(PinNumber) + R"(">
+                    <input type="hidden" name="action" value="start_recording">
                     <button type="submit" class="start">Start</button>
                 </form>
-                <form action="/stopRecordingPin" method="get">
+                <form action="/multiplex_graph" method="get">
+                    <input type="hidden" name="signalType" value=")" + signalType + R"(">
                     <input type="hidden" name="pinNumber" value=")" + String(PinNumber) + R"(">
+                    <input type="hidden" name="action" value="stop_recording">
                     <button type="submit" class="stop">Stop</button>
                 </form>
             </div>
         </div>
     )";
+
 
     
     return form;

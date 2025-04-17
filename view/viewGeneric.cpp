@@ -253,8 +253,14 @@ String viewGeneric::addFormCss(){
         }
 
         /* Tabelle per visualizzare dati */
+        .scrollable-container {
+            justify-content: center; /* centra il contenuto */
+            width: 90%;
+            overflow-y: auto;
+            max-height: 80vh;
+        }
         .history-table {
-            width: 80%;
+            width: 100%;
             border-collapse: collapse; /* Rimuove spazi tra celle */
             margin: 20px 0;
             font-size: 18px;

@@ -13,7 +13,6 @@ String viewHistory::generateHTML()
     html += "<thead>";
     html += "<tr>";
     html += "<th>Pin</th>";
-    html += "<th>Index</th>";
     html += "<th>Value</th>";
     html += "<th>Actions</th>";
     html += "</tr>";

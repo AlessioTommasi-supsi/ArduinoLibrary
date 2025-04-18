@@ -35,6 +35,12 @@ String viewMultiplex::pageContent(){
                         <option value="tensione_non_amplificato">Segnale di tensione non amplificato</option>
                         <option value="tensione_amp_331">Segnale di tensione con guadagno pari a 331</option>
                         <option value="tensione_amp_0.216">Segnale di tensione con guadagno pari a 0.216</option>
+
+                        <option value="CN10_resistenza">Resistenza CN10</option>
+                        <option value="CN10_tensione_non_amplificato">Segnale di tensione non amplificato</option>
+                        <option value="CN10_tensione_amp_331">Segnale di tensione con guadagno pari a 331</option>
+                        <option value="CN10_tensione_amp_0.216">Segnale di tensione con guadagno pari a 0.216</option>
+
                     </select>
                 </fieldset>
                 
@@ -63,6 +69,18 @@ String viewMultiplex::pageContent(){
                         break;
                     case "tensione_amp_0.216":
                         messageDiv.textContent = "Collegare al morsetto 1 dekka morsettiera CN2.";
+                        break;
+                    case "CN10_resistenza":
+                        messageDiv.textContent = "La resistenza PT100 la devi collegare tra il morsetto 8 e il morsetto 2 della morsettiera CN10.";
+                        break;
+                    case "CN10_tensione_non_amplificato":
+                        messageDiv.textContent = "Devi collegare segnale al morsetto 7 della morsettiera CN10.";
+                        break;
+                    case "CN10_tensione_amp_331":
+                        messageDiv.textContent = "Collegare al morsetto 6 della morsettiera CN10: max signal readed +5v, -5v.";
+                        break;
+                    case "CN10_tensione_amp_0.216":
+                        messageDiv.textContent = "Collegare al morsetto 1 dekka morsettiera CN10.";
                         break;
                     default:
                         messageDiv.textContent = "";

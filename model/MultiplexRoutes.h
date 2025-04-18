@@ -9,6 +9,9 @@
 #include <string>
 
 
+#include "ADS1115_controller.h"
+
+
 
 #include "viewGraph.h"
 #include "viewMultiplex.h"
@@ -21,6 +24,9 @@
 class MultiplexRoutes
 {
 public:
+
+    static ADS1115_controller adsController;
+
     void defineRoutes(AsyncWebServer &server);
 };
 

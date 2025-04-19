@@ -23,6 +23,9 @@ String viewHome::generateHTML()
 
 String viewHome::pageContent()
 {
+    html += viewGeneric::dynamicUpdateContentScript(); //aggiungo script per aggiornamento dinamico
+    html += viewGeneric::dynamicUpdateContent("id_navbarStyle", "/navbarStyle", -1); //aggiungo script per aggiornamento dinamico
+    html += viewGeneric::addNavbar();
     html+= R"(
     <div class="main_container_absolute">
         <div class="main_container_relative">

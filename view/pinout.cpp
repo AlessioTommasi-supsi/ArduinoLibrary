@@ -19,7 +19,7 @@ String Pinout::pageContent()
     html += "<h1>Pinout</h1>";
 
     // Inserisco un'immagine presa da internet:
-    html += "<img src='https://raw.githubusercontent.com/AlessioTommasi-supsi/iotProject/refs/heads/main/image/ESP-38Pin-pinout.jpg' alt='ESP32 Pinout' style='width: 100%; max-width: 800px;'>";
+    html += "<img src='https://raw.githubusercontent.com/AlessioTommasi-supsi/SmartHome/main/image.png' alt='ESP32 Pinout' style='width: 100%; max-width: 800px;'>";
     html += "<br><br>";
     // Aggiungo una sezione per i dati dei pin
     html += "<div id='pinData'></div>";

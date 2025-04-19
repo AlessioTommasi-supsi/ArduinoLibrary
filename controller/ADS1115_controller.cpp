@@ -1,17 +1,26 @@
 #include "ADS1115_controller.h"
 
+// Inizializzazione della variabile static
+ADS1115_controller* ADS1115_controller::instance = nullptr;
+
+ADS1115_controller* ADS1115_controller::getInstance() {
+    if(instance == nullptr) {
+        instance = new ADS1115_controller();
+    }
+    return instance;
+}
+
 ADS1115_controller::ADS1115_controller()
   : adsModel(), recordingActive(false), recordingInterval(1000),
-    lastRecordTime(0), recordingTask(NULL), currentChannel(-1)
+    lastRecordTime(0), recordingTask(NULL), currentChannel(-1), initializationFailed(false)
 {
     mutex = xSemaphoreCreateMutex();
-    
-    // Inizializza l'ADS1115 (usa la porta I2C predefinita)
+    // Inizializza l'ADS1115; se fallisce, imposta il flag
     if (!ads.begin()) {
         Serial.println("Failed to initialize ADS1115.");
-        // Gestione dell'errore: blocca il sistema o gestisci altrimenti.
-        ADS1115_controller::initializationFailed = true;
-        return;
+        initializationFailed = true;
+    } else {
+        initializationFailed = false;
     }
 }
 
@@ -49,9 +58,9 @@ void ADS1115_controller::startRecording(const String &signalType, int interval) 
         recordingActive = true;
         lastRecordTime = millis();
         recordedValues.clear();
-        currentChannel = channel;  // Salva il canale corrente!
+        currentChannel = channel;
         
-        // Imposta il multiplexer sul canale selezionato
+        // Configura il multiplexer
         adsModel.setChannel(currentChannel);
         
         // Lettura immediata
@@ -64,7 +73,6 @@ void ADS1115_controller::startRecording(const String &signalType, int interval) 
         Serial.print(volts);
         Serial.println(" V");
         
-        // Avvia il task di registrazione se non è già in esecuzione
         if (recordingTask == NULL) {
             xTaskCreatePinnedToCore(
                 recordingTaskFunction,
@@ -77,7 +85,6 @@ void ADS1115_controller::startRecording(const String &signalType, int interval) 
             );
         }
         xSemaphoreGive(mutex);
-        
         Serial.print("Registrazione avviata sul canale ADS ");
         Serial.print(currentChannel);
         Serial.print(" con intervallo ");
@@ -107,7 +114,6 @@ void ADS1115_controller::recordingTaskFunction(void *parameter) {
             if (currentTime - controller->lastRecordTime >= (unsigned long)controller->recordingInterval) {
                 if (xSemaphoreTake(controller->mutex, portMAX_DELAY) == pdTRUE) {
                     controller->adsModel.setChannel(controller->currentChannel);
-                    
                     int16_t adc = controller->ads.readADC_SingleEnded(0);
                     float volts = controller->ads.computeVolts(adc);
                     controller->recordedValues.push_back(volts);
@@ -132,4 +138,21 @@ const std::vector<float>& ADS1115_controller::getRecordedValues() const {
 
 int ADS1115_controller::getCurrentChannel() const {
     return currentChannel;
+}
+
+bool ADS1115_controller::isInitializationFailed() const {
+    return initializationFailed;
+}
+
+void ADS1115_controller::reinitialize() {
+    if (xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE) {
+        if (ads.begin()) {
+            initializationFailed = false;
+            Serial.println("Reinizializzazione riuscita.");
+        } else {
+            initializationFailed = true;
+            Serial.println("Reinizializzazione fallita.");
+        }
+        xSemaphoreGive(mutex);
+    }
 }

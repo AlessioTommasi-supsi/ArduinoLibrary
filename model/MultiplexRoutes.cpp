@@ -1,44 +1,39 @@
-#include "MultiplexRoutes.h"
-#include <vector>
-#include <set> 
-
-
-ADS1115_controller *MultiplexRoutes::adsController = nullptr;
-
-
-void MultiplexRoutes::defineRoutes(AsyncWebServer &server){
-
-    server.on("/multiplex_config", HTTP_GET, [](AsyncWebServerRequest *request){
-        String htmlContent = viewMultiplex::Config();
-        const char *htmlContentPtr = htmlContent.c_str();
-        request->send(200, "text/html", htmlContentPtr); 
-         
-    });
-
-    server.on("/getADSValues", HTTP_GET, [](AsyncWebServerRequest *request){
-        if(adsController->initializationFailed) {
+// Endpoint: /getADSValues
+    // Restituisce in formato JSON le letture registrate dall'ADS1115
+   
+     server.on("/getADSValues", HTTP_GET, [](AsyncWebServerRequest *request) {
+        ADS1115_controller* adsCtrl = ADS1115_controller::getInstance();
+        
+        if (adsCtrl->isInitializationFailed()) {
+            // Se l'inizializzazione è fallita, restituisce un messaggio d'errore
             request->send(500, "text/html", "<h1>Error: ADS1115 Initialization Failed.</h1>");
             return;
         }
         
-        const std::vector<float>& values = adsController->getRecordedValues();
+        const std::vector<float>& values = adsCtrl->getRecordedValues();
         String json = "[";
         for (size_t i = 0; i < values.size(); i++) {
             if (i > 0)
                 json += ",";
             json += String(values[i]);
         }
-        json += "]";
-        
+        // Se non ci sono valori, restituisce un array vuoto (oppure puoi decidere di restituire [0])
+        if(values.size() == 0) {
+            json = "[]";
+        } else {
+            json += "]";
+        }
         request->send(200, "application/json", json);
     });
-    
 
-    server.on("/multiplex_graph", HTTP_GET, [](AsyncWebServerRequest *request){
+    // Endpoint: /multiplex_graph
+    // Gestisce l'input della configurazione e avvia/ferma la registrazione.
+    // Genera la pagina HTML con il grafico, inserendo anche un eventuale messaggio d'errore
+    // e un bottone "Riprova inizializzazione" se l'ADS1115 non è stato inizializzato correttamente.
+    server.on("/multiplex_graph", HTTP_GET, [](AsyncWebServerRequest *request) {
         String signalType;
         String action;
         String milliseconds;
-
         String ErrorMessage = "";
         
         if (request->hasParam("signalType")) {
@@ -63,27 +58,46 @@ void MultiplexRoutes::defineRoutes(AsyncWebServer &server){
             milliseconds = "1000";
         }
         
+        // Utilizza il singleton direttamente
+        ADS1115_controller* adsCtrl = ADS1115_controller::getInstance();
         if (action == "start_recording") {
-            adsController->startRecording(signalType, milliseconds.toInt());
+            adsCtrl->startRecording(signalType, milliseconds.toInt());
         } else if (action == "stop_recording") {
-            adsController->stopRecording();
+            adsCtrl->stopRecording();
         }
         
-        if(adsController->initializationFailed) {
-            // Nel caso in cui l'inizializzazione fallisca, rispondi subito con un messaggio di errore
-            //request->send(500, "text/html", "<h1>Error: ADS1115 Initialization Failed.</h1>");
+        if (adsCtrl->isInitializationFailed()) {
+            // Aggiunge un messaggio d'errore e un form con un bottone per tentare la re-inizializzazione.
             ErrorMessage = "<h1>Error: ADS1115 Initialization Failed.</h1>";
-            Serial.println(ErrorMessage);
+            ErrorMessage += "<form action='/reinitialize_ads' method='get'><button type='submit'>Riprova inizializzazione</button></form>";
+            Serial.println("Initialization failed: " + ErrorMessage);
         }
         
         Serial.println("Action completed, preparing response...");
         
-        std::vector<int> channelVector = { adsController->getCurrentChannel() };
-        String htmlContent = viewGeneric::defaultCssHeader("Graph View");
-        htmlContent += viewMultiplex::pinStartAndStopForm(adsController->getCurrentChannel(), signalType);
-        htmlContent += viewGraph::generateGraph(channelVector, "getADSValues", "ads1115");
+        // Prepara un vettore contenente il canale selezionato (un singolo elemento)
+        std::vector<int> channelVector = { adsCtrl->getCurrentChannel() };
         
+        String htmlContent = viewGeneric::defaultCssHeader("Graph View");
+        htmlContent += viewMultiplex::pinStartAndStopForm(adsCtrl->getCurrentChannel(), signalType);
+        htmlContent += viewGraph::generateGraph(channelVector, "getADSValues", "ads1115");
         htmlContent += ErrorMessage;
+        
         request->send(200, "text/html", htmlContent);
+    });
+
+    // Endpoint: /reinitialize_ads
+    // Tenta di re-inizializzare l'ADS1115 e restituisce il risultato (con un link per tornare al Graph)
+    server.on("/reinitialize_ads", HTTP_GET, [](AsyncWebServerRequest *request) {
+        ADS1115_controller* adsCtrl = ADS1115_controller::getInstance();
+        adsCtrl->reinitialize();
+        String Message = "";
+        if (adsCtrl->isInitializationFailed()) {
+            Message = "<h1>Riprova inizializzazione fallita.</h1>";
+        } else {
+            Message = "<h1>ADS1115 re-inizializzato con successo!</h1>";
+        }
+        Message += "<a href='/multiplex_config'>Torna alle configurazioni</a>";
+        request->send(200, "text/html", Message);
     });
 }

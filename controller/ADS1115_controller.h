@@ -10,54 +10,52 @@
 
 class ADS1115_controller {
 public:
-    bool initializationFailed = false; // Flag per indicare se l'inizializzazione ha avuto successo
-    // Inizializza l'istanza interna dell'ADS1115 e il modello per il multiplexer
-    ADS1115_controller();
+    // Restituisce l'istanza singleton come puntatore
+    static ADS1115_controller* getInstance();
 
-    // Avvia la registrazione dei dati 
-    // Il parametro signalType (stringa) viene mappato nel canale corretto (0..7)
-    // e interval è l'intervallo di tempo (ms) tra una lettura ed una successiva.
+    // Avvia la registrazione dei dati: signalType viene mappato in un canale (0..7).
+    // interval è l'intervallo in ms.
     void startRecording(const String &signalType, int interval);
     
     // Ferma la registrazione
     void stopRecording();
     
-    // Ritorna lo storico delle letture (in volt)
+    // Restituisce lo storico delle letture (in volt)
     const std::vector<float>& getRecordedValues() const;
-    
-    // Funzione di mapping: dal signalType (stringa) al canale multiplexer (0..7)
-    static int signalTypeToChannel(const String &signalType);
     
     // Restituisce il canale corrente selezionato
     int getCurrentChannel() const;
     
-    // Ritorna l'handle del task di registrazione (se necessario)
-    TaskHandle_t getRecordingTaskHandle() const { return recordingTask; }
+    // Restituisce il flag di fallimento dell'inizializzazione
+    bool isInitializationFailed() const;
     
+    // Riprova a inizializzare l'ADS1115 (aggiorna il flag)
+    void reinitialize();
+    
+    // Mappatura dal signalType (stringa) al canale multiplexer (0..7)
+    static int signalTypeToChannel(const String &signalType);
+    
+    // Disabilita copia e assegnazione
+    ADS1115_controller(const ADS1115_controller&) = delete;
+    ADS1115_controller& operator=(const ADS1115_controller&) = delete;
+
 private:
-    // Istanza interna dell'ADS1115
+    ADS1115_controller();
+    static ADS1115_controller* instance;  // Puntatore statico all'unica istanza
+
     Adafruit_ADS1X15 ads;
-    // Modello per il multiplexer
     ADS1115_model adsModel;
     
-    // Thread-safety: mutex per l'accesso alle variabili condivise
     SemaphoreHandle_t mutex;
     
-    // Stato della registrazione e relativo intervallo (ms)
     bool recordingActive;
     int recordingInterval;
     unsigned long lastRecordTime;
-    
-    // Storico delle letture (in volt)
     std::vector<float> recordedValues;
-    
-    // Handle del task FreeRTOS per la registrazione
     TaskHandle_t recordingTask;
-    
-    // Membro per salvare il canale corrente, aggiornato da startRecording()
     int currentChannel;
+    bool initializationFailed;
     
-    // La funzione task che esegue in loop la registrazione (simile a Pin::recordingFunction)
     static void recordingTaskFunction(void *parameter);
 };
 

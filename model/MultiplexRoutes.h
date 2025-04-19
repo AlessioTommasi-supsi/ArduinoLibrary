@@ -24,9 +24,6 @@
 class MultiplexRoutes
 {
 public:
-
-    static ADS1115_controller *adsController;
-
     void defineRoutes(AsyncWebServer &server);
 };
 

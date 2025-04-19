@@ -1,0 +1,158 @@
+#include "ADS1115_controller.h"
+
+// Inizializzazione della variabile static
+ADS1115_controller* ADS1115_controller::instance = nullptr;
+
+ADS1115_controller* ADS1115_controller::getInstance() {
+    if(instance == nullptr) {
+        instance = new ADS1115_controller();
+    }
+    return instance;
+}
+
+ADS1115_controller::ADS1115_controller()
+  : adsModel(), recordingActive(false), recordingInterval(1000),
+    lastRecordTime(0), recordingTask(NULL), currentChannel(-1), initializationFailed(false)
+{
+    mutex = xSemaphoreCreateMutex();
+    // Inizializza l'ADS1115; se fallisce, imposta il flag
+    if (!ads.begin()) {
+        Serial.println("Failed to initialize ADS1115.");
+        initializationFailed = true;
+    } else {
+        initializationFailed = false;
+    }
+}
+
+int ADS1115_controller::signalTypeToChannel(const String &signalType) {
+    if (signalType == "resistenza") {
+        return 0;
+    } else if (signalType == "tensione_non_amplificato") {
+        return 1;
+    } else if (signalType == "tensione_amp_331") {
+        return 2;
+    } else if (signalType == "tensione_amp_0.216") {
+        return 3;
+    } else if (signalType == "CN10_resistenza") {
+        return 4;
+    } else if (signalType == "CN10_tensione_non_amplificato") {
+        return 5;
+    } else if (signalType == "CN10_tensione_amp_331") {
+        return 6;
+    } else if (signalType == "CN10_tensione_amp_0.216") {
+        return 7;
+    } else {
+        return -1;
+    }
+}
+
+void ADS1115_controller::startRecording(const String &signalType, int interval) {
+    int channel = signalTypeToChannel(signalType);
+    if (channel < 0) {
+        Serial.println("Errore: signalType non valido: " + signalType);
+        return;
+    }
+    
+    if (xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE) {
+        recordingInterval = interval;
+        recordingActive = true;
+        lastRecordTime = millis();
+        recordedValues.clear();
+        currentChannel = channel;
+        
+        // Configura il multiplexer
+        adsModel.setChannel(currentChannel);
+        
+        // Lettura immediata
+        int16_t adc = ads.readADC_SingleEnded(0);
+        float volts = ads.computeVolts(adc);
+        recordedValues.push_back(volts);
+        Serial.print("Lettura iniziale ADS (canale ");
+        Serial.print(currentChannel);
+        Serial.print("): ");
+        Serial.print(volts);
+        Serial.println(" V");
+        
+        if (recordingTask == NULL) {
+            xTaskCreatePinnedToCore(
+                recordingTaskFunction,
+                "ADS1115RecordingTask",
+                4096,
+                this,
+                1,
+                &recordingTask,
+                0
+            );
+        }
+        xSemaphoreGive(mutex);
+        Serial.print("Registrazione avviata sul canale ADS ");
+        Serial.print(currentChannel);
+        Serial.print(" con intervallo ");
+        Serial.print(interval);
+        Serial.println(" ms");
+    }
+}
+
+void ADS1115_controller::stopRecording() {
+    if (xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE) {
+        recordingActive = false;
+        if (recordingTask != NULL) {
+            vTaskDelete(recordingTask);
+            recordingTask = NULL;
+            Serial.println("Recording task terminato.");
+        }
+        xSemaphoreGive(mutex);
+    }
+}
+
+void ADS1115_controller::recordingTaskFunction(void *parameter) {
+    ADS1115_controller *controller = static_cast<ADS1115_controller*>(parameter);
+    
+    while (true) {
+        if (controller->recordingActive) {
+            unsigned long currentTime = millis();
+            if (currentTime - controller->lastRecordTime >= (unsigned long)controller->recordingInterval) {
+                if (xSemaphoreTake(controller->mutex, portMAX_DELAY) == pdTRUE) {
+                    controller->adsModel.setChannel(controller->currentChannel);
+                    int16_t adc = controller->ads.readADC_SingleEnded(0);
+                    float volts = controller->ads.computeVolts(adc);
+                    controller->recordedValues.push_back(volts);
+                    controller->lastRecordTime = currentTime;
+                    Serial.print("Lettura ADS (canale ");
+                    Serial.print(controller->currentChannel);
+                    Serial.print("): ");
+                    Serial.print(volts);
+                    Serial.println(" V");
+                    xSemaphoreGive(controller->mutex);
+                }
+            }
+        }
+        vTaskDelay(10 / portTICK_PERIOD_MS);
+    }
+    vTaskDelete(NULL);
+}
+
+const std::vector<float>& ADS1115_controller::getRecordedValues() const {
+    return recordedValues;
+}
+
+int ADS1115_controller::getCurrentChannel() const {
+    return currentChannel;
+}
+
+bool ADS1115_controller::isInitializationFailed() const {
+    return initializationFailed;
+}
+
+void ADS1115_controller::reinitialize() {
+    if (xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE) {
+        if (ads.begin()) {
+            initializationFailed = false;
+            Serial.println("Reinizializzazione riuscita.");
+        } else {
+            initializationFailed = true;
+            Serial.println("Reinizializzazione fallita.");
+        }
+        xSemaphoreGive(mutex);
+    }
+}

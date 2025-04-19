@@ -9,6 +9,9 @@
 #include <string>
 
 
+#include "ADS1115_controller.h"
+
+
 
 #include "viewGraph.h"
 #include "viewMultiplex.h"

@@ -18,10 +18,8 @@
 
 #include "RoutesInterface.h"
 #include "pinoutRoutes.h"
-#include "modbusRoutes.h"
 #include "wifiRoutes.h"
 #include "monitorResource.h"
-#include "MultiplexRoutes.h"
 #include "cssRoutes.h"
 
 class Routes : public RoutesInterface

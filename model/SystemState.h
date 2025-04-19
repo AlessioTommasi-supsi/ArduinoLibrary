@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <Arduino.h>
-#include "MasterModbus.h"
 #include "WiFiManager.h"
 #include "WebServer.h"
 #include "Logger.h"
@@ -70,7 +69,6 @@ public:
 
     static PinoutData *pinoutData;
 
-    static MasterModbus *masterModbus;
 
     static WiFiManager *wifiManager;
 
@@ -96,19 +94,11 @@ public:
 
     char * getError();
 
-    void pushRegister(int address, float value);
-
-    void startRecordingRegister(int addr, int milliseconds);
-
-    void stopRecordingRegister(int addr);
-
     std::vector<float> getAllRegisterValue(int address);
 
     std::vector<float> getAllRegisterValue();
 
     std::vector<int> getAllRegisterAddress();
-
-    void clearRegisters();
 
     void defaultClear();
 

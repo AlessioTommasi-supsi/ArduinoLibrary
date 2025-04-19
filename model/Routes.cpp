@@ -47,18 +47,11 @@ void Routes::defineRoutes(AsyncWebServer &server)
     pinoutRoutes pinout;
     pinout.defineRoutes(server);
 
-    ModbusRoutes modbus;
-    modbus.defineRoutes(server);
-
     WifiRoutes wifi;
     wifi.defineRoutes(server);
 
     MonitorResource monitor;
     monitor.defineRoutes(server);
-
-
-    MultiplexRoutes multiplex;
-    multiplex.defineRoutes(server);
 
     
 

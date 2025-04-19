@@ -454,10 +454,7 @@ String viewGeneric::addNavbar()
             <div class="icon">🔌</div>
             <span>Pinout</span>
             </a>
-            <a href="/currentregister">
-            <div class="icon">📋</div>
-            <span>Register</span>
-            </a>
+            
             <a href="/history">
             <div class="icon">⏳</div>
             <span>History</span>
@@ -470,14 +467,7 @@ String viewGeneric::addNavbar()
             <div class="icon">📶</div>
             <span>WIfi Config</span>
             </a>
-            <a href="/multiplex_config">
-            <div class="icon">⚙️</div>
-            <span>Multiplexer</span>
-            </a>
-            <a href="/extra">
-            <div class="icon">📱</div>
-            <span>Mobile</span>
-            </a>
+            
         </div>
         )";
     return navbar;

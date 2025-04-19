@@ -249,6 +249,12 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
         } 
         });
 
+        server.on("/history", HTTP_GET, [](AsyncWebServerRequest *request){
+            String htmlContent = viewHistory::generateHTML();
+            const char *htmlContentPtr = htmlContent.c_str();
+            request->send(200, "text/html", htmlContentPtr);
+        });
+
         server.on("/getPinValuesHistory", HTTP_GET, [](AsyncWebServerRequest *request) {
             String content = viewHistory::pinoutContent();
             request->send(200, "text/html", content);

@@ -10,7 +10,7 @@ SmartHomeBoard::SmartHomeBoard()
 void SmartHomeBoard::initializePins()
 {
     //richiama metodo padre
-    Esp32_30pin::initializePins();
+    //Esp32_30pin::initializePins();
     //utilizza setdi metodo padre per modificare i pin
     Pin &livingRoomPin = getPin(32);
     livingRoomPin.type = PinType::DIGITAL;

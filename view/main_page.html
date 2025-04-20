@@ -24,24 +24,19 @@
     flex-direction: column;
     align-items: center;
     }
-    /* Contenitore a griglia per disporre i bottoni, massimo 3 per riga */
-    /* Contenitore Flex per i bottoni */
     .emoji-button-container {
       display: flex;
       flex-wrap: wrap;
-      justify-content: center;  /* Centra ogni riga incompleta */
+      justify-content: center;
       gap: 20px;
-      max-width: 1200px; /* Limite per 3 colonne su schermi grandi */
-      margin: 0 auto;
+      margin-top: 30px;
     }
     
-    /* Bottone con le emoji, grande e responsive */
     .emoji-button {
       background-color: #fff;
       border: none;
       border-radius: 15px;
       box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-      /* Imposta larghezza e altezza per circa 3 per riga su schermi grandi */
       flex: 0 1 calc(33.333% - 20px);
       max-width: calc(33.333% - 20px);
       height: 250px;
@@ -49,9 +44,10 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: 100px; /* Dimensioni emoji per desktop */
+      font-size: 100px;
       cursor: pointer;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative; /* per posizionare lo spinner assoluto */
+      transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
       box-sizing: border-box;
     }
     
@@ -60,7 +56,6 @@
       box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3);
     }
     
-    /* Il testo sotto l'emoji */
     .emoji-button label {
       display: block;
       margin-top: 10px;
@@ -68,7 +63,26 @@
       color: #333;
     }
     
-    /* Tablet: circa due per riga */
+    /* Stato di loading: bottone traslucido */
+    .emoji-button.loading-state {
+      opacity: 0.5;
+      pointer-events: none; /* impedisce ulteriori click durante il fetch */
+    }
+
+    /* Spinner all'interno del bottone */
+    .emoji-button .loading-icon {
+      display: none;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 32px;
+    }
+    
+    /* Mostra lo spinner in stato loading */
+    .emoji-button.loading-state .loading-icon {
+      display: block;
+    }
+    
     @media (max-width: 768px) {
       .emoji-button {
         flex: 0 1 calc(50% - 20px);
@@ -81,7 +95,6 @@
       }
     }
     
-    /* Smartphone: ogni bottone quasi a tutta larghezza */
     @media (max-width: 480px) {
       .emoji-button {
         flex: 0 1 90%;
@@ -263,31 +276,71 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="glass_container">
                 
   
-                <!-- Contenitore per i 5 bottoni con emoji -->
                 <div class="emoji-button-container">
-                    <button class="emoji-button">
-                    🚪
-                    <label>Porta</label>
+                    <!-- Esempio: Bottone "Porta" con emoji 🚪 -->
+                    <button class="emoji-button" onclick="fetchData(this, 'http://alessiotommasi.com/')">
+                      🚪
+                      <label>Porta</label>
+                      <!-- Contenitore per l'icona di loading -->
+                      <div class="loading-icon">⏳</div>
                     </button>
-                    <button class="emoji-button">
-                    💡
-                    <label>Luce</label>
+                    
+                    <!-- Puoi aggiungere altri bottoni analoghi con emoji differenti -->
+                    <button class="emoji-button" onclick="fetchData(this, 'https://github.com/AlessioTommasi-supsi/SmartHome')">
+                      💡
+                      <label>Luce</label>
+                      <div class="loading-icon">⏳</div>
                     </button>
-                    <button class="emoji-button">
-                    📺
-                    <label>TV</label>
+                    
+                    <button class="emoji-button" onclick="fetchData(this, '/api_example3')">
+                      📺
+                      <label>TV</label>
+                      <div class="loading-icon">⏳</div>
                     </button>
-                    <button class="emoji-button">
-                    🛠️
-                    <label>Strumenti</label>
+                    
+                    <button class="emoji-button" onclick="fetchData(this, '/api_example4')">
+                      🛠️
+                      <label>Strumenti</label>
+                      <div class="loading-icon">⏳</div>
                     </button>
-                    <button class="emoji-button">
-                    🔑
-                    <label>Chiave</label>
+                    
+                    <button class="emoji-button" onclick="fetchData(this, '/api_example5')">
+                      🔑
+                      <label>Chiave</label>
+                      <div class="loading-icon">⏳</div>
                     </button>
-                </div>
+                  </div>
                 
             </div>
+            <script>
+                // Funzione che viene chiamata al click del bottone.
+                // 'button' è l'elemento HTML che è stato cliccato, 'apiUrl' è l'endpoint da chiamare.
+                function fetchData(button, apiUrl) {
+                  // Aggiunge la classe loading-state, riducendo l'opacità
+                  button.classList.add("loading-state");
+                  
+                  // Esegue la chiamata fetch all'API
+                  fetch(apiUrl)
+                    .then(response => {
+                      if (!response.ok) {
+                        throw new Error("Network response was not ok");
+                      }
+                      return response.json(); // oppure response.text() se la risposta è testuale
+                    })
+                    .then(data => {
+                      console.log("Dati ricevuti:", data);
+                      // Qui puoi aggiornare il bottone o altre parti della pagina in base alla risposta.
+                    })
+                    .catch(err => {
+                      console.error("Fetch error:", err);
+                      // Puoi mostrare un messaggio di errore nell'interfaccia se desiderato.
+                    })
+                    .finally(() => {
+                      // Rimuove la classe loading-state così il bottone torna alla normalità
+                      button.classList.remove("loading-state");
+                    });
+                }
+              </script>
         </div>
         <a href="mailto:alessio.tommasi.lavoro@gmail.com"><button id="GetInTouchBtn">📲</button></a>
         <a href="http://alessiotommasi.com/model/docs/curriculum.pdf"><button id="ResumeBtn">📖</button></a>

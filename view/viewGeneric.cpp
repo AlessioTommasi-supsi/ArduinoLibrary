@@ -23,6 +23,7 @@ String viewGeneric::addCss(){
 String viewGeneric::addNavbarStyleCss(){
     String navbarStyleCss ="<style>";
     navbarStyleCss += viewGeneric::addNavbarCss();
+    navbarStyleCss += "</style>";
     return navbarStyleCss;
 };
 
@@ -140,6 +141,104 @@ String viewGeneric::addNavbarCss(){
     )"; 
     return addNavbarCss;
 }
+
+
+String viewGeneric::addEmoji_buttonStyleCss(){
+    String Emoji_buttonStyleCss ="<style>";
+    Emoji_buttonStyleCss += viewGeneric::addEmoji_buttonCss();
+    Emoji_buttonStyleCss += "</style>";
+    return Emoji_buttonStyleCss;
+};
+
+String viewGeneric::addEmoji_buttonCss(){
+    String addEmoji_buttonCss = R"(
+     .emoji-button-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 30px;
+    }
+    
+    .emoji-button {
+      background-color: #fff;
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+      flex: 0 1 calc(33.333% - 20px);
+      max-width: calc(33.333% - 20px);
+      height: 250px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 100px;
+      cursor: pointer;
+      position: relative; /* per posizionare lo spinner assoluto */
+      transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+      box-sizing: border-box;
+    }
+    
+    .emoji-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .emoji-button label {
+      display: block;
+      margin-top: 10px;
+      font-size: 24px;
+      color: #333;
+    }
+    
+    /* Stato di loading: bottone traslucido */
+    .emoji-button.loading-state {
+      opacity: 0.5;
+      pointer-events: none; /* impedisce ulteriori click durante il fetch */
+    }
+
+    /* Spinner all'interno del bottone */
+    .emoji-button .loading-icon {
+      display: none;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 32px;
+    }
+    
+    /* Mostra lo spinner in stato loading */
+    .emoji-button.loading-state .loading-icon {
+      display: block;
+    }
+    
+    @media (max-width: 768px) {
+      .emoji-button {
+        flex: 0 1 calc(50% - 20px);
+        max-width: calc(50% - 20px);
+        height: 200px;
+        font-size: 80px;
+      }
+      .emoji-button label {
+        font-size: 20px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .emoji-button {
+        flex: 0 1 90%;
+        max-width: 90%;
+        height: auto;
+        font-size: 80px;
+        padding: 20px 0;
+      }
+      .emoji-button label {
+        font-size: 18px;
+      }
+    }
+    )"; 
+    return addEmoji_buttonCss;
+}
+
 
 String viewGeneric::addPinCss(){
     String pinCss = R"(

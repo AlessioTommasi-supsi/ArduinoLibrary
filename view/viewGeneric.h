@@ -27,6 +27,8 @@ class viewGeneric
         static String addNavbarCss();
         static String addNavbarStyleCss();
         static String addNavbar();
+        static String addEmoji_buttonStyleCss();
+        static String addEmoji_buttonCss();
         static String dynamicUpdateContent(String divId, String api, int timeToUpdate);
         static String dynamicUpdateContentScript();
         static String fetchContentScript();

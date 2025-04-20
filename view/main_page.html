@@ -241,7 +241,7 @@
     
 </div>
 
-<div id="textTypingContainer">
+    <div id="textTypingContainer">
         <div id="textTypingAnimation" class="glassEffect">I am: Developer|</div>
     </div>
 
@@ -272,38 +272,43 @@
   
                 <div class="emoji-button-container">
                     <!-- Esempio: Bottone "Porta" con emoji 🚪 -->
-                    <button class="emoji-button" onclick="fetchData(this, 'http://alessiotommasi.com/')">
-                      🚪
-                      <label>Porta</label>
+                    <button class="emoji-button" onclick="fetchData(this, 'pulsePin?pin=32')">
+                        🚪 
+                      <label>Porta studio</label>
                       <!-- Contenitore per l'icona di loading -->
                       <div class="loading-icon">⏳</div>
                     </button>
                     
                     <!-- Puoi aggiungere altri bottoni analoghi con emoji differenti -->
-                    <button class="emoji-button" onclick="fetchData(this, 'https://github.com/AlessioTommasi-supsi/SmartHome')">
+                    <button class="emoji-button" onclick="fetchData(this, 'pulsePin?pin=33')">
                       💡
-                      <label>Luce</label>
+                      <label>Luce interna studio</label>
                       <div class="loading-icon">⏳</div>
                     </button>
                     
-                    <button class="emoji-button" onclick="fetchData(this, '/api_example3')">
-                      📺
-                      <label>TV</label>
-                      <div class="loading-icon">⏳</div>
+                    <button class="emoji-button" onclick="fetchData(this, 'pulsePin?pin=25')">
+                        💡
+                        <label>Luce esterna studio</label>
+                        <div class="loading-icon">⏳</div>
+                    </button> 
+                    <button class="emoji-button" onclick="fetchData(this, 'pulsePin?pin=26')">
+                        💡
+                        <label>Luce presepe</label>
+                        <div class="loading-icon">⏳</div>
+                    </button> 
+
+                    <button class="emoji-button" onclick="fetchData(this, 'pulsePin?pin=27')">
+                        💡
+                        <label>Luce cantina</label>
+                        <div class="loading-icon">⏳</div>
                     </button>
-                    
-                    <button class="emoji-button" onclick="fetchData(this, '/api_example4')">
-                      🛠️
-                      <label>Strumenti</label>
-                      <div class="loading-icon">⏳</div>
+
+                    <button class="emoji-button" onclick="fetchData(this, 'pulsePin?pin=14')">
+                        💡
+                        <label>Luce camino</label>
+                        <div class="loading-icon">⏳</div>
                     </button>
-                    
-                    <button class="emoji-button" onclick="fetchData(this, '/api_example5')">
-                      🔑
-                      <label>Chiave</label>
-                      <div class="loading-icon">⏳</div>
-                    </button>
-                  </div>
+                </div>
                 
             </div>
             <script>

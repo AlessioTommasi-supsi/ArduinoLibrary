@@ -208,9 +208,38 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
         }
     });
 
+    server.on("/pulsePin", HTTP_GET, [](AsyncWebServerRequest *request){   
+        int PinNumber = -1;
+        int pin_delay = 1000;
+        bool rise_direction = false;  //di default se non specificato parametri tiro a pin a gnd per 1 secondo!   
+        if (!request->hasParam("pin")) {
+            request->send(500, "text/html", "Error: Pin parameter missing");
+            return;
+        }
+        PinNumber = request->getParam("pin")->value().toInt();
+        if (request->hasParam("rise_direction"))
+        {
+            rise_direction = request->getParam("rise_direction")->value() == "up";
+        }
+
+        if (request->hasParam("delay"))
+        {
+            pin_delay = request->getParam("delay")->value().toInt();
+        }
+
+
+        SystemState::getInstance()->pinoutData->getPin(PinNumber).write(rise_direction);
+        delay(pin_delay);
+        SystemState::getInstance()->pinoutData->getPin(PinNumber).write(!rise_direction);
+
+        String htmlContent = "Pin " + String(PinNumber) + " pulsed for " + String(pin_delay) + " milliseconds";
+        const char *htmlContentPtr = htmlContent.c_str();
+        request->send(200, "text/html", htmlContentPtr);
+    });
+
 
     server.on("/getPinValues", HTTP_GET, [](AsyncWebServerRequest *request){
-        if (request->hasParam("pin")) {
+        if (request->hasParam("pin")) { 
             try
             {
                 String pin = request->getParam("pin")->value();

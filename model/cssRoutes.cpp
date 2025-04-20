@@ -38,5 +38,11 @@ void cssRoutes::defineRoutes(AsyncWebServer &server)
         response->addHeader("Access-Control-Allow-Origin", "*"); // Aggiungi header CORS
         request->send(response); 
     });
-    
+
+    server.on("/emoji_buttonStyle", HTTP_GET, [](AsyncWebServerRequest *request){
+        String css = viewGeneric::addEmoji_buttonStyleCss();
+        AsyncWebServerResponse *response = request->beginResponse(200, "text/html", css);
+        response->addHeader("Access-Control-Allow-Origin", "*"); // Aggiungi header CORS
+        request->send(response); 
+    });
 }

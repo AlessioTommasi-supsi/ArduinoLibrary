@@ -107,6 +107,7 @@ String viewHome::pageContent()
                 </div>
                 
             </div>
+            <br><br><br><br>
             <script>
                 // Funzione che viene chiamata al click del bottone.
                 // 'button' è l'elemento HTML che è stato cliccato, 'apiUrl' è l'endpoint da chiamare.
@@ -151,7 +152,7 @@ String viewHome::pageContent()
             </div>
         </div>
     </div>
-    <br><br><br><br>
+    
     )rawliteral";
 
     return html;

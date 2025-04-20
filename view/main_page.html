@@ -13,17 +13,88 @@
     <link rel="stylesheet" href="http://alessiotommasi.com/view/css/particle_style.css">
     
 <style>
-body {
-font-family: Arial, sans-serif;
-line-height: 1.6;
-background-color: #f4f4f4;
-margin: 0;
-padding: 20px;
-padding-top: 60px; /* Evita la sovrapposizione della navbar */
-display: flex;
-flex-direction: column;
-align-items: center;
-}
+    body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+    padding-top: 60px; /* Evita la sovrapposizione della navbar */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    }
+    /* Contenitore a griglia per disporre i bottoni, massimo 3 per riga */
+    /* Contenitore Flex per i bottoni */
+    .emoji-button-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;  /* Centra ogni riga incompleta */
+      gap: 20px;
+      max-width: 1200px; /* Limite per 3 colonne su schermi grandi */
+      margin: 0 auto;
+    }
+    
+    /* Bottone con le emoji, grande e responsive */
+    .emoji-button {
+      background-color: #fff;
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+      /* Imposta larghezza e altezza per circa 3 per riga su schermi grandi */
+      flex: 0 1 calc(33.333% - 20px);
+      max-width: calc(33.333% - 20px);
+      height: 250px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 100px; /* Dimensioni emoji per desktop */
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      box-sizing: border-box;
+    }
+    
+    .emoji-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Il testo sotto l'emoji */
+    .emoji-button label {
+      display: block;
+      margin-top: 10px;
+      font-size: 24px;
+      color: #333;
+    }
+    
+    /* Tablet: circa due per riga */
+    @media (max-width: 768px) {
+      .emoji-button {
+        flex: 0 1 calc(50% - 20px);
+        max-width: calc(50% - 20px);
+        height: 200px;
+        font-size: 80px;
+      }
+      .emoji-button label {
+        font-size: 20px;
+      }
+    }
+    
+    /* Smartphone: ogni bottone quasi a tutta larghezza */
+    @media (max-width: 480px) {
+      .emoji-button {
+        flex: 0 1 90%;
+        max-width: 90%;
+        height: auto;
+        font-size: 80px;
+        padding: 20px 0;
+      }
+      .emoji-button label {
+        font-size: 18px;
+      }
+    }
+
 </style></head><body>
 <script>
      // Funzione per caricare dinamicamente i dati dal backend
@@ -136,6 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <div class="main_container_relative">
     <div id="particles-js"><canvas class="particles-js-canvas-el" style="width: 100%; height: 100%;" width="2210" height="1658"></canvas></div>
 
+    
 <!-- Navbar Responsive con Scorrimento Orizzontale -->
 <div class="navbar">
     <a href="/monitor">
@@ -189,31 +261,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
         <div class="next_page" id="aboutMeTitle">
             <div class="glass_container">
-                <div class="glass_content">
-                    <div class="glass_container">
-                        <div class="image-with-text responsive_div">
-                            <img class="project_maxwidth responsive_img" src="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/c.png" alt="Description of the image">
-                            <div class="project_maxwidth responsive_text">
-                                <h3>ALPHA </h3>
-                                <p>
-                                    <button class="knowledge-button">C++</button>
-                                    <button class="knowledge-button">ESP32</button>
-                                    <button class="knowledge-button">MODBUS</button>
-                                    <button class="knowledge-button">CSS</button>
-                                </p>
-                                <p>
-                                    Acquisizione Locale di Parametri con Hardware Avanzato
-                                </p>
-                                <p>
-                                    Il progetto ALPHA `e stato sviluppato nel corso di IoT del Master in Informatica presso SUPSI. Il focus principale `e sull’ESP32 e il protocollo Modbus
-                                </p>
-                                <a href="https://github.com/AlessioTommasi-supsi/iotProject/blob/main/docs/tesi.pdf"> <button class="download-button">official</button> </a>
-                                <a href="https://github.com/AlessioTommasi-supsi/iotProject/tree/main/docs"> <button class="download-button">ghithub docs</button> </a>
-                                <a href="https://github.com/AlessioTommasi-supsi/iotProject/tree/main"> <button class="download-button">official repo</button> </a>
-                            </div>
-                        </div>
-                    </div>
+                
+  
+                <!-- Contenitore per i 5 bottoni con emoji -->
+                <div class="emoji-button-container">
+                    <button class="emoji-button">
+                    🚪
+                    <label>Porta</label>
+                    </button>
+                    <button class="emoji-button">
+                    💡
+                    <label>Luce</label>
+                    </button>
+                    <button class="emoji-button">
+                    📺
+                    <label>TV</label>
+                    </button>
+                    <button class="emoji-button">
+                    🛠️
+                    <label>Strumenti</label>
+                    </button>
+                    <button class="emoji-button">
+                    🔑
+                    <label>Chiave</label>
+                    </button>
                 </div>
+                
             </div>
         </div>
         <a href="mailto:alessio.tommasi.lavoro@gmail.com"><button id="GetInTouchBtn">📲</button></a>

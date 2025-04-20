@@ -1,6 +1,4 @@
-<html lang="en">
-
-<head>
+<html><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Porfolio - Alessio Tommasi</title>
@@ -13,198 +11,334 @@
     <link rel="stylesheet" href="http://alessiotommasi.com/view/css/buttons.css">
     <link rel="stylesheet" href="http://alessiotommasi.com/view/css/dashboard.css">
     <link rel="stylesheet" href="http://alessiotommasi.com/view/css/particle_style.css">
+    
+<style>
+body {
+font-family: Arial, sans-serif;
+line-height: 1.6;
+background-color: #f4f4f4;
+margin: 0;
+padding: 20px;
+padding-top: 60px; /* Evita la sovrapposizione della navbar */
+display: flex;
+flex-direction: column;
+align-items: center;
+}
+</style></head><body>
+<script>
+     // Funzione per caricare dinamicamente i dati dal backend
+    async function fetchContent(api) {
+        try {
+            // Mostra il messaggio di caricamento (se esiste)
+            const loadingDiv = document.getElementById('loading');
+            if (loadingDiv) loadingDiv.style.display = 'block';
 
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            margin: 0;
+            // Effettua la richiesta GET
+            const response = await fetch(api);
+            if (!response.ok) {
+                throw new Error('Errore durante il caricamento dei dati: ' + response.status);
+            }
+            return await response.text(); // Restituisce il contenuto della risposta
+        } catch (error) {
+            console.error(error);
+            const loadingDiv = document.getElementById('loading');
+            if (loadingDiv) {
+                loadingDiv.innerText = 'Errore durante il caricamento dei dati';
+            }
+            return null; // In caso di errore, restituisce null
         }
-    
-        .navbar {
-            display: flex;
-            justify-content: center;
-            background-color: #333;
-            width: 100%;
-            padding: 10px 0;
-            position: fixed;
-            top: 0;
-            z-index: 2000;
-        }
-    
-        .navbar a {
-            color: white;
-            padding: 14px 20px;
-            text-align: center;
-            text-decoration: none;
-            font-size: 17px;
-        }
-    
-        .navbar a:hover {
-            background-color: #ddd;
-            color: black;
-        }
-    
-        .form-container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin-top: 60px;
-        }
-    
-        form {
-            display: flex;
-            flex-direction: column;
-        }
-    
-        label {
-            margin-bottom: 5px;
-        }
-    
-        input,
-        select {
-            margin-bottom: 15px;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-    
-        button {
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-    
-        button:hover {
-            background-color: #45a049;
-        }
-    
-        .history-table {
-            width: 80%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            font-size: 18px;
-            text-align: left;
-        }
-    
-        .history-table th,
-        .history-table td {
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-        }
-    
-        .history-table th {
-            background-color: #f2f2f2;
-        }
-    
-        .history-table tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-    
-        .history-table tr:nth-child(odd) {
-            background-color: #fff;
-        }
-    
-        canvas {
-            max-width: 100%;
-            height: auto;
-        }
-    </style>
-</head>
+    }
+</script>
 
-<body>
+<script>
+    // Variabile globale per tenere traccia dell'indice dei contenuti aggiunti
+    let contentIndex = 0;
+    // Funzione per gestire l'aggiunta o la sostituzione del contenuto
+    function updateContent(divId, content, replace) {
+        if (replace) {
+            // Sostituisci il contenuto del div esistente
+            const existingDiv = document.getElementById(divId);
+            if (existingDiv) {
+                existingDiv.innerHTML = content;
+            } else {
+                console.error('Div con ID ' + divId + ' non trovato per la sostituzione.');
+            }
+        } else {
+            // Aggiungi un nuovo div con contenuto sotto
+            const newContentDiv = document.createElement('div');
+            newContentDiv.id = `contentAdd_${contentIndex}`;
+            newContentDiv.className = 'content';
+            newContentDiv.innerHTML = content;
+            contentIndex++;
+
+            const loadButton = document.getElementById('loadButton');
+            if (loadButton) {
+                document.body.insertBefore(newContentDiv, loadButton);
+            } else {
+                document.body.appendChild(newContentDiv);
+            }
+        }
+    }
+
+    // Funzione per inizializzare il caricamento
+    async function loadPageContent(api, divId, timeToUpdate) {
+        const content = await fetchContent(api);
+        if (content) {
+            updateContent(divId, content, timeToUpdate > 0);
+        }
+
+        // Se il refresh è attivo, imposta un intervallo
+        if (timeToUpdate > 0) {
+            setInterval(async () => {
+                const refreshedContent = await fetchContent(api);
+                if (refreshedContent) {
+                    updateContent(divId, refreshedContent, true); // Sostituisce il contenuto
+                }
+            }, timeToUpdate);
+        }
+    }
+</script>
+
+<script> 
+// Esegue il caricamento iniziale
+document.addEventListener('DOMContentLoaded', () => {
+    loadPageContent('/navbarStyle', 'id_navbarStyle', -1);
+});
+</script>
+
+<!-- Navbar Responsive con Scorrimento Orizzontale -->
+<div class="navbar">
+    <a href="/monitor">
+    <div class="icon">🖥️</div>
+    <span>Monitor</span>
+    </a>
+    <a href="/pinout">
+    <div class="icon">🔌</div>
+    <span>Pinout</span>
+    </a>
     
-    <div class="main_container_absolute">
-        <div class="main_container_relative">
-            <div id="particles-js"></div>
-            <div class="navbar"><a href="/monitor">Monitor</a><a href="/pinout">Pinout</a><a href="/currentregister">Current
-                    Register</a><a href="/history">History</a><a href="/graph">Graph</a><a href="/config">Config</a>
-            </div>
+    <a href="/history">
+    <div class="icon">⏳</div>
+    <span>History</span>
+    </a>
+    <a href="/graph">
+    <div class="icon">📈</div>
+    <span>Graph</span>
+    </a>
+    <a href="/config">
+    <div class="icon">📶</div>
+    <span>WIfi Config</span>
+    </a>
+    
+</div>
 
-            <div id="textTypingContainer">
-                <div id="textTypingAnimation" class="glassEffect"></div>
-            </div>
+<div class="main_container_absolute">
+<div class="main_container_relative">
+    <div id="particles-js"><canvas class="particles-js-canvas-el" style="width: 100%; height: 100%;" width="2210" height="1658"></canvas></div>
 
-            <div class="absolute_dashboard_button_container">
-                <div class="dashboard_button_container">
-                    <button id="goAboutMeBtn" class="dashboard_link-button">&#9660;</button>
+<!-- Navbar Responsive con Scorrimento Orizzontale -->
+<div class="navbar">
+    <a href="/monitor">
+    <div class="icon">🖥️</div>
+    <span>Monitor</span>
+    </a>
+    <a href="/pinout">
+    <div class="icon">🔌</div>
+    <span>Pinout</span>
+    </a>
+    
+    <a href="/history">
+    <div class="icon">⏳</div>
+    <span>History</span>
+    </a>
+    <a href="/graph">
+    <div class="icon">📈</div>
+    <span>Graph</span>
+    </a>
+    <a href="/config">
+    <div class="icon">📶</div>
+    <span>WIfi Config</span>
+    </a>
+    
+</div>
+
+<div id="textTypingContainer">
+        <div id="textTypingAnimation" class="glassEffect">I am: Developer|</div>
+    </div>
+
+    <div>
+        <div class="no_overflow">
+
+            <div class="logo_container">
+                <div class="gear_logo_container">
+                    <img class="gear" src="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/gearNobg.png" alt="Immagine senza sfondo">
+                </div>
+                <div class="logo">
+                    <img class="logo_image" src="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/logo.png" alt="Immagine senza sfondo">
                 </div>
             </div>
 
-            <div>
+            <div class="gear_container_left">
+                <img class="gear" src="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/gearNobg.png" alt="Immagine senza sfondo">
+            </div>
 
+            <div class="gear_container_bottom">
+                <img class="gear" src="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/gearNobg.png" alt="Immagine senza sfondo">
+            </div>
+        </div>
 
-                <div class="no_overflow">
-
-                    <div class="logo_container">
-                        <div class="gear_logo_container">
-                            <img class="gear" src="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/gearNobg.png" alt="Immagine senza sfondo">
-                        </div>
-                        <div class="logo">
-                            <img class="logo_image" src="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/logo.png" alt="Immagine senza sfondo">
-                        </div>
-                    </div>
-
-                    <div class="gear_container_left">
-                        <img class="gear" src="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/gearNobg.png" alt="Immagine senza sfondo">
-                    </div>
-
-                    <div class="gear_container_bottom">
-                        <img class="gear" src="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/gearNobg.png" alt="Immagine senza sfondo">
-                    </div>
-
-                </div>
-
-
-
-                <div class="next_page" id="aboutMeTitle">
+        <div class="next_page" id="aboutMeTitle">
+            <div class="glass_container">
+                <div class="glass_content">
                     <div class="glass_container">
-                        <div class="glass_content">
-                            <div class="glass_container">
-                                <div class="image-with-text responsive_div">
-                                    <img class="project_maxwidth responsive_img"
-                                        src="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/c.png" alt="Description of the image">
-                                    <div class="project_maxwidth responsive_text">
-                                        <h3>iot Project </h3>
-                                        <p>
-                                            <button class="knowledge-button">C++</button>
-                                            <button class="knowledge-button">ESP32</button>
-                                            <button class="knowledge-button">MODBUS</button>
-                                            <button class="knowledge-button">CSS</button>
-                                        </p>
-                                        <p>
-                                            iotProject developed in SUPSI Master in Computer Science course IoT, focusing on ESP32, ESAM, and
-                                            Modbus Protocol.
-                                        </p>
-                                        <a href="https://github.com/AlessioTommasi-supsi/iotProject"> <button
-                                                class="download-button">docs</button> </a>
-                                    </div>
-                                </div>
+                        <div class="image-with-text responsive_div">
+                            <img class="project_maxwidth responsive_img" src="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/c.png" alt="Description of the image">
+                            <div class="project_maxwidth responsive_text">
+                                <h3>ALPHA </h3>
+                                <p>
+                                    <button class="knowledge-button">C++</button>
+                                    <button class="knowledge-button">ESP32</button>
+                                    <button class="knowledge-button">MODBUS</button>
+                                    <button class="knowledge-button">CSS</button>
+                                </p>
+                                <p>
+                                    Acquisizione Locale di Parametri con Hardware Avanzato
+                                </p>
+                                <p>
+                                    Il progetto ALPHA `e stato sviluppato nel corso di IoT del Master in Informatica presso SUPSI. Il focus principale `e sull’ESP32 e il protocollo Modbus
+                                </p>
+                                <a href="https://github.com/AlessioTommasi-supsi/iotProject/blob/main/docs/tesi.pdf"> <button class="download-button">official</button> </a>
+                                <a href="https://github.com/AlessioTommasi-supsi/iotProject/tree/main/docs"> <button class="download-button">ghithub docs</button> </a>
+                                <a href="https://github.com/AlessioTommasi-supsi/iotProject/tree/main"> <button class="download-button">official repo</button> </a>
                             </div>
                         </div>
                     </div>
                 </div>
-                <a href="mailto:alessio.tommasi.lavoro@gmail.com"><button id="GetInTouchBtn">📲</button></a>
-                <a href="http://alessiotommasi.com/model/docs/curriculum.pdf"><button id="ResumeBtn">📖</button></a>
-
-                <!--  JavaScript files -->
-                <script src="http://alessiotommasi.com/view/js/rotation_on_scroll.js"></script>
-                <script src="http://alessiotommasi.com/view/js/autoType.js"></script>
-                <script src="http://alessiotommasi.com/view/js/scrollUp.js"></script>
-                <script src="http://alessiotommasi.com/view/js/class_switcher.js"></script>
-
-                <script src="http://alessiotommasi.com/view/js/particleLib/particles.js"></script>
-                <script src="http://alessiotommasi.com/view/js/particleLib/app.js"></script>
-
             </div>
         </div>
-    </div>
-</body>
+        <a href="mailto:alessio.tommasi.lavoro@gmail.com"><button id="GetInTouchBtn">📲</button></a>
+        <a href="http://alessiotommasi.com/model/docs/curriculum.pdf"><button id="ResumeBtn">📖</button></a>
 
-</html>
+        <!--  JavaScript files -->
+        <script src="http://alessiotommasi.com/view/js/rotation_on_scroll.js"></script>
+        <script src="http://alessiotommasi.com/view/js/autoType.js"></script>
+        <script src="http://alessiotommasi.com/view/js/scrollUp.js"></script>
+        <script src="http://alessiotommasi.com/view/js/class_switcher.js"></script>
+
+        <script src="http://alessiotommasi.com/view/js/particleLib/particles.js"></script>
+        <script src="http://alessiotommasi.com/view/js/particleLib/app.js"></script>
+
+    </div>
+</div>
+</div>
+<div id="contentAdd_0" class="content"><style>
+/* Versione Mobile (default): navbar in basso, più piccola */
+.navbar {
+display: flex;
+justify-content: space-evenly;
+align-items: center;
+background: rgba(48, 48, 48, 0.6); /* Grigio traslucido */
+backdrop-filter: blur(12px);
+-webkit-backdrop-filter: blur(12px);
+box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+border-radius: 15px;
+padding: 8px 16px; /* padding ridotto */
+z-index: 2000;
+
+/* Posizionata in basso e centrata */
+position: fixed;
+bottom: 15px;
+left: 50%;
+transform: translateX(-50%);
+width: 80vw; /* ridotta dal 90vw all'80vw */
+
+flex-direction: row;
+overflow-x: auto; /* scroll orizzontale */
+scroll-behavior: smooth;
+gap: 8px; /* gap ridotto */
+}
+
+/* Rimuove la scrollbar per estetica */
+.navbar::-webkit-scrollbar {
+display: none;
+}
+
+/* Link della navbar */
+.navbar a {
+text-decoration: none;
+color: white;
+text-align: center;
+display: inline-flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+padding: 8px; /* padding interno leggermente ridotto */
+transition: transform 0.2s ease-in-out, color 0.3s ease;
+}
+
+/* Icone della navbar, dimensioni ridotte */
+.navbar .icon {
+width: 50px;   /* diminuito rispetto ai 60px */
+height: 50px;  /* diminuito rispetto ai 60px */
+background-color: rgba(255, 255, 255, 0.752);
+border-radius: 8px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 24px;  /* ridotto rispetto ai 30px */
+color: #333;
+transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.2), 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Testo sotto le icone, dimensione ridotta */
+.navbar span {
+font-size: 12px;  /* ridotto rispetto ai 14px */
+margin-top: 8px;
+color: white;
+transition: transform 0.3s ease, color 0.3s ease;
+}
+
+/* Effetto hover */
+.navbar a:hover .icon {
+transform: scale(1.3);
+background-color: rgba(161, 255, 167, 0.7);
+color: white;
+box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+}
+.navbar a:hover span {
+color: #4CAF50;
+}
+
+/* Responsive per smartphone */
+@media (max-width: 480px) {
+.navbar .icon {
+width: 45px;
+height: 45px;
+font-size: 20px;
+}
+.navbar span {
+font-size: 10px;
+}
+}
+
+/* Versione desktop/tablet: layout verticale (min-width >= 1500px) */
+@media (min-width: 1500px) {
+.navbar {
+flex-direction: column;
+top: 50%;
+left: 15px;
+transform: translateY(-50%);
+bottom: auto;
+right: auto;
+
+/* Limita l'altezza e la larghezza per non occupare troppo spazio */
+max-height: 80vh;  /* ridotto dal 90vh all'80vh */
+width: auto;
+
+overflow-y: auto;  /* scroll verticale */
+overflow-x: hidden;
+padding: 10px;     /* padding leggermente ridotto */
+}
+}
+</style></div></body></html>

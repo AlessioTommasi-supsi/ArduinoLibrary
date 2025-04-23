@@ -39,12 +39,17 @@ public:
     ADS1115_controller(const ADS1115_controller&) = delete;
     ADS1115_controller& operator=(const ADS1115_controller&) = delete;
 
+    void printAllReadingsFromADS1115();
+    void printReadFromADS1115(int channel);
+
+    Adafruit_ADS1115 ads;
+    ADS1115_model adsModel;
+
 private:
     ADS1115_controller();
     static ADS1115_controller* instance;  // Puntatore statico all'unica istanza
 
-    Adafruit_ADS1X15 ads;
-    ADS1115_model adsModel;
+    
     
     SemaphoreHandle_t mutex;
     

@@ -12,6 +12,9 @@ class ADS1115_model {
 public:
     // Imposta il canale del multiplexer (mappa completa da 0 a 7)
     static void setChannel(int channel) {
+        pinMode(PIN_A, OUTPUT);
+        pinMode(PIN_B, OUTPUT);
+        pinMode(PIN_C, OUTPUT);
         switch (channel)
         {
             case 0:

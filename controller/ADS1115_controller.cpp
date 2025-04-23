@@ -12,7 +12,7 @@ ADS1115_controller* ADS1115_controller::getInstance() {
 
 ADS1115_controller::ADS1115_controller()
   : adsModel(), recordingActive(false), recordingInterval(1000),
-    lastRecordTime(0), recordingTask(NULL), currentChannel(-1), initializationFailed(false)
+    lastRecordTime(0), recordingTask(NULL), currentChannel(0), initializationFailed(false)
 {
     mutex = xSemaphoreCreateMutex();
     // Inizializza l'ADS1115; se fallisce, imposta il flag
@@ -105,6 +105,30 @@ void ADS1115_controller::stopRecording() {
     }
 }
 
+void ADS1115_controller::printReadFromADS1115(int channel)
+{
+  int16_t adc;
+  float volts;
+  //65563/2 = 32668
+  adc = ads.readADC_SingleEnded(channel);
+  volts = ads.computeVolts(adc);
+  volts = volts; // Aggiungi un offset della scheda
+  Serial.println("");
+  Serial.print("AIN");Serial.print(channel);Serial.print(": ");  Serial.print(adc);  Serial.print("  "); Serial.print(volts); Serial.println("V");
+  
+}
+
+void ADS1115_controller::printAllReadingsFromADS1115()
+{
+  Serial.println("-------------------------------------------------");
+  for (int i = 0; i < 4; i++)
+  {
+    printReadFromADS1115(i);
+  }
+  Serial.println("-------------------------------------------------");
+}
+
+
 void ADS1115_controller::recordingTaskFunction(void *parameter) {
     ADS1115_controller *controller = static_cast<ADS1115_controller*>(parameter);
     
@@ -123,6 +147,8 @@ void ADS1115_controller::recordingTaskFunction(void *parameter) {
                     Serial.print("): ");
                     Serial.print(volts);
                     Serial.println(" V");
+                    // Stampa tutte le letture
+                    //controller->printAllReadingsFromADS1115();
                     xSemaphoreGive(controller->mutex);
                 }
             }

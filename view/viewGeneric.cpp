@@ -422,12 +422,42 @@ String viewGeneric::addFieldFormCss(){
 }
 
 
-String viewGeneric::defaultPorfolioCss(){
+String viewGeneric::defaultPorfolioCss() {
     String porfolioCss = R"(
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Porfolio - Alessio Tommasi</title>
-            <link rel="icon" href="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/logo.png" type="image/png">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Porfolio - Alessio Tommasi</title>
+        <link rel="icon" href="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/logo.png" type="image/png">
+
+        <script>
+        // Funzione che carica un CSS in modo asincrono
+        function loadCSS(href) {
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = href;
+            link.onload = function() {
+                console.log("CSS caricato: " + href);
+            };
+            link.onerror = function() {
+                console.error("Errore nel caricamento del CSS: " + href);
+            };
+            document.head.appendChild(link);
+        }
+
+        // Carica i CSS una volta che il DOM è stato interamente caricato
+        document.addEventListener("DOMContentLoaded", function() {
+            loadCSS("http://alessiotommasi.com/view/css/style.css");
+            loadCSS("http://alessiotommasi.com/view/css/gear.css");
+            loadCSS("http://alessiotommasi.com/view/css/logo.css");
+            loadCSS("http://alessiotommasi.com/view/css/glass_effect.css");
+            loadCSS("http://alessiotommasi.com/view/css/autoType.css");
+            loadCSS("http://alessiotommasi.com/view/css/buttons.css");
+            loadCSS("http://alessiotommasi.com/view/css/dashboard.css");
+            loadCSS("http://alessiotommasi.com/view/css/particle_style.css");
+        });
+        </script>
+
+        <noscript>
             <link rel="stylesheet" href="http://alessiotommasi.com/view/css/style.css">
             <link rel="stylesheet" href="http://alessiotommasi.com/view/css/gear.css">
             <link rel="stylesheet" href="http://alessiotommasi.com/view/css/logo.css">
@@ -436,8 +466,8 @@ String viewGeneric::defaultPorfolioCss(){
             <link rel="stylesheet" href="http://alessiotommasi.com/view/css/buttons.css">
             <link rel="stylesheet" href="http://alessiotommasi.com/view/css/dashboard.css">
             <link rel="stylesheet" href="http://alessiotommasi.com/view/css/particle_style.css">
-            
-    )";
+        </noscript>
+            )";
     return porfolioCss;
 }
 

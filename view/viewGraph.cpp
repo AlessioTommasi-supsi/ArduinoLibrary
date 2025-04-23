@@ -8,7 +8,7 @@ String viewGraph::generateHTML()
 
     html += "<h1>Graph View</h1>";
 
-    
+    html += "<h2>Registri:</h2>";
     std::vector<int> addresses = SystemState::getInstance()->getAllRegisterAddress();
     int i = 0;
     for (int addr : addresses)

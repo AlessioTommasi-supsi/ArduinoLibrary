@@ -58,7 +58,7 @@ String Pinout::pageContent()
 
 
     //aggiungo grafico da ViewGraph
-    //html += viewGraph::generateGraph(SystemState::getInstance()->pinoutData->getPinNumbers(), "getPinValues", "pin");
+    html += viewGraph::generateGraph(SystemState::getInstance()->pinoutData->getPinNumbers(), "getPinValues", "pin");
 
     return html;
 }

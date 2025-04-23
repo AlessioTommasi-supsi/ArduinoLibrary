@@ -1,5 +1,13 @@
-// Endpoint: /getADSValues
-    // Restituisce in formato JSON le letture registrate dall'ADS1115
+#include "MultiplexRoutes.h"
+#include <vector>
+#include <set>
+
+void MultiplexRoutes::defineRoutes(AsyncWebServer &server) {
+
+    server.on("/multiplex_config", HTTP_GET, [](AsyncWebServerRequest *request) {
+        String htmlContent = viewMultiplex::Config();
+        request->send(200, "text/html", htmlContent);
+    });
    
      server.on("/getADSValues", HTTP_GET, [](AsyncWebServerRequest *request) {
         ADS1115_controller* adsCtrl = ADS1115_controller::getInstance();

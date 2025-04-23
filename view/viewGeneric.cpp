@@ -573,9 +573,11 @@ String viewGeneric::dynamicUpdateContent(String divId/*una stringa univoca nella
     var_html += R"(
     <script> 
         // Esegue il caricamento iniziale
-        document.addEventListener('DOMContentLoaded', () => {
+        try {
             loadPageContent(')" + api + R"(', ')" + divId + R"(', )" + String(timeToUpdate) + R"();
-        });
+        } catch (error) {
+            console.error('Errore durante il caricamento:', error);
+        }
     </script>
     )";
     return var_html;

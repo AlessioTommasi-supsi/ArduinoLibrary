@@ -10,7 +10,7 @@ void Esp32_38pinBoard::initializePins()
 {
     //richiama metodo padre
     //Esp32_38pin::initializePins();
-    //utilizza setdi metodo padre per modificare i pin
+    //utilizza set di metodo padre per modificare i pin
     Pin &readedPin = getPin(23);
 
     if (readedPin.type == PinType::UNKNOWN)

@@ -32,7 +32,7 @@ String viewGraph::generateGraph(std::vector<int> addresses, String apiFetch, Str
     String var_html = "";
 
     // Menu a tendina per selezionare l'indirizzo del registro
-    var_html += "<label for='           register-select'>Select Register Address: or gpio value</label>";
+    var_html += "<label for='           register-select'>Select:</label>";
     var_html += "<select id='register-select' onchange='updateGraph()'>";
 
     std::set<int> seen;
@@ -114,7 +114,7 @@ String viewGraph::generateGraph(std::vector<int> addresses, String apiFetch, Str
     var_html += "}";
     var_html += "document.addEventListener('DOMContentLoaded', () => {";
     var_html += "  updateGraph();";                  // Per caricare il grafico all'avvio
-    var_html += "  setInterval(updateGraph, 1000);"; // Aggiorna il grafico ogni 5 secondi
+    var_html += "  setInterval(updateGraph, 5000);"; // Aggiorna il grafico ogni 5 secondi
     var_html += "});";
     var_html += "</script>";
 

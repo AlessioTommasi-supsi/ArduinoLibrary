@@ -13,10 +13,14 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
     });
     
     server.on("/history", HTTP_GET, [](AsyncWebServerRequest *request){
-        String htmlContent = viewHistory::generateHTML();
-        const char *htmlContentPtr = htmlContent.c_str();
-        request->send(200, "text/html", htmlContentPtr); 
-         
+        if (SystemState::getInstance()->getPinoutLock()) {
+            String htmlContent = viewHistory::generateHTML();
+            const char *htmlContentPtr = htmlContent.c_str();
+            SystemState::getInstance()->releasePinoutLock();
+            request->send(200, "text/html", htmlContentPtr);
+        }
+        
+       
     });
 
     server.on("/getHistoryContent", HTTP_GET, [](AsyncWebServerRequest *request){

@@ -43,6 +43,9 @@ void MultiplexRoutes::defineRoutes(AsyncWebServer &server) {
         String action;
         String milliseconds;
         String ErrorMessage = "";
+
+        
+        ADS1115_controller* adsCtrl = ADS1115_controller::getInstance();
         
         if (request->hasParam("signalType")) {
             signalType = request->getParam("signalType")->value();
@@ -66,8 +69,11 @@ void MultiplexRoutes::defineRoutes(AsyncWebServer &server) {
             milliseconds = "1000";
         }
         
-        // Utilizza il singleton direttamente
-        ADS1115_controller* adsCtrl = ADS1115_controller::getInstance();
+        // Imposta il canale del multiplexer in base al signalType
+        adsCtrl->setChannel(signalType);
+
+        
+        
         if (action == "start_recording") {
             adsCtrl->startRecording(signalType, milliseconds.toInt());
         } else if (action == "stop_recording") {

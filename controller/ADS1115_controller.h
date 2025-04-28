@@ -8,6 +8,7 @@
 #include <freertos/semphr.h>
 #include "ADS1115_model.h"
 
+
 class ADS1115_controller {
 public:
     // Restituisce l'istanza singleton come puntatore
@@ -16,6 +17,8 @@ public:
     // Avvia la registrazione dei dati: signalType viene mappato in un canale (0..7).
     // interval è l'intervallo in ms.
     void startRecording(const String &signalType, int interval);
+
+    void setChannel(const String &signalType);
     
     // Ferma la registrazione
     void stopRecording();
@@ -43,7 +46,7 @@ public:
     void printReadFromADS1115(int channel);
 
     Adafruit_ADS1115 ads;
-    ADS1115_model adsModel;
+    ADS1115_model *adsModel;
 
 private:
     ADS1115_controller();

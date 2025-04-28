@@ -2,6 +2,7 @@
 #define ADS1115_MODEL_H
 
 #include <Arduino.h>
+#include "Pin.h"
 
 // Definizione dei pin del multiplexer (collegati all'ESP32)
 #define PIN_A 12  // S0 MUX
@@ -11,57 +12,6 @@
 class ADS1115_model {
 public:
     // Imposta il canale del multiplexer (mappa completa da 0 a 7)
-    static void setChannel(int channel) {
-        pinMode(PIN_A, OUTPUT);
-        pinMode(PIN_B, OUTPUT);
-        pinMode(PIN_C, OUTPUT);
-        switch (channel)
-        {
-            case 0:
-                digitalWrite(PIN_A, LOW);
-                digitalWrite(PIN_B, LOW);
-                digitalWrite(PIN_C, LOW);
-                break;
-            case 1:
-                digitalWrite(PIN_A, HIGH);
-                digitalWrite(PIN_B, LOW);
-                digitalWrite(PIN_C, LOW);
-                break;
-            case 2:
-                digitalWrite(PIN_A, LOW);
-                digitalWrite(PIN_B, HIGH);
-                digitalWrite(PIN_C, LOW);
-                break;
-            case 3:
-                digitalWrite(PIN_A, HIGH);
-                digitalWrite(PIN_B, HIGH);
-                digitalWrite(PIN_C, LOW);
-                break;
-            case 4:
-                digitalWrite(PIN_A, LOW);
-                digitalWrite(PIN_B, LOW);
-                digitalWrite(PIN_C, HIGH);
-                break;
-            case 5:
-                digitalWrite(PIN_A, HIGH);
-                digitalWrite(PIN_B, LOW);
-                digitalWrite(PIN_C, HIGH);
-                break;
-            case 6:
-                digitalWrite(PIN_A, LOW);
-                digitalWrite(PIN_B, HIGH);
-                digitalWrite(PIN_C, HIGH);
-                break;
-            case 7:
-                digitalWrite(PIN_A, HIGH);
-                digitalWrite(PIN_B, HIGH);
-                digitalWrite(PIN_C, HIGH);
-                break;
-            default:
-                // Se il canale non è valido, non eseguire nulla
-                break;
-        }
-    }
+    static void setChannel(int channel);
 };
-
 #endif // ADS1115_MODEL_H

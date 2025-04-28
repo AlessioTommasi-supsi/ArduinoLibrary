@@ -11,9 +11,14 @@ ADS1115_controller* ADS1115_controller::getInstance() {
 }
 
 ADS1115_controller::ADS1115_controller()
-  : adsModel(), recordingActive(false), recordingInterval(1000),
+  :  recordingActive(false), recordingInterval(1000),
     lastRecordTime(0), recordingTask(NULL), currentChannel(0), initializationFailed(false)
 {
+
+    // Inizializza il modello ADS1115
+    adsModel = new ADS1115_model();
+
+    
     mutex = xSemaphoreCreateMutex();
     // Inizializza l'ADS1115; se fallisce, imposta il flag
     if (!ads.begin()) {
@@ -46,6 +51,21 @@ int ADS1115_controller::signalTypeToChannel(const String &signalType) {
     }
 }
 
+void ADS1115_controller::setChannel(const String &signalType) {
+    int channel = signalTypeToChannel(signalType);
+    if (channel < 0) {
+        Serial.println("Errore: signalType non valido: " + signalType);
+        return;
+    }
+    
+    if (xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE) {
+        adsModel->setChannel(channel);
+        currentChannel = channel;
+        xSemaphoreGive(mutex);
+    }
+}
+
+
 void ADS1115_controller::startRecording(const String &signalType, int interval) {
     int channel = signalTypeToChannel(signalType);
     if (channel < 0) {
@@ -61,7 +81,7 @@ void ADS1115_controller::startRecording(const String &signalType, int interval) 
         currentChannel = channel;
         
         // Configura il multiplexer
-        adsModel.setChannel(currentChannel);
+        adsModel->setChannel(currentChannel);
         
         // Lettura immediata
         int16_t adc = ads.readADC_SingleEnded(0);
@@ -137,7 +157,7 @@ void ADS1115_controller::recordingTaskFunction(void *parameter) {
             unsigned long currentTime = millis();
             if (currentTime - controller->lastRecordTime >= (unsigned long)controller->recordingInterval) {
                 if (xSemaphoreTake(controller->mutex, portMAX_DELAY) == pdTRUE) {
-                    controller->adsModel.setChannel(controller->currentChannel);
+                    controller->adsModel->setChannel(controller->currentChannel);
                     int16_t adc = controller->ads.readADC_SingleEnded(0);
                     float volts = controller->ads.computeVolts(adc);
                     controller->recordedValues.push_back(volts);

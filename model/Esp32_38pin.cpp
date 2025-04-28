@@ -253,7 +253,7 @@ void Esp32_38pin::initializePins()
         Serial.println("Errore durante l'inizializzazione dei pin: ");
     }
 
-    printPinsOnSerial();
+    //printPinsOnSerial();
 }
 
 void Esp32_38pin::addPin(const Pin& pin) {

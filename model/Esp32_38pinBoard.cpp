@@ -3,6 +3,7 @@
 Esp32_38pinBoard::Esp32_38pinBoard() {
     Serial.println("Costruttore Esp32_38pinBoard");
     initializePins();
+    printPinsOnSerial();
     Serial.println("Inizializzazione Esp32_38pinBoard effettuata!");
 }
 
@@ -14,21 +15,23 @@ void Esp32_38pinBoard::initializePins()
     //richiama metodo padre
     //Esp32_38pin::initializePins();
     //utilizza set di metodo padre per modificare i pin
-    Pin &readedPin = getPin(12);
+    Pin &pinA = getPin(12);
 
-    sprintf(readedPin.note, "MUX S0 - A");
-    readedPin.type = PinType::DIGITAL;
-    readedPin.write(false);
+    sprintf(pinA.note, "MUX S0 - A");
+    pinA.type = PinType::DIGITAL;
+    pinA.write(false);
+    addPin(pinA);
 
-    readedPin = getPin(13);
-    sprintf(readedPin.note, "MUX S1 - B");
-    readedPin.type = PinType::DIGITAL;
-    readedPin.write(false);
+    Pin &pinB = getPin(13);
+    sprintf(pinB.note, "MUX S1 - B");
+    pinB.type = PinType::DIGITAL;
+    pinB.write(false);
+    addPin(pinB);
 
-    readedPin = getPin(14);
-    sprintf(readedPin.note, "MUX S2 - C");
-    readedPin.type = PinType::DIGITAL;
-    readedPin.write(false);
-        
+    Pin &pinC = getPin(14);
+    sprintf(pinC.note, "MUX S2 - C");
+    pinC.type = PinType::DIGITAL;
+    pinC.write(false);        
+    addPin(pinC);
 
 }

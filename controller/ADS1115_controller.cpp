@@ -56,10 +56,10 @@ float ADS1115_controller::signalCorrectionValue(int channel) {
     switch (channel)
     {
     case 0:
-        correctionValue = 1/9000  //ritorna dato in KOhm!
+        correctionValue = 1/9000;  //ritorna dato in KOhm!
     break;
     case 4:
-        correctionValue = 1/9000  //ritorna dato in KOhm!
+        correctionValue = 1/9000;  //ritorna dato in KOhm!
     break;
     
     case 1:

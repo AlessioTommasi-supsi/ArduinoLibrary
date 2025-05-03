@@ -18,7 +18,7 @@ ADS1115_controller::ADS1115_controller()
     // Inizializza il modello ADS1115
     adsModel = new ADS1115_model();
 
-    
+
     mutex = xSemaphoreCreateMutex();
     // Inizializza l'ADS1115; se fallisce, imposta il flag
     if (!ads.begin()) {
@@ -49,6 +49,27 @@ int ADS1115_controller::signalTypeToChannel(const String &signalType) {
     } else {
         return -1;
     }
+}
+
+float ADS1115_controller::signalCorrectionValue(int channel) {
+    float correctionValue = 1.0;
+    switch (channel)
+    {
+    case 0:
+        correctionValue = 1/9000  //ritorna dato in KOhm!
+    break;
+    case 4:
+        correctionValue = 1/9000  //ritorna dato in KOhm!
+    break;
+    
+    case 1:
+        correctionValue = 1/1000; //ritorna dato in mV!
+
+    default:
+        break;
+    }
+
+    return correctionValue;
 }
 
 void ADS1115_controller::setChannel(const String &signalType) {
@@ -86,6 +107,7 @@ void ADS1115_controller::startRecording(const String &signalType, int interval) 
         // Lettura immediata
         int16_t adc = ads.readADC_SingleEnded(0);
         float volts = ads.computeVolts(adc);
+        volts = volts * signalCorrectionValue(currentChannel); // Applica la correzione del segnale
         recordedValues.push_back(volts);
         Serial.print("Lettura iniziale ADS (canale ");
         Serial.print(currentChannel);

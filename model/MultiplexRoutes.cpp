@@ -79,11 +79,11 @@ void MultiplexRoutes::defineRoutes(AsyncWebServer &server) {
         if (action == "start_monitor") {
             int outputPinNumber = request->getParam("out_pin_number")->value().toInt();
             adsCtrl->startMonitorTask(outputPinNumber);
-        } else if (action == "stop_recording") {
+        } else if (action == "stop_monitor") {
             adsCtrl->stopMonitorTask();
         }
 
-        if (action == "stop_monitor") {
+        if (action == "start_recording") {
             adsCtrl->startRecording(signalType, milliseconds.toInt());
         } else if (action == "stop_recording") {
             adsCtrl->stopRecording();

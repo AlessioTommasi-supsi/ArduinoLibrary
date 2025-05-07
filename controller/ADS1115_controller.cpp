@@ -231,26 +231,26 @@ void ADS1115_controller::monitorTaskFunction(void *parameter) {
     ADS1115_controller *controller = static_cast<ADS1115_controller*>(parameter);
     
     while (true) {
+        Serial.println("Monitor task in esecuzione...");
         unsigned long currentTime = millis();
-        if (currentTime - controller->lastRecordTime >= (unsigned long)controller->recordingInterval) {
-            if (xSemaphoreTake(controller->mutex, portMAX_DELAY) == pdTRUE) {
-                controller->adsModel->setChannel(controller->currentChannel);
-                int16_t adc = controller->ads.readADC_SingleEnded(0);
-                float volts = controller->ads.computeVolts(adc);
-                Serial.print("Monitor ADS (canale ");
-                Serial.print(controller->currentChannel);
-                Serial.print("): ");
-                Serial.print(volts);
-                Serial.println(" V");
+        if (xSemaphoreTake(controller->mutex, portMAX_DELAY) == pdTRUE) {
+            controller->adsModel->setChannel(controller->currentChannel);
+            int16_t adc = controller->ads.readADC_SingleEnded(0);
+            float volts = controller->ads.computeVolts(adc);
+            Serial.print("Monitor ADS (canale ");
+            Serial.print(controller->currentChannel);
+            Serial.print("): ");
+            Serial.print(volts);
+            Serial.println(" V");
 
-                Pin &outputPin = SystemState::getInstance()->pinoutData->getPin(controller->outputPinNumber);
-                bool goHigh = volts > 1.5; // Soglia di attivazione
-                outputPin.write(goHigh);
-                
-                xSemaphoreGive(controller->mutex);
-            }
+            Pin &outputPin = SystemState::getInstance()->pinoutData->getPin(controller->outputPinNumber);
+            bool goHigh = volts > 1.5; // Soglia di attivazione
+            outputPin.write(goHigh);
+            
+            xSemaphoreGive(controller->mutex);
         }
-        vTaskDelay(10 / portTICK_PERIOD_MS);
+    
+        vTaskDelay(500 / portTICK_PERIOD_MS);// aspetto 500ms prima di fare un'altra lettura
     }
     vTaskDelete(NULL);
 }

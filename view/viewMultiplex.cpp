@@ -1,4 +1,5 @@
 #include "viewMultiplex.h"
+#include "SystemState.h"
 
 
 String viewMultiplex::Config(){
@@ -117,13 +118,38 @@ String viewMultiplex::pinStartAndStopForm(int PinNumber, String signalType){
                 </form>
                 <form action="/multiplex_graph" method="get">
                     <input type="hidden" name="signalType" value=")" + signalType + R"(">
-                    <input type="hidden" name="pinNumber" value=")" + String(PinNumber) + R"(">
+                    <input type="hidden" name="pinNumber" value=")" + String(PinNumber) + R"rawliteral(">
                     <input type="hidden" name="action" value="stop_recording">
                     <button type="submit" class="stop">Stop</button>
                 </form>
+
+                <!-- Sezione: Seleziona il tipo di USCITA! -->
+                
+                <br><br><br>
+
+                <form action="/multiplex_graph" method="get">
+                    <fieldset>
+                    
+                    <label for="exit_type">Tipo di uscita:</label>
+                    <select id="exit_type" name="exit_pin_number">
+                        <option value="DIGITAL_PIN_NUMBER">uscita digitale</option>
+                        <option value="ANALOG_PIN_NUMBER">uscita analogica</option>    
+                    </select>
+                    </fieldset>
+                    <input type="hidden" name="signalType" value=")rawliteral" + signalType + R"rawliteral(">
+                    <input type="hidden" name="pinToMonitorNumber" value=")rawliteral" + String(PinNumber) + R"(">
+                    <input type="hidden" name="action" value="start_monitor">
+                    <button type="submit" class="start">StartMonitor</button>
+                </form>
+                <form action="/multiplex_graph" method="get">
+                    <input type="hidden" name="signalType" value=")" + signalType + R"rawliteral(">
+                    <input type="hidden" name="pinToMonitorNumber" value=")" + String(PinNumber) + R"rawliteral(">
+                    <input type="hidden" name="action" value="stop_monitor">
+                    <button type="submit" class="stop">StopMonitor</button>
+                </form>
             </div>
         </div>
-    )";
+    )rawliteral";
 
 
     

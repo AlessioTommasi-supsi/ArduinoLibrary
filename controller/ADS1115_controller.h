@@ -7,6 +7,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 #include "ADS1115_model.h"
+#include "SystemState.h"
 
 
 class ADS1115_controller {
@@ -17,6 +18,8 @@ public:
     // Avvia la registrazione dei dati: signalType viene mappato in un canale (0..7).
     // interval è l'intervallo in ms.
     void startRecording(const String &signalType, int interval);
+    void startMonitorTask(int outputPinNumber);
+    void stopMonitorTask();
 
     void setChannel(const String &signalType);
     
@@ -47,8 +50,13 @@ public:
     void printAllReadingsFromADS1115();
     void printReadFromADS1115(int channel);
 
+    float read();
+
+
     Adafruit_ADS1115 ads;
     ADS1115_model *adsModel;
+
+    int recordingInterval;
 
 private:
     ADS1115_controller();
@@ -59,14 +67,17 @@ private:
     SemaphoreHandle_t mutex;
     
     bool recordingActive;
-    int recordingInterval;
     unsigned long lastRecordTime;
     std::vector<float> recordedValues;
     TaskHandle_t recordingTask;
+    TaskHandle_t monitorTask;
+
+    int outputPinNumber;
     int currentChannel;
     bool initializationFailed;
     
     static void recordingTaskFunction(void *parameter);
+    static void monitorTaskFunction(void *parameter);
 };
 
 #endif // ADS1115_CONTROLLER_H

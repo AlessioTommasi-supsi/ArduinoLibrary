@@ -64,6 +64,7 @@ void MultiplexRoutes::defineRoutes(AsyncWebServer &server) {
         
         if (request->hasParam("milliseconds")) {
             milliseconds = request->getParam("milliseconds")->value();
+            adsCtrl->recordingInterval = milliseconds.toInt();
             Serial.println("Milliseconds: " + milliseconds);
         } else {
             milliseconds = "1000";
@@ -73,8 +74,16 @@ void MultiplexRoutes::defineRoutes(AsyncWebServer &server) {
         adsCtrl->setChannel(signalType);
 
         
-        
-        if (action == "start_recording") {
+
+        //gestione pin che monitora un altro pin! 
+        if (action == "start_monitor") {
+            int outputPinNumber = request->getParam("out_pin_number")->value().toInt();
+            adsCtrl->startMonitorTask(outputPinNumber);
+        } else if (action == "stop_recording") {
+            adsCtrl->stopMonitorTask();
+        }
+
+        if (action == "stop_monitor") {
             adsCtrl->startRecording(signalType, milliseconds.toInt());
         } else if (action == "stop_recording") {
             adsCtrl->stopRecording();

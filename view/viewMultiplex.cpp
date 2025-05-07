@@ -98,7 +98,7 @@ String viewMultiplex::pageContent(){
 }
 
 /*Devo ancora modificare grafico, se prende in input un determinato numero di pin non mostra tutto menu a tendina ma fa diverso! solo signaltype!*/
-String viewMultiplex::pinStartAndStopForm(int PinNumber, String signalType){
+String viewMultiplex::pinStartAndStopForm(int channelAdsNumber, String signalType){
     String form = "";
 
     //form+= viewGeneric::dynamicUpdateContent("", "/pinStyle", -1); e richiesto da mettere al chiamante!
@@ -112,13 +112,13 @@ String viewMultiplex::pinStartAndStopForm(int PinNumber, String signalType){
                     <label for="milliseconds">Milliseconds:</label>
                     <input type="text" id="milliseconds" name="milliseconds" required="" value="1000">
                     <input type="hidden" name="signalType" value=")" + signalType + R"(">
-                    <input type="hidden" name="pinNumber" value=")" + String(PinNumber) + R"(">
+                    <input type="hidden" name="channelAdsNumber" value=")" + String(channelAdsNumber) + R"(">
                     <input type="hidden" name="action" value="start_recording">
                     <button type="submit" class="start">Start</button>
                 </form>
                 <form action="/multiplex_graph" method="get">
                     <input type="hidden" name="signalType" value=")" + signalType + R"(">
-                    <input type="hidden" name="pinNumber" value=")" + String(PinNumber) + R"rawliteral(">
+                    <input type="hidden" name="channelAdsNumber" value=")" + String(channelAdsNumber) + R"rawliteral(">
                     <input type="hidden" name="action" value="stop_recording">
                     <button type="submit" class="stop">Stop</button>
                 </form>
@@ -131,19 +131,18 @@ String viewMultiplex::pinStartAndStopForm(int PinNumber, String signalType){
                     <fieldset>
                     
                     <label for="exit_type">Tipo di uscita:</label>
-                    <select id="exit_type" name="exit_pin_number">
-                        <option value="DIGITAL_PIN_NUMBER">uscita digitale</option>
-                        <option value="ANALOG_PIN_NUMBER">uscita analogica</option>    
+                    <select id="exit_type" name="out_pin_number">
+                        <option value="25">uscita digitale</option>
+                        <option value="26">uscita analogica</option>    
                     </select>
                     </fieldset>
-                    <input type="hidden" name="signalType" value=")rawliteral" + signalType + R"rawliteral(">
-                    <input type="hidden" name="pinToMonitorNumber" value=")rawliteral" + String(PinNumber) + R"(">
+                    <input type="hidden" name="signalType" value=")rawliteral" + signalType + R"(">
                     <input type="hidden" name="action" value="start_monitor">
                     <button type="submit" class="start">StartMonitor</button>
                 </form>
                 <form action="/multiplex_graph" method="get">
                     <input type="hidden" name="signalType" value=")" + signalType + R"rawliteral(">
-                    <input type="hidden" name="pinToMonitorNumber" value=")" + String(PinNumber) + R"rawliteral(">
+                    <input type="hidden" name="pinToMonitorNumber" value=")" + String(channelAdsNumber) + R"rawliteral(">
                     <input type="hidden" name="action" value="stop_monitor">
                     <button type="submit" class="stop">StopMonitor</button>
                 </form>

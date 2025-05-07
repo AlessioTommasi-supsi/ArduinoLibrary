@@ -93,6 +93,10 @@ void ADS1115_controller::startRecording(const String &signalType, int interval) 
         Serial.println("Errore: signalType non valido: " + signalType);
         return;
     }
+    if (initializationFailed) {
+        Serial.println("Errore: ads non inizializzato!: " + signalType);
+        return;
+    }
     
     if (xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE) {
         recordingInterval = interval;
@@ -170,6 +174,87 @@ void ADS1115_controller::printAllReadingsFromADS1115()
   Serial.println("-------------------------------------------------");
 }
 
+float ADS1115_controller::read(){
+    float volts = 0;
+    if (xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE) {
+        // Lettura immediata
+        int16_t adc = ads.readADC_SingleEnded(0);
+        volts = ads.computeVolts(adc);
+        volts = volts * signalCorrectionValue(currentChannel); // Applica la correzione del segnale
+        Serial.print("Read  ADS (canale ");
+        Serial.print(currentChannel);
+        Serial.print("): ");
+        Serial.print(volts);
+        Serial.println(" V");
+        xSemaphoreGive(mutex);
+    }
+    return volts;
+}
+
+void ADS1115_controller::startMonitorTask(int outputPinNumber) {
+
+    if (initializationFailed) {
+        Serial.println("Errore: ads non inizializzato!: ");
+        return;
+    }
+    if (xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE) {
+        this->outputPinNumber = outputPinNumber;
+        if (monitorTask == NULL) {
+            xTaskCreatePinnedToCore(
+                monitorTaskFunction,
+                "ADS1115MonitorTask",
+                4096,
+                this,
+                1,
+                &monitorTask,
+                0
+            );
+        }
+        xSemaphoreGive(mutex);
+        Serial.println("Monitor task avviato.");
+
+    }
+}
+
+void ADS1115_controller::stopMonitorTask() {
+    if (xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE) {
+        if (monitorTask != NULL) {
+            vTaskDelete(monitorTask);
+            monitorTask = NULL;
+            Serial.println("Monitor task terminato.");
+        }
+        xSemaphoreGive(mutex);
+    }
+}
+
+void ADS1115_controller::monitorTaskFunction(void *parameter) {
+    ADS1115_controller *controller = static_cast<ADS1115_controller*>(parameter);
+    
+    while (true) {
+        unsigned long currentTime = millis();
+        if (currentTime - controller->lastRecordTime >= (unsigned long)controller->recordingInterval) {
+            if (xSemaphoreTake(controller->mutex, portMAX_DELAY) == pdTRUE) {
+                controller->adsModel->setChannel(controller->currentChannel);
+                int16_t adc = controller->ads.readADC_SingleEnded(0);
+                float volts = controller->ads.computeVolts(adc);
+                Serial.print("Monitor ADS (canale ");
+                Serial.print(controller->currentChannel);
+                Serial.print("): ");
+                Serial.print(volts);
+                Serial.println(" V");
+
+                Pin &outputPin = SystemState::getInstance()->pinoutData->getPin(controller->outputPinNumber);
+                bool goHigh = volts > 1.5; // Soglia di attivazione
+                outputPin.write(goHigh);
+                
+                xSemaphoreGive(controller->mutex);
+            }
+        }
+        vTaskDelay(10 / portTICK_PERIOD_MS);
+    }
+    vTaskDelete(NULL);
+}
+
 
 void ADS1115_controller::recordingTaskFunction(void *parameter) {
     ADS1115_controller *controller = static_cast<ADS1115_controller*>(parameter);
@@ -182,6 +267,7 @@ void ADS1115_controller::recordingTaskFunction(void *parameter) {
                     controller->adsModel->setChannel(controller->currentChannel);
                     int16_t adc = controller->ads.readADC_SingleEnded(0);
                     float volts = controller->ads.computeVolts(adc);
+                    volts = volts * controller->signalCorrectionValue(controller->currentChannel); // Applica la correzione del segnale
                     controller->recordedValues.push_back(volts);
                     controller->lastRecordTime = currentTime;
                     Serial.print("Lettura ADS (canale ");

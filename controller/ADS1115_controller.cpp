@@ -12,7 +12,7 @@ ADS1115_controller* ADS1115_controller::getInstance() {
 
 ADS1115_controller::ADS1115_controller()
   :  recordingActive(false), recordingInterval(1000),
-    lastRecordTime(0), recordingTask(NULL), currentChannel(0), initializationFailed(false)
+    lastRecordTime(0), recordingTask(NULL), monitorTask(NULL), currentChannel(0), initializationFailed(false)
 {
 
     // Inizializza il modello ADS1115
@@ -231,26 +231,37 @@ void ADS1115_controller::monitorTaskFunction(void *parameter) {
     ADS1115_controller *controller = static_cast<ADS1115_controller*>(parameter);
     
     while (true) {
-        Serial.println("Monitor task in esecuzione...");
+        //Serial.println("Monitor task in esecuzione...");
         unsigned long currentTime = millis();
-        if (xSemaphoreTake(controller->mutex, portMAX_DELAY) == pdTRUE) {
-            controller->adsModel->setChannel(controller->currentChannel);
-            int16_t adc = controller->ads.readADC_SingleEnded(0);
-            float volts = controller->ads.computeVolts(adc);
-            Serial.print("Monitor ADS (canale ");
-            Serial.print(controller->currentChannel);
-            Serial.print("): ");
-            Serial.print(volts);
-            Serial.println(" V");
+        if (currentTime - controller->lastRecordTime >= (unsigned long)controller->recordingInterval) {
+            if (xSemaphoreTake(controller->mutex, portMAX_DELAY) == pdTRUE) {
+                try
+                {
+                    controller->adsModel->setChannel(controller->currentChannel);
+                    int16_t adc = controller->ads.readADC_SingleEnded(0);
+                    float volts = controller->ads.computeVolts(adc);
+                    Serial.print("Monitor ADS (canale ");
+                    Serial.print(controller->currentChannel);
+                    Serial.print("): ");
+                    Serial.print(volts);
+                    Serial.println(" V");
 
-            Pin &outputPin = SystemState::getInstance()->pinoutData->getPin(controller->outputPinNumber);
-            bool goHigh = volts > 1.5; // Soglia di attivazione
-            outputPin.write(goHigh);
+                    Pin &outputPin = SystemState::getInstance()->pinoutData->getPin(controller->outputPinNumber);
+                    bool goHigh = volts > 1.5; // Soglia di attivazione
+                    outputPin.write(goHigh);
+                    
+                    controller->lastRecordTime = currentTime;
+                }
+                catch(...)
+                {
+                    Serial.println("Errore nella lettura dell'ADS1115.");
+                }
+                
+                xSemaphoreGive(controller->mutex);
+            }
             
-            xSemaphoreGive(controller->mutex);
         }
-    
-        vTaskDelay(500 / portTICK_PERIOD_MS);// aspetto 500ms prima di fare un'altra lettura
+        vTaskDelay(10 / portTICK_PERIOD_MS);// aspetto ms prima di fare un'altra lettura
     }
     vTaskDelete(NULL);
 }

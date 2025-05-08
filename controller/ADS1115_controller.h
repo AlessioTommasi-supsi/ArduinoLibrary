@@ -19,6 +19,7 @@ public:
     // interval è l'intervallo in ms.
     void startRecording(const String &signalType, int interval);
     void startMonitorTask(int outputPinNumber);
+    void startAlertMonitorTask(int outputPinNumber, float alertValue);
     void stopMonitorTask();
 
     void setChannel(const String &signalType);
@@ -57,6 +58,7 @@ public:
     ADS1115_model *adsModel;
 
     int recordingInterval;
+    float alertValue;
 
 private:
     ADS1115_controller();
@@ -78,6 +80,7 @@ private:
     
     static void recordingTaskFunction(void *parameter);
     static void monitorTaskFunction(void *parameter);
+    static void monitorAlertTaskFunction(void *parameter);
 };
 
 #endif // ADS1115_CONTROLLER_H

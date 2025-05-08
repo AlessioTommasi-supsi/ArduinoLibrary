@@ -146,6 +146,34 @@ String viewMultiplex::pinStartAndStopForm(int channelAdsNumber, String signalTyp
                     <input type="hidden" name="action" value="stop_monitor">
                     <button type="submit" class="stop">StopMonitor</button>
                 </form>
+                )rawliteral";
+    form += R"(
+                <br><br><br>
+
+                <form action="/multiplex_graph" method="get">
+                    <label for="alert_value">inserisci la soglia di allarme: </label>
+                    <input type="text" id="alert_value" name="alert_value" required="" value="0">
+                    <input type="hidden" name="signalType" value=")" + signalType + R"(">
+                    <input type="hidden" name="channelAdsNumber" value=")" + String(channelAdsNumber) + R"(">
+                    <input type="hidden" name="action" value="start_monitor_alert">
+                    <fieldset>
+                    
+                    <label for="exit_type">Tipo di uscita:</label>
+                    <select id="exit_type" name="out_pin_number">
+                        <option value="25">uscita digitale</option>
+                        <option value="26">uscita analogica</option>    
+                    </select>
+                    </fieldset>
+                    
+                    <button type="submit" class="start">Start</button>
+                </form>
+                <form action="/multiplex_graph" method="get">
+                    <input type="hidden" name="signalType" value=")" + signalType + R"(">
+                    <input type="hidden" name="channelAdsNumber" value=")" + String(channelAdsNumber) + R"rawliteral(">
+                    <input type="hidden" name="action" value="stop_monitor_alert">
+                    <button type="submit" class="stop">Stop</button>
+                </form>
+
             </div>
         </div>
     )rawliteral";

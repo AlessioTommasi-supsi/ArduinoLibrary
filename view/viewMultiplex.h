@@ -15,7 +15,7 @@ public:
 
     static String pageContent();
 
-    static String pinStartAndStopForm(int PinNumber, String signalType);
+    static String pinStartAndStopForm(int channelAdsNumber, String signalType);
 };
 
 #endif

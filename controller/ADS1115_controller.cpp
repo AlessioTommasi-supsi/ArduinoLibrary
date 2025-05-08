@@ -197,6 +197,7 @@ void ADS1115_controller::startMonitorTask(int outputPinNumber) {
         Serial.println("Errore: ads non inizializzato!: ");
         return;
     }
+    create_startMonitorTask:
     if (xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE) {
         this->outputPinNumber = outputPinNumber;
         if (monitorTask == NULL) {
@@ -209,6 +210,11 @@ void ADS1115_controller::startMonitorTask(int outputPinNumber) {
                 &monitorTask,
                 0
             );
+        }else {
+            Serial.println("Monitor task già in esecuzione, lo stoppo e ne creo uno nuovo! .");
+            xSemaphoreGive(mutex);
+            stopMonitorTask();
+            goto create_startMonitorTask; // Riprova a creare il task
         }
         xSemaphoreGive(mutex);
         Serial.println("Monitor task avviato.");
@@ -216,7 +222,38 @@ void ADS1115_controller::startMonitorTask(int outputPinNumber) {
     }
 }
 
-void ADS1115_controller::stopMonitorTask() {
+
+void ADS1115_controller::startAlertMonitorTask(int outputPinNumber, float alertValue) {
+    if (initializationFailed) {
+        Serial.println("Errore: ads non inizializzato!: ");
+        return;
+    }
+    create_alertMonitorTask:
+    if (xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE) {
+        this->outputPinNumber = outputPinNumber;
+        this->alertValue = alertValue;
+        if (monitorTask == NULL) {
+            xTaskCreatePinnedToCore(
+                monitorAlertTaskFunction,
+                "ADS1115MonitorAlertTask",
+                4096,
+                this,
+                1,
+                &monitorTask,
+                0
+            );
+        }else {
+            Serial.println("Alert  task già in esecuzione, lo stoppo e ne creo uno nuovo! .");
+            xSemaphoreGive(mutex);
+            stopMonitorTask();
+            goto create_alertMonitorTask; // Riprova a creare il task
+        }
+        xSemaphoreGive(mutex);
+        Serial.println("Monitor task avviato.");
+    }
+}
+
+void ADS1115_controller::stopMonitorTask() { /*cancello sia che stia facendo alert che solito monitor!*/
     if (xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE) {
         if (monitorTask != NULL) {
             vTaskDelete(monitorTask);
@@ -240,6 +277,7 @@ void ADS1115_controller::monitorTaskFunction(void *parameter) {
                     controller->adsModel->setChannel(controller->currentChannel);
                     int16_t adc = controller->ads.readADC_SingleEnded(0);
                     float volts = controller->ads.computeVolts(adc);
+                    volts = volts * controller->signalCorrectionValue(controller->currentChannel); // Applica la correzione del segnale
                     Serial.print("Monitor ADS (canale ");
                     Serial.print(controller->currentChannel);
                     Serial.print("): ");
@@ -248,6 +286,48 @@ void ADS1115_controller::monitorTaskFunction(void *parameter) {
 
                     Pin &outputPin = SystemState::getInstance()->pinoutData->getPin(controller->outputPinNumber);
                     bool goHigh = volts > 1.5; // Soglia di attivazione
+                    outputPin.write(goHigh);
+                    
+                    controller->lastRecordTime = currentTime;
+                }
+                catch(...)
+                {
+                    Serial.println("Errore nella lettura dell'ADS1115.");
+                }
+                
+                xSemaphoreGive(controller->mutex);
+            }
+            
+        }
+        vTaskDelay(10 / portTICK_PERIOD_MS);// aspetto ms prima di fare un'altra lettura
+    }
+    vTaskDelete(NULL);
+}
+
+void ADS1115_controller::monitorAlertTaskFunction(void *parameter) {
+    ADS1115_controller *controller = static_cast<ADS1115_controller*>(parameter);
+    
+    while (true) {
+        unsigned long currentTime = millis();
+        if (currentTime - controller->lastRecordTime >= (unsigned long)controller->recordingInterval) {
+            if (xSemaphoreTake(controller->mutex, portMAX_DELAY) == pdTRUE) {
+                try
+                {
+                    controller->adsModel->setChannel(controller->currentChannel);
+                    int16_t adc = controller->ads.readADC_SingleEnded(0);
+                    float volts = controller->ads.computeVolts(adc);
+                    volts = volts * controller->signalCorrectionValue(controller->currentChannel); // Applica la correzione del segnale
+                    Serial.print("Monitor Alert ADS (canale ");
+                    Serial.print(controller->currentChannel);
+                    Serial.print("): ");
+                    Serial.print(volts);
+                    Serial.println(" V ");
+                    Serial.print("Soglia: ");
+                    Serial.print(controller->alertValue);
+                    Serial.println(" ");
+
+                    Pin &outputPin = SystemState::getInstance()->pinoutData->getPin(controller->outputPinNumber);
+                    bool goHigh = volts > controller->alertValue; // Soglia di attivazione
                     outputPin.write(goHigh);
                     
                     controller->lastRecordTime = currentTime;

@@ -75,11 +75,18 @@ void MultiplexRoutes::defineRoutes(AsyncWebServer &server) {
 
         
 
-        //gestione pin che monitora un altro pin! 
+        //gestione pin che monitora un altro pin! posso fare monitor di 1 solo pi di out per volta! e solo o monitor o solo alert!!
         if (action == "start_monitor") {
             int outputPinNumber = request->getParam("out_pin_number")->value().toInt();
             adsCtrl->startMonitorTask(outputPinNumber);
         } else if (action == "stop_monitor") {
+            adsCtrl->stopMonitorTask();
+        }
+        if (action == "start_monitor_alert") {
+            int outputPinNumber = request->getParam("out_pin_number")->value().toInt();
+            float alertValue = request->getParam("alert_value")->value().toFloat();
+            adsCtrl->startAlertMonitorTask(outputPinNumber, alertValue);
+        } else if (action == "stop_monitor_alert") {
             adsCtrl->stopMonitorTask();
         }
 

@@ -70,12 +70,6 @@ String viewCurrentRegister::generateHTML(String registerAddress, float registerV
     
     
 
-    //page_content += "porcoddeo dove essere ellole";
-    /**
-     * Aggiungo il contenuto della pagina con una richiesta asincrona
-     */
-    //String api = "/modbusMasterPageContent";
-   // page_content += viewGeneric::dynamicUpdateContent("", api, -1);
     page_content += viewGeneric::dynamicUpdateContent("", "/modbusMasterPageContent?registerAddress=" + registerAddress + "&registerValue=" + String(registerValue), -1);
 
     

@@ -19,6 +19,21 @@ String viewCurrentRegister::generateEmptyFormRegister()
     form += "    </form>";
     form += "</div>";
 
+    form += "<br><br><br>";
+
+    form += "<div class=\"form-container\">";
+    form += "    <form action=\"modbusSlave\" method=\"get\">";
+    form += "        <label for=\"registerAddress\">Register Address:</label>";
+    form += "        <input type=\"text\" id=\"registerAddress\" name=\"registerAddress\" required>";
+    form += "        <label for=\"registerType\">Register Type:</label>";
+    form += "        <select id=\"registerType\" name=\"registerType\" required>";
+    form += "            <option value=\"int\">int</option>";
+    form += "            <option value=\"float\">float</option>";
+    form += "        </select>";
+    form += "        <button type=\"submit\">Write As Slave</button>";
+    form += "    </form>";
+    form += "</div>";
+
     return form;
 }
 
@@ -108,6 +123,17 @@ String viewCurrentRegister::pageContent(String registerAddress, float registerVa
     page_content += "            <option value=\"float\">float</option>";
     page_content += "        </select>";\
     page_content += "        <button type=\"submit\">Monitor</button>";
+    page_content += "    </form>";
+
+    page_content += "    <form action=\"modbusSlave\" method=\"get\">";
+    page_content += "        <label for=\"registerAddress\">Register Address:</label>";
+    page_content += "        <input type=\"text\" id=\"registerAddress\" name=\"registerAddress\" value=\"" + registerAddress + "\" required>";
+    page_content += "        <label for=\"registerType\">Register Type:</label>";
+    page_content += "        <select id=\"registerType\" name=\"registerType\" required>";
+    page_content += "            <option value=\"int\">int</option>";
+    page_content += "            <option value=\"float\">float</option>";
+    page_content += "        </select>";\
+    page_content += "        <button type=\"submit\">Write As Slave</button>";
     page_content += "    </form>";
     
     page_content += "</div>";

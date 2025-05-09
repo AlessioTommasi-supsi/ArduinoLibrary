@@ -52,20 +52,39 @@ int ADS1115_controller::signalTypeToChannel(const String &signalType) {
 }
 
 float ADS1115_controller::signalCorrectionValue(int channel) {
+    Serial.println("SignalCorrectionValue!!");
     float correctionValue = 1.0;
     switch (channel)
     {
     case 0:
-        correctionValue = 1/9000;  //ritorna dato in KOhm!
+        correctionValue = 1;  //
+    
+    break;
+    case 2:
+        correctionValue = 1;  //
+    break;
+    case 3:
+        //Serial.println("Canale 3 selezionato!");
+        correctionValue = correctionValue / 0.216; //ritorna dato in V!
     break;
     case 4:
-        correctionValue = 1/9000;  //ritorna dato in KOhm!
+        correctionValue = 1;  //
+        break;
+    case 5:
+        correctionValue = 1;  //
+        
     break;
-    
-    case 1:
-        correctionValue = 1/1000; //ritorna dato in mV!
-
+    case 6:
+        correctionValue = 1;  //
+        break;
+    case 7:
+        correctionValue = 1/0.216; //ritorna dato in V!
+        break;
+    case 8:
+        correctionValue = 1;  //
+    break;
     default:
+        Serial.println("Default Case! channel not set!  Channel: "+ channel);
         break;
     }
 
@@ -346,7 +365,7 @@ void ADS1115_controller::monitorAlertTaskFunction(void *parameter) {
     vTaskDelete(NULL);
 }
 
-
+/*MISURA RESISTENZA O MUSURA TENSIONE STACCA SEMPRE LA TENSIONE*/
 void ADS1115_controller::recordingTaskFunction(void *parameter) {
     ADS1115_controller *controller = static_cast<ADS1115_controller*>(parameter);
     
@@ -358,7 +377,9 @@ void ADS1115_controller::recordingTaskFunction(void *parameter) {
                     controller->adsModel->setChannel(controller->currentChannel);
                     int16_t adc = controller->ads.readADC_SingleEnded(0);
                     float volts = controller->ads.computeVolts(adc);
-                    volts = volts * controller->signalCorrectionValue(controller->currentChannel); // Applica la correzione del segnale
+                    float correction = controller->signalCorrectionValue(controller->currentChannel); 
+                    volts = volts * correction; // Applica la correzione del segnale
+                    Serial.println("Selected correction value: "+String(correction));
                     controller->recordedValues.push_back(volts);
                     controller->lastRecordTime = currentTime;
                     Serial.print("Lettura ADS (canale ");

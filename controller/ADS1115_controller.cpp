@@ -52,7 +52,7 @@ int ADS1115_controller::signalTypeToChannel(const String &signalType) {
 }
 
 float ADS1115_controller::signalCorrectionValue(int channel) {
-    Serial.println("SignalCorrectionValue!!");
+    //Serial.println("SignalCorrectionValue!!");
     float correctionValue = 1.0;
     switch (channel)
     {
@@ -85,7 +85,7 @@ float ADS1115_controller::signalCorrectionValue(int channel) {
     break;
     default:
         Serial.println("Default Case! channel not set!  Channel: "+ channel);
-        break;
+    break;
     }
 
     return correctionValue;

@@ -119,6 +119,41 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
         }  
     });
 
+    server.on("/modbusSlave", HTTP_GET, [](AsyncWebServerRequest *request){
+        try
+        {
+            String registerAddress = request->getParam("registerAddress")->value();
+            String registerValue = request->getParam("registerValue")->value();
+            String registerType = request->getParam("registerType")->value();
+
+            if(registerType == "int")
+            {
+                //SystemState::masterModbus->writeHoldingIntRegisters(registerAddress.toInt(), registerValue.toInt());
+            }
+            else if(registerType == "float")
+            {
+                //SystemState::masterModbus->writeHoldingFloatRegisters(registerAddress.toInt(), registerValue.toFloat());
+            }
+            else
+            {
+                request->send(400, "text/plain", "Invalid register type");
+            }
+            
+            String popupScript = "showPopup('Scrittura come slave avviata con successo!');";
+            String htmlContent = viewCurrentRegister::generateHTML(registerAddress, 0.0, popupScript);
+       
+            
+            const char *htmlContentPtr = htmlContent.c_str();
+            request->send(200, "text/html", htmlContentPtr); 
+        }
+        catch(...)
+        {
+            Serial.println("Error during get modbusSlave");
+            request->send(200, "text/html", "Error: An error occurred");
+        }  
+    });
+
+
     server.on("/modbusMasterPageContent", HTTP_GET, [](AsyncWebServerRequest *request){
         try
         {

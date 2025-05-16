@@ -58,48 +58,53 @@ String viewCurrentRegister::generateHTML(String registerAddress, float registerV
     return viewCurrentRegister::generateHTML(registerAddress, registerValue, "");
 }
 
-
 String viewCurrentRegister::generateHTML(String registerAddress, float registerValue, String popupScript = "")
 {
     // Creazione dell'header HTML con il foglio di stile CSS
     String css = viewGeneric::basicHeader("Current Register"); 
-    css += viewGeneric::dynamicUpdateContentScript(); //aggiungo script per aggiornamento dinamico
-    css += viewGeneric::dynamicUpdateContent("", "/navbarStyle", -1); //aggiungo script per aggiornamento dinamico
-    //css += viewGeneric::dynamicUpdateContent("", "/formStyle", -1); //aggiungo script per aggiornamento dinamico //NON FUNZIONANTE SE LO METTO CRASH!
-
-    //String page_content = pageContent(registerAddress, registerValue);
+    css += viewGeneric::dynamicUpdateContentScript();
+    css += viewGeneric::dynamicUpdateContent("", "/navbarStyle", -1);
 
     String page_content = "";
     page_content += viewGeneric::addNavbar();
-    
-    
+    page_content += viewGeneric::dynamicUpdateContent(
+        "", 
+        "/modbusMasterPageContent?registerAddress=" + registerAddress 
+          + "&registerValue=" + String(registerValue), 
+        -1
+    );
 
-    page_content += viewGeneric::dynamicUpdateContent("", "/modbusMasterPageContent?registerAddress=" + registerAddress + "&registerValue=" + String(registerValue), -1);
+    // 1) Definizione della funzione showPopup
+    page_content += "<script>"
+                    "function showPopup(message) {"
+                    "  document.getElementById('popupMessage').innerText = message;"
+                    "  document.getElementById('popup').style.display = 'block';"
+                    "}"
+                    "</script>";
 
-    
+    // 2) Inserisco **qui** il <div> del popup, **fuori** dal contenuto dinamico
+    page_content += "<div id=\"popup\" "
+                    "style=\"display:none;position:fixed;top:50%;left:50%;"
+                    "transform:translate(-50%,-50%);padding:20px;"
+                    "background-color:white;border:1px solid black;z-index:1000;\">"
+                    "<p id=\"popupMessage\"></p>"
+                    "<button onclick=\"document.getElementById('popup').style.display='none';\">Close</button>"
+                    "</div>";
 
-    // Aggiunta del JavaScript per gestire il popup
-    page_content += "<script>";
-    page_content += "function showPopup(message) {";
-    page_content += "    document.getElementById('popupMessage').innerText = message;";
-    page_content += "    document.getElementById('popup').style.display = 'block';";
-    page_content += "}";
-    page_content += "</script>";
-
-
-
-    // Aggiunta del popupScript se presente
+    // 3) Se c'è uno script di popup, lo wrappo in DOMContentLoaded
     if (popupScript != "") {
-        page_content += "<script>";
-        page_content += popupScript;
-        page_content += "</script>";
+        page_content += "<script>"
+                        "window.addEventListener('DOMContentLoaded', function() {"
+                        + popupScript +
+                        "});"
+                        "</script>";
     }
 
-    // Aggiunta del footer
+    // Footer e restituzione
     page_content += viewGeneric::defaultFooter();
-
     return css + page_content;
 }
+
 
 String viewCurrentRegister::pageContent(String registerAddress, float registerValue)
 {

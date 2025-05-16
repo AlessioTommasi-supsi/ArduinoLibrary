@@ -120,38 +120,38 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
     });
 
     server.on("/modbusSlave", HTTP_GET, [](AsyncWebServerRequest *request){
-        try
-        {
+        try {
             String registerAddress = request->getParam("registerAddress")->value();
-            String registerValue = request->getParam("registerValue")->value();
-            String registerType = request->getParam("registerType")->value();
-
-            if(registerType == "int")
-            {
-                //SystemState::masterModbus->writeHoldingIntRegisters(registerAddress.toInt(), registerValue.toInt());
+            String registerValue   = request->getParam("registerValue")->value();
+            String registerType    = request->getParam("registerType")->value();
+    
+            if (registerType == "int") {
+                // … scrittura int …
             }
-            else if(registerType == "float")
-            {
-                //SystemState::masterModbus->writeHoldingFloatRegisters(registerAddress.toInt(), registerValue.toFloat());
+            else if (registerType == "float") {
+                // … scrittura float …
             }
-            else
-            {
+            else {
                 request->send(400, "text/plain", "Invalid register type");
+                return;
             }
-            
+    
+            // NOTA: popupScript non cambia, viene wrappato da generateHTML
             String popupScript = "showPopup('Scrittura come slave avviata con successo!');";
-            String htmlContent = viewCurrentRegister::generateHTML(registerAddress, 0.0, popupScript);
-       
-            
-            const char *htmlContentPtr = htmlContent.c_str();
-            request->send(200, "text/html", htmlContentPtr); 
+            String htmlContent = viewCurrentRegister::generateHTML(
+                registerAddress, 
+                registerValue.toFloat(), 
+                popupScript
+            );
+    
+            request->send(200, "text/html", htmlContent.c_str()); 
         }
-        catch(...)
-        {
+        catch(...) {
             Serial.println("Error during get modbusSlave");
-            request->send(200, "text/html", "Error: An error occurred");
+            request->send(500, "text/html", "Error: An error occurred");
         }  
     });
+    
 
 
     server.on("/modbusMasterPageContent", HTTP_GET, [](AsyncWebServerRequest *request){

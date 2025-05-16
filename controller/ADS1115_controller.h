@@ -42,7 +42,7 @@ public:
     // Mappatura dal signalType (stringa) al canale multiplexer (0..7)
     static int signalTypeToChannel(const String &signalType);
 
-    float signalCorrectionValue(int channel);
+    float signalCorrectionValue(int channel, float volts = 0.0);
     
     // Disabilita copia e assegnazione
     ADS1115_controller(const ADS1115_controller&) = delete;

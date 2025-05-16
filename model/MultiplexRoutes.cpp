@@ -99,7 +99,7 @@ void MultiplexRoutes::defineRoutes(AsyncWebServer &server) {
         if (adsCtrl->isInitializationFailed()) {
             // Aggiunge un messaggio d'errore e un form con un bottone per tentare la re-inizializzazione.
             ErrorMessage = "<h1>Error: ADS1115 Initialization Failed.</h1>";
-            ErrorMessage += "<form action='/reinitialize_ads' method='get'><button type='submit'>Riprova inizializzazione</button></form>";
+            ErrorMessage += "<form action='/reinitialize_ads' method='get'><button type='submit'>Riprova inizializzazione</button></form><br><br><br><br><br>";
             Serial.println("Initialization failed: " + ErrorMessage);
         }
         

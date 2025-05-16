@@ -51,13 +51,16 @@ int ADS1115_controller::signalTypeToChannel(const String &signalType) {
     }
 }
 
-float ADS1115_controller::signalCorrectionValue(int channel) {
+float ADS1115_controller::signalCorrectionValue(int channel, float volts) {
     //Serial.println("SignalCorrectionValue!!");
     float correctionValue = 1.0;
     switch (channel)
     {
     case 0:
-        correctionValue = 1;  //
+        correctionValue = correctionValue / 0.216; //k necessaria per trovare V!
+        volts = volts * correctionValue; //ritorna dato in V!
+        //formula data da prof: R da calcolare = (tensione letta in ch0 * 2700)/ (2.5 - tensione letta in ch0)
+        volts = (volts * 2700) / (2.5 - volts); //ritorna dato in Ohm!
     
     break;
     case 2:
@@ -88,7 +91,7 @@ float ADS1115_controller::signalCorrectionValue(int channel) {
     break;
     }
 
-    return correctionValue;
+    return volts;
 }
 
 void ADS1115_controller::setChannel(const String &signalType) {
@@ -130,7 +133,7 @@ void ADS1115_controller::startRecording(const String &signalType, int interval) 
         // Lettura immediata
         int16_t adc = ads.readADC_SingleEnded(0);
         float volts = ads.computeVolts(adc);
-        volts = volts * signalCorrectionValue(currentChannel); // Applica la correzione del segnale
+        volts =  signalCorrectionValue(currentChannel, volts); // Applica la correzione del segnale
         recordedValues.push_back(volts);
         Serial.print("Lettura iniziale ADS (canale ");
         Serial.print(currentChannel);
@@ -177,7 +180,7 @@ void ADS1115_controller::printReadFromADS1115(int channel)
   //65563/2 = 32668
   adc = ads.readADC_SingleEnded(channel);
   volts = ads.computeVolts(adc);
-  volts = volts; // Aggiungi un offset della scheda
+  volts = volts; // Aggiungi un offset o correctionvalue etc della scheda se necessario
   Serial.println("");
   Serial.print("AIN");Serial.print(channel);Serial.print(": ");  Serial.print(adc);  Serial.print("  "); Serial.print(volts); Serial.println("V");
   
@@ -199,7 +202,7 @@ float ADS1115_controller::read(){
         // Lettura immediata
         int16_t adc = ads.readADC_SingleEnded(0);
         volts = ads.computeVolts(adc);
-        volts = volts * signalCorrectionValue(currentChannel); // Applica la correzione del segnale
+        volts = signalCorrectionValue(currentChannel, volts); // Applica la correzione del segnale
         Serial.print("Read  ADS (canale ");
         Serial.print(currentChannel);
         Serial.print("): ");
@@ -296,7 +299,7 @@ void ADS1115_controller::monitorTaskFunction(void *parameter) {
                     controller->adsModel->setChannel(controller->currentChannel);
                     int16_t adc = controller->ads.readADC_SingleEnded(0);
                     float volts = controller->ads.computeVolts(adc);
-                    volts = volts * controller->signalCorrectionValue(controller->currentChannel); // Applica la correzione del segnale
+                    volts = controller->signalCorrectionValue(controller->currentChannel, volts); // Applica la correzione del segnale
                     Serial.print("Monitor ADS (canale ");
                     Serial.print(controller->currentChannel);
                     Serial.print("): ");
@@ -335,7 +338,7 @@ void ADS1115_controller::monitorAlertTaskFunction(void *parameter) {
                     controller->adsModel->setChannel(controller->currentChannel);
                     int16_t adc = controller->ads.readADC_SingleEnded(0);
                     float volts = controller->ads.computeVolts(adc);
-                    volts = volts * controller->signalCorrectionValue(controller->currentChannel); // Applica la correzione del segnale
+                    volts =  controller->signalCorrectionValue(controller->currentChannel, volts); // Applica la correzione del segnale
                     Serial.print("Monitor Alert ADS (canale ");
                     Serial.print(controller->currentChannel);
                     Serial.print("): ");
@@ -377,8 +380,8 @@ void ADS1115_controller::recordingTaskFunction(void *parameter) {
                     controller->adsModel->setChannel(controller->currentChannel);
                     int16_t adc = controller->ads.readADC_SingleEnded(0);
                     float volts = controller->ads.computeVolts(adc);
-                    float correction = controller->signalCorrectionValue(controller->currentChannel); 
-                    volts = volts * correction; // Applica la correzione del segnale
+                    float correction = controller->signalCorrectionValue(controller->currentChannel,volts); 
+                    volts =  correction; // Applica la correzione del segnale
                     Serial.println("Selected correction value: "+String(correction));
                     controller->recordedValues.push_back(volts);
                     controller->lastRecordTime = currentTime;

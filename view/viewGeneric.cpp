@@ -14,6 +14,7 @@ String viewGeneric::addCss(){
         display: flex;
         flex-direction: column;
         align-items: center;
+        padding-bottom: 200px; /* Spazio extra per evitare la navbar mobile */
     }
     )";
     //return css+ viewGeneric::addNavbarCss();

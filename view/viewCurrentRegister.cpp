@@ -4,6 +4,8 @@ String viewCurrentRegister::html = "";
 
 String viewCurrentRegister::generateEmptyFormRegister()
 {
+    int registerAddress = 0;
+    float registerValue = 0.0;
     String form ;
 
     form += "<div class=\"form-container\">";
@@ -24,12 +26,14 @@ String viewCurrentRegister::generateEmptyFormRegister()
     form += "<div class=\"form-container\">";
     form += "    <form action=\"modbusSlave\" method=\"get\">";
     form += "        <label for=\"registerAddress\">Register Address:</label>";
-    form += "        <input type=\"text\" id=\"registerAddress\" name=\"registerAddress\" required>";
+    form += "        <input type=\"text\" id=\"registerAddress\" name=\"registerAddress\" value=\"" + String(registerAddress) + "\" required>";
+    form += "        <label for=\"registerAddress\">Register Value:</label>";
+    form += "        <input type=\"text\" id=\"registerAddress\" name=\"registerValue\" value=\"" + String(registerValue) + "\" required>";
     form += "        <label for=\"registerType\">Register Type:</label>";
     form += "        <select id=\"registerType\" name=\"registerType\" required>";
     form += "            <option value=\"int\">int</option>";
     form += "            <option value=\"float\">float</option>";
-    form += "        </select>";
+    form += "        </select>";\
     form += "        <button type=\"submit\">Write As Slave</button>";
     form += "    </form>";
     form += "</div>";
@@ -122,6 +126,8 @@ String viewCurrentRegister::pageContent(String registerAddress, float registerVa
     page_content += "    <form action=\"modbusSlave\" method=\"get\">";
     page_content += "        <label for=\"registerAddress\">Register Address:</label>";
     page_content += "        <input type=\"text\" id=\"registerAddress\" name=\"registerAddress\" value=\"" + registerAddress + "\" required>";
+    page_content += "        <label for=\"registerAddress\">Register Value:</label>";
+    page_content += "        <input type=\"text\" id=\"registerAddress\" name=\"registerValue\" value=\"" + String(registerValue) + "\" required>";
     page_content += "        <label for=\"registerType\">Register Type:</label>";
     page_content += "        <select id=\"registerType\" name=\"registerType\" required>";
     page_content += "            <option value=\"int\">int</option>";

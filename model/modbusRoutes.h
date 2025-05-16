@@ -19,10 +19,13 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 
+#include "ModBusSlaveController.h"
+
 
 class ModbusRoutes
 {
 public:
+    // Costruttore: istanzia il controller Modbus
     void defineRoutes(AsyncWebServer &server);
 };
 

@@ -124,18 +124,21 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
             String registerAddress = request->getParam("registerAddress")->value();
             String registerValue   = request->getParam("registerValue")->value();
             String registerType    = request->getParam("registerType")->value();
-    
+        
             if (registerType == "int") {
-                // … scrittura int …
+                ModBusSlaveController::getInstance()->writeIntRegister(registerAddress.toInt(), registerValue.toInt());
             }
             else if (registerType == "float") {
-                // … scrittura float …
+                ModBusSlaveController::getInstance()->writeFloatRegister(registerAddress.toInt(), registerValue.toFloat());
             }
             else {
-                request->send(400, "text/plain", "Invalid register type");
+                request->send(400, "text/plain", "Tipo di registro non valido");
                 return;
             }
-    
+        
+            // Inizializzo o verifico lo stato del polling
+            ModBusSlaveController::getInstance()->poll();
+        
             // NOTA: popupScript non cambia, viene wrappato da generateHTML
             String popupScript = "showPopup('Scrittura come slave avviata con successo!');";
             String htmlContent = viewCurrentRegister::generateHTML(
@@ -143,14 +146,15 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
                 registerValue.toFloat(), 
                 popupScript
             );
-    
+        
             request->send(200, "text/html", htmlContent.c_str()); 
         }
         catch(...) {
-            Serial.println("Error during get modbusSlave");
-            request->send(500, "text/html", "Error: An error occurred");
+            Serial.println("Errore durante la richiesta modbusSlave");
+            request->send(500, "text/html", "Errore: si è verificato un problema");
         }  
     });
+    
     
 
 

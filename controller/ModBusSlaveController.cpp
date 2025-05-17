@@ -12,6 +12,7 @@ static void modbusPollTask(void *pvParameters) {
         }
         // Ritardo breve per evitare di bloccare la CPU
         vTaskDelay(10 / portTICK_PERIOD_MS);
+        //[]
     }
 }
 

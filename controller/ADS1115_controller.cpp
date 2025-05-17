@@ -307,8 +307,28 @@ void ADS1115_controller::monitorTaskFunction(void *parameter) {
                     Serial.println(" V");
 
                     Pin &outputPin = SystemState::getInstance()->pinoutData->getPin(controller->outputPinNumber);
-                    bool goHigh = volts > 1.5; // Soglia di attivazione
-                    outputPin.write(goHigh);
+                    
+                    if (controller->outputPinNumber == 25) // Se l'uscita è digitale
+                    {
+                        // Esegui il monitoraggio digitale
+                        Serial.println("Monitoraggio digitale attivo.");
+                        bool goHigh = volts > 1.5; // Soglia di attivazione
+                        outputPin.write(goHigh);
+                    }
+                    else if (controller->outputPinNumber == 26) // Se l'uscita è analogica
+                    {
+                        // Esegui il monitoraggio analogico
+                        Serial.println("Monitoraggio analogico attivo.");
+                        pinMode(25, OUTPUT);
+                        //devo convertrire: 0 - 3.3V in 0 - 255
+                        outputPin.voltage = volts; 
+                        int dacValue = static_cast<int>((volts / 3.3) * 255); // Converti 0-3.3V in 0-255
+                        dacWrite(25, dacValue);  // Scrivi il valore convertito nel DAC
+
+                    }
+                    
+
+                    
                     
                     controller->lastRecordTime = currentTime;
                 }

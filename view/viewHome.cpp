@@ -33,7 +33,6 @@ String viewHome::pageContent()
             <div id="particles-js"></div>
     )";
 
-    html+= viewGeneric::addNavbar();
 
     html += R"rawliteral(
     

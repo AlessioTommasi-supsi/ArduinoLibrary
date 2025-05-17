@@ -54,12 +54,15 @@ String Pinout::pageContent()
     html += "});";
     html += "</script>";
 
-    html += "<br><br>";
+    html += "<br><br><br><br><br><br><br><br><br><br>";
 
 
     //aggiungo grafico da ViewGraph
-    html += viewGraph::generateGraph(SystemState::getInstance()->pinoutData->getPinNumbers(), "getPinValues", "pin");
-
+    /*in realta al prof non interessa grafico quindi forse e meglio cosi!!
+     html += viewGraph::generateGraph(SystemState::getInstance()->pinoutData->getPinNumbers(), "getPinValues", "pin");
+    html += "<br><br><br><br><br><br><br><br><br><br>";
+    */
+   
     return html;
 }
 

@@ -31,6 +31,11 @@ void Pin::setMode(uint8_t mode)
 }
 
 // Scrive sul pin
+
+/**
+ * true = HIGH
+ * false = LOW
+ */
 bool Pin::write(bool goHigh)
 {
     if (xSemaphoreTake(isPinUsable_Mutex, portMAX_DELAY))

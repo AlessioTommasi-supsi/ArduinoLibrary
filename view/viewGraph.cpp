@@ -8,7 +8,7 @@ String viewGraph::generateHTML()
 
     html += "<h1>Graph View</h1>";
 
-    
+    html += "<h2>Registri:</h2>";
     std::vector<int> addresses = SystemState::getInstance()->getAllRegisterAddress();
     int i = 0;
     for (int addr : addresses)
@@ -32,7 +32,7 @@ String viewGraph::generateGraph(std::vector<int> addresses, String apiFetch, Str
     String var_html = "";
 
     // Menu a tendina per selezionare l'indirizzo del registro
-    var_html += "<label for='           register-select'>Select Register Address: or gpio value</label>";
+    var_html += "<label for='           register-select'>Select:</label>";
     var_html += "<select id='register-select' onchange='updateGraph()'>";
 
     std::set<int> seen;
@@ -66,7 +66,7 @@ String viewGraph::generateGraph(std::vector<int> addresses, String apiFetch, Str
     var_html += "<canvas id='myChart' width='400' height='200'></canvas>";
 
     // Script JavaScript per Chart.js e per gestire il grafico
-    var_html += "<script src='https://cdn.jsdelivr.net/npm/chart.js'></script>";
+    var_html += "<script src='https://cdn.jsdelivr.net/npm/chart.js' async></script>";
     var_html += "<script>";
     var_html += "let chart;";
     var_html += "function updateGraph() {";
@@ -114,7 +114,7 @@ String viewGraph::generateGraph(std::vector<int> addresses, String apiFetch, Str
     var_html += "}";
     var_html += "document.addEventListener('DOMContentLoaded', () => {";
     var_html += "  updateGraph();";                  // Per caricare il grafico all'avvio
-    var_html += "  setInterval(updateGraph, 1000);"; // Aggiorna il grafico ogni 5 secondi
+    var_html += "  setInterval(updateGraph, 5000);"; // Aggiorna il grafico ogni 5 secondi
     var_html += "});";
     var_html += "</script>";
 
@@ -124,7 +124,7 @@ String viewGraph::generateGraph(std::vector<int> addresses, String apiFetch, Str
 String viewGraph::initCirularProgressBarGraph()
 {
     String var_circle_progressbar_html = "";
-    var_circle_progressbar_html += "<script src='https://cdn.jsdelivr.net/npm/chart.js'></script>";
+    var_circle_progressbar_html += "<script src='https://cdn.jsdelivr.net/npm/chart.js' async></script>";
     var_circle_progressbar_html += "<div class='circle_progressbar_chart-container' style='font-family: Raleway, sans-serif; display: flex; flex-wrap: wrap; justify-content: space-around; gap: 20px; padding: 20px;'>";
     var_circle_progressbar_html += "<script>var charts = {};</script>"; // Aggiungi questa linea per inizializzare l'oggetto charts
     return var_circle_progressbar_html;

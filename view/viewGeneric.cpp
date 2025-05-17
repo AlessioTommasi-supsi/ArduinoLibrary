@@ -589,9 +589,9 @@ String viewGeneric::addNavbar()
             <div class="icon">⏳</div>
             <span>History</span>
             </a>
-            <a href="/graph">
-            <div class="icon">📈</div>
-            <span>Graph</span>
+            <a href="/">
+            <div class="icon">🏠 </div>
+            <span>Home</span>
             </a>
             <a href="/config">
             <div class="icon">📶</div>

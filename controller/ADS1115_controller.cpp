@@ -52,28 +52,38 @@ int ADS1115_controller::signalTypeToChannel(const String &signalType) {
 }
 
 float ADS1115_controller::signalCorrectionValue(int channel, float volts) {
-    //Serial.println("SignalCorrectionValue!!");
+    Serial.print("SignalCorrectionValue!! raw READINGS FOR ADS: ");
+    Serial.println(volts);
     float correctionValue = 1.0;
     switch (channel)
-    {
+    {//ohm
     case 0:
-        correctionValue = correctionValue / 0.216; //k necessaria per trovare V!
-        volts = volts * correctionValue; //ritorna dato in V!
+        
+        
+        
+        //volts = volts * correctionValue; //ritorna dato in V!
+        Serial.print("valore in volt letto da AD:     ");
+        Serial.println(volts);
         //formula data da prof: R da calcolare = (tensione letta in ch0 * 2700)/ (2.5 - tensione letta in ch0)
         volts = (volts * 2700) / (2.5 - volts); //ritorna dato in Ohm!
     
+    break;
+    case 1:
+        volts  = (volts/110)*1000; //ma corrente
+        correctionValue = 1;  //
     break;
     case 2:
         correctionValue = 1;  //
     break;
     case 3:
         //Serial.println("Canale 3 selezionato!");
-        correctionValue = correctionValue / 0.216; //ritorna dato in V!
+        correctionValue = correctionValue / 0.216; //ritorna dato in micro V!
     break;
     case 4:
-        correctionValue = 1;  //
+        volts = (volts * 2700) / (2.5 - volts); //ritorna dato in Ohm!
         break;
     case 5:
+        volts  = (volts/110)*1000; //ma corrente
         correctionValue = 1;  //
         
     break;
@@ -83,9 +93,7 @@ float ADS1115_controller::signalCorrectionValue(int channel, float volts) {
     case 7:
         correctionValue = 1/0.216; //ritorna dato in V!
         break;
-    case 8:
-        correctionValue = 1;  //
-    break;
+    
     default:
         Serial.println("Default Case! channel not set!  Channel: "+ channel);
     break;
@@ -319,11 +327,11 @@ void ADS1115_controller::monitorTaskFunction(void *parameter) {
                     {
                         // Esegui il monitoraggio analogico
                         Serial.println("Monitoraggio analogico attivo.");
-                        pinMode(25, OUTPUT);
+                        pinMode(26, OUTPUT);
                         //devo convertrire: 0 - 3.3V in 0 - 255
                         outputPin.voltage = volts; 
                         int dacValue = static_cast<int>((volts / 3.3) * 255); // Converti 0-3.3V in 0-255
-                        dacWrite(25, dacValue);  // Scrivi il valore convertito nel DAC
+                        dacWrite(26, dacValue);  // Scrivi il valore convertito nel DAC
 
                     }
                     

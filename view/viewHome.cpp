@@ -44,19 +44,19 @@ String viewHome::pageContent()
 
                     <div class="logo_container">
                         <div class="gear_logo_container">
-                            <img class="gear" src="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/gearNobg.png" alt="Immagine senza sfondo">
+                            <img class="gear" src="https://alessiotommasi.com/view/images/gearNobg.png" alt="Immagine senza sfondo">
                         </div>
                         <div class="logo">
-                            <img class="logo_image" src="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/logo.png" alt="Immagine senza sfondo">
+                            <img class="logo_image" src="https://alessiotommasi.com/view/images/logo.png" alt="Immagine senza sfondo">
                         </div>
                     </div>
 
                     <div class="gear_container_left">
-                        <img class="gear" src="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/gearNobg.png" alt="Immagine senza sfondo">
+                        <img class="gear" src="https://alessiotommasi.com/view/images/gearNobg.png" alt="Immagine senza sfondo">
                     </div>
 
                     <div class="gear_container_bottom">
-                        <img class="gear" src="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/gearNobg.png" alt="Immagine senza sfondo">
+                        <img class="gear" src="https://alessiotommasi.com/view/images/gearNobg.png" alt="Immagine senza sfondo">
                     </div>
                 </div>
 
@@ -66,7 +66,7 @@ String viewHome::pageContent()
                             <div class="glass_container">
                                 <div class="image-with-text responsive_div">
                                     <img class="project_maxwidth responsive_img"
-                                        src="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/c.png" alt="Description of the image">
+                                        src="https://alessiotommasi.com/view/images/c.png" alt="Description of the image">
                                     <div class="project_maxwidth responsive_text">
                                         <h3>ALPHA </h3>
                                         <p>
@@ -93,6 +93,9 @@ String viewHome::pageContent()
                         </div>
                     </div>
                 </div>
+
+                <br><br><br><br>
+
                 <a href="mailto:alessio.tommasi.lavoro@gmail.com"><button id="GetInTouchBtn">📲</button></a>
                 <a href="http://alessiotommasi.com/model/docs/curriculum.pdf"><button id="ResumeBtn">📖</button></a>
 

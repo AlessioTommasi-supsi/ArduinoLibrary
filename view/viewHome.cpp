@@ -23,40 +23,55 @@ String viewHome::generateHTML()
 
 String viewHome::pageContent()
 {
-    html += viewGeneric::dynamicUpdateContentScript(); //aggiungo script per aggiornamento dinamico
-    html += viewGeneric::dynamicUpdateContent("id_navbarStyle", "/navbarStyle", -1); //aggiungo script per aggiornamento dinamico
+    html += viewGeneric::dynamicUpdateContentScript();
+    html += viewGeneric::dynamicUpdateContent("id_navbarStyle", "/navbarStyle", -1);
     html += viewGeneric::addNavbar();
     
     html+= R"(
     <div class="main_container_absolute">
         <div class="main_container_relative">
             <div id="particles-js"></div>
-    )";
+            
+            <!-- Stile inline per i margini dei glass containers -->
+            <style>
+                /* Margini per glass_container per evitare overlap con navbar */
+                .glass_container {
+                    /* Mobile: margine inferiore per navbar in basso */
+                    margin-bottom: 120px !important;
+                    margin-top: 20px !important;
+                }
 
+                /* Desktop: margine laterale ridotto per navbar a sinistra */
+                @media (min-width: 1500px) {
+                    .glass_container {
+                        margin-left: 120px !important; /* Ridotto da 180px a 120px */
+                        margin-right: 20px !important;
+                        margin-bottom: 20px !important;
+                    }
+                }
+            </style>
 
-    html += R"(
-    <div id="textTypingContainer">
+            <div id="textTypingContainer">
                 <div id="textTypingAnimation" class="glassEffect"></div>
             </div>
 
             <div>
                 <div class="no_overflow">
-
                     <div class="logo_container">
                         <div class="gear_logo_container">
-                            <img class="gear" src="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/gearNobg.png" alt="Immagine senza sfondo">
+                            <img class="gear" src="https://alessiotommasi.com/view/images/gearNobg.png" alt="Immagine senza sfondo">
                         </div>
                         <div class="logo">
-                            <img class="logo_image" src="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/logo.png" alt="Immagine senza sfondo">
+                            <img class="logo_image" src="https://alessiotommasi.com/view/images/logo.png" alt="Immagine senza sfondo">
                         </div>
                     </div>
 
                     <div class="gear_container_left">
-                        <img class="gear" src="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/gearNobg.png" alt="Immagine senza sfondo">
+                        <img class="gear" src="https://alessiotommasi.com/view/images/gearNobg.png" alt="Immagine senza sfondo">
                     </div>
 
                     <div class="gear_container_bottom">
-                        <img class="gear" src="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/gearNobg.png" alt="Immagine senza sfondo">
+                        <img class="gear" src="https://alessiotommasi.com/view/images/gearNobg.png" alt="Immagine senza sfondo">
                     </div>
                 </div>
 
@@ -66,7 +81,7 @@ String viewHome::pageContent()
                             <div class="glass_container">
                                 <div class="image-with-text responsive_div">
                                     <img class="project_maxwidth responsive_img"
-                                        src="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/c.png" alt="Description of the image">
+                                        src="https://alessiotommasi.com/view/images/c.png" alt="Description of the image">
                                     <div class="project_maxwidth responsive_text">
                                         <h3>ALPHA </h3>
                                         <p>
@@ -79,7 +94,7 @@ String viewHome::pageContent()
                                             Acquisizione Locale di Parametri con Hardware Avanzato
                                         </p>
                                         <p>
-                                            Il progetto ALPHA `e stato sviluppato nel corso di IoT del Master in Informatica presso SUPSI. Il focus principale `e sull’ESP32 e il protocollo Modbus
+                                            Il progetto ALPHA `e stato sviluppato nel corso di IoT del Master in Informatica presso SUPSI. Il focus principale `e sull'ESP32 e il protocollo Modbus
                                         </p>
                                         <a href="https://github.com/AlessioTommasi-supsi/iotProject/blob/main/docs/tesi.pdf"> <button
                                                 class="download-button">official</button> </a>
@@ -93,6 +108,9 @@ String viewHome::pageContent()
                         </div>
                     </div>
                 </div>
+
+                <br><br><br><br>
+
                 <a href="mailto:alessio.tommasi.lavoro@gmail.com"><button id="GetInTouchBtn">📲</button></a>
                 <a href="http://alessiotommasi.com/model/docs/curriculum.pdf"><button id="ResumeBtn">📖</button></a>
 

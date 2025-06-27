@@ -427,8 +427,8 @@ String viewGeneric::defaultPorfolioCss() {
     String porfolioCss = R"(
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Porfolio - Alessio Tommasi</title>
-        <link rel="icon" href="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/logo.png" type="image/png">
+        <title>ALPHA</title>
+        <link rel="icon" href="https://alessiotommasi.com/view/images/logo.png" type="image/png">
 
         <script>
         // Funzione che carica un CSS in modo asincrono

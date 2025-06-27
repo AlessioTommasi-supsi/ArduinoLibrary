@@ -506,8 +506,8 @@ String viewGeneric::addNavbar()
             <span>Multiplexer</span>
             </a>
             <a href="/extra">
-            <div class="icon">📱</div>
-            <span>Mobile</span>
+            <div class="icon">📊</div>
+            <span>ADS</span>
             </a>
         </div>
         )";

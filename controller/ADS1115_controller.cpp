@@ -46,6 +46,14 @@ int ADS1115_controller::signalTypeToChannel(const String &signalType) {
         return 6;
     } else if (signalType == "CN10_tensione_amp_0.216") {
         return 7;
+    }else if (signalType == "termocoppia_cn2") {
+        return 8;
+    } else if (signalType == "PT100_cn2") {
+        return 9;
+    } else if (signalType == "termocoppia_cn10") {
+        return 10;
+    } else if (signalType == "PT100_cn10") {
+        return 11;
     } else {
         return -1;
     }

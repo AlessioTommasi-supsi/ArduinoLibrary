@@ -1,5 +1,3 @@
-
-
 #include "modbusRoutes.h"
 
 
@@ -88,18 +86,30 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
             String registerAddress = request->getParam("registerAddress")->value();
             String registerType = request->getParam("registerType")->value();
 
+            Serial.println("request of modbusMaster");
+            Serial.println("registerAddress: " + registerAddress);
+            Serial.println("registerType: " + registerType);
+
             if(registerType == "int")
             {
                 //float registerValue = SystemState::masterModbus->readHoldingIntRegisters(registerAddress.toInt());
-                float registerValue = 1.0;
-                //String htmlContent = viewCurrentRegister::generateHTML(registerAddress, registerValue);
-                const char *htmlContentPtr = viewCurrentRegister::generateHTML(registerAddress, registerValue).c_str();
+                String popupScript = "showPopup('Selezionata modalita master!!');";
+                String registerValue = "0"; // Placeholder for register value, replace with actual logic
+                
+                // Usa il metodo offline-safe invece di quello normale
+                String htmlContent = viewCurrentRegister::generateOfflineHTML(
+                    registerAddress, 
+                    registerValue.toFloat(), 
+                    popupScript
+                );
+                const char *htmlContentPtr = htmlContent.c_str();
+                
                 request->send(200, "text/html", htmlContentPtr);
             }
             else if(registerType == "float")
             {
                 float registerValue = SystemState::masterModbus->readHoldingFloatRegisters(registerAddress.toInt());
-                String htmlContent = viewCurrentRegister::generateHTML(registerAddress, registerValue);
+                String htmlContent = viewCurrentRegister::generateOfflineHTML(registerAddress, registerValue);
                 const char *htmlContentPtr = htmlContent.c_str();
                 request->send(200, "text/html", htmlContentPtr); 
             }
@@ -107,10 +117,6 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
             {
                 request->send(400, "text/plain", "Invalid register type");
             }
-
-            String htmlContent = viewCurrentRegister::generateHTML();
-            const char *htmlContentPtr = htmlContent.c_str();
-            request->send(200, "text/html", htmlContentPtr); 
         }
         catch(...)
         {
@@ -166,16 +172,19 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
             
             String registerAddress = request->getParam("registerAddress")->value();
             float registerValue = request->getParam("registerValue")->value().toFloat();
-            Serial.println("vlaoriPassati: ");
+            Serial.println("valoriPassati: ");
             Serial.print("registerAddress: " + registerAddress);
             Serial.println("  registerValue: " + String(registerValue));
-            content += viewCurrentRegister::pageContent(registerAddress, registerValue);
-            //Serial.println("generato il contenuto della pagina");
             
+            // Usa solo il contenuto della pagina senza dipendenze esterne
+            content += viewCurrentRegister::pageContent(registerAddress, registerValue);
+            Serial.println("generato il contenuto della pagina");
 
             AsyncWebServerResponse *response = request->beginResponse(200, "text/html", content);
-            response->addHeader("Access-Control-Allow-Origin", "*"); // Aggiungi header CORS
+            response->addHeader("Access-Control-Allow-Origin", "*");
+            response->addHeader("Cache-Control", "no-cache"); // Evita problemi di cache
             request->send(response);
+            
         }
         catch(...)
         {

@@ -60,7 +60,7 @@ String viewCurrentRegister::generateHTML(String registerAddress, float registerV
 
 String viewCurrentRegister::generateHTML(String registerAddress, float registerValue, String popupScript = "")
 {
-    // Creazione dell'header HTML con il foglio di stile CSS
+    // Creazione dell'header HTML con il foglio di stile CSS usando solo risorse locali
     String css = viewGeneric::basicHeader("Current Register"); 
     css += viewGeneric::dynamicUpdateContentScript();
     css += viewGeneric::dynamicUpdateContent("", "/navbarStyle", -1);
@@ -207,5 +207,50 @@ String viewCurrentRegister::generateHTMLConfirm(String registerAddress, float re
     // Aggiunta del footer
     html += viewGeneric::defaultFooter();
 
+    return html;
+}
+String viewCurrentRegister::generateOfflineHTML(String registerAddress, float registerValue, String popupScript)
+{
+    // Header completamente locale senza risorse esterne
+    String html = "<!DOCTYPE html>";
+    html += "<html>";
+    html += "<head>";
+    html += "<meta charset=\"UTF-8\">";
+    html += "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">";
+    html += "<title>Current Register</title>";
+    html += "<style>";
+    html += viewGeneric::addCss();
+    html += viewGeneric::addFormCss();
+    html += viewGeneric::addNavbarCss();
+    html += "</style>";
+    html += "</head>";
+    html += "<body>";
+    
+    // Navbar locale
+    html += viewGeneric::addNavbar();
+    
+    // Contenuto della pagina
+    html += pageContent(registerAddress, registerValue);
+    
+    // Script per popup senza dipendenze esterne
+    html += "<script>";
+    html += "function showPopup(message) {";
+    html += "  document.getElementById('popupMessage').innerText = message;";
+    html += "  document.getElementById('popup').style.display = 'block';";
+    html += "}";
+    html += "</script>";
+    
+    // Esecuzione del popup se presente
+    if (popupScript != "") {
+        html += "<script>";
+        html += "window.addEventListener('DOMContentLoaded', function() {";
+        html += popupScript;
+        html += "});";
+        html += "</script>";
+    }
+    
+    html += "</body>";
+    html += "</html>";
+    
     return html;
 }

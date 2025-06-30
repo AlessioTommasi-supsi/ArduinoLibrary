@@ -8,6 +8,9 @@
 #include <freertos/semphr.h>
 #include "ADS1115_model.h"
 #include "SystemState.h"
+#include "TermocoppiaK.h"  // Include per la classe TermocoppiaK
+#include "PT100.h"        // Include per la classe PT100
+#include "PT1000.h"       // Include per la classe PT1000
 
 
 class ADS1115_controller {
@@ -77,6 +80,11 @@ private:
     int outputPinNumber;
     int currentChannel;
     bool initializationFailed;
+
+    // Istanze delle classi per linearizzazione
+    TermocoppiaK* termocoppiaK;
+    PT100* pt100;
+    PT1000* pt1000;
     
     static void recordingTaskFunction(void *parameter);
     static void monitorTaskFunction(void *parameter);

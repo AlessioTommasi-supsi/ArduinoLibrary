@@ -18,6 +18,10 @@ ADS1115_controller::ADS1115_controller()
     // Inizializza il modello ADS1115
     adsModel = new ADS1115_model();
 
+    // Inizializza le classi per linearizzazione
+    termocoppiaK = new TermocoppiaK();
+    pt100 = new PT100();
+    pt1000 = new PT1000();
 
     mutex = xSemaphoreCreateMutex();
     // Inizializza l'ADS1115; se fallisce, imposta il flag
@@ -46,7 +50,7 @@ int ADS1115_controller::signalTypeToChannel(const String &signalType) {
         return 6;
     } else if (signalType == "CN10_tensione_amp_0.216") {
         return 7;
-    }else if (signalType == "termocoppia_cn2") {
+    } else if (signalType == "termocoppia_cn2") {
         return 8;
     } else if (signalType == "PT100_cn2") {
         return 9;
@@ -54,6 +58,10 @@ int ADS1115_controller::signalTypeToChannel(const String &signalType) {
         return 10;
     } else if (signalType == "PT100_cn10") {
         return 11;
+    } else if (signalType == "PT1000_cn2") {
+        return 12; // Aggiunto per PT1000 CN2
+    } else if (signalType == "PT1000_cn10") {
+        return 13;
     } else {
         return -1;
     }
@@ -101,7 +109,34 @@ float ADS1115_controller::signalCorrectionValue(int channel, float volts) {
     case 7:
         correctionValue = 1/0.216; //ritorna dato in V!
         break;
+
+
+    case 8:// Termocoppia CN2
+        // Applica il fattore di correzione per convertire in microV (simile al caso 3)
+        volts = volts * TermocoppiaK::CORRECTION_FACTOR; // Converte in microV
+        // Usa la tabella di linearizzazione per ottenere la temperatura
+        volts = termocoppiaK->getTemperature(volts); // Input: microV, Output: °C
+        break;
+    case 9:// PT100 CN2
+        //formula data da prof: R da calcolare = (tensione letta in ch0 * 2700)/ (2.5 - tensione letta in ch0)
+        volts = (volts * 2700) / (2.5 - volts); //ritorna dato in Ohm!
+        // Usa la classe PT100 per convertire la resistenza in temperatura
+        volts = pt100->getTemperature(volts); // Input: Ohm, Output: °C
+        break;
+    case 10:
+        correctionValue = 1;  //
+        break;
+    case 11:
+        correctionValue = 1/0.216; //ritorna dato in V!
+        break;
     
+
+    case 12:// PT1000 CN2
+        //formula data da prof: R da calcolare = (tensione letta in ch0 * 2700)/ (2.5 - tensione letta in ch0)
+        volts = (volts * 2700) / (2.5 - volts); //ritorna dato in Ohm!
+        // Usa la classe PT1000 per convertire la resistenza in temperatura
+        volts = pt1000->getTemperature(volts); // Input: Ohm, Output: °C
+        break;
     default:
         Serial.println("Default Case! channel not set!  Channel: "+ channel);
     break;

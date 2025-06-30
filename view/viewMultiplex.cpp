@@ -36,16 +36,18 @@ String viewMultiplex::pageContent(){
                         <option value="tensione_non_amplificato">Corrente CN2 [mA]</option>
                         <option value="tensione_amp_331">ADS RAW Voltage con CH mux = 2</option>
                         <option value="tensione_amp_0.216">Tensione CN2[&micro;V]</option>
-                        <option value="termocoppia_cn2">Termocoppia CN2</option>
+                        <option value="termocoppia_cn2">Termocoppia K CN2</option>
                         <option value="PT100_cn2">PT100 CN2</option>
+                        <option value="PT1000_cn2">PT1000 CN2</option>
 
 
                         <option value="CN10_resistenza">Resistenza CN10</option>
                         <option value="CN10_tensione_non_amplificato">Corrente CN10 [mA]</option>
                         <option value="CN10_tensione_amp_331">ADS RAW Voltage con CH mux = 6</option>
                         <option value="CN10_tensione_amp_0.216">Tensione CN10 [&micro;V]</option>
-                        <option value="termocoppia_cn10">Termocoppia CN10</option>
+                        <option value="termocoppia_cn10">Termocoppia K CN10</option>
                         <option value="PT100_cn10">PT100 CN10</option>
+                        <option value="PT1000_cn10">PT1000 CN10</option>
 
                     </select>
                 </fieldset>

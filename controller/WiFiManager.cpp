@@ -7,7 +7,7 @@ WebServer *my_webServer = nullptr;
 WiFiManager::WiFiManager()
 {
     /*qui creo Esp32 funziona come AP!*/
-    this->ssid = "ESP32-Access-Point";
+    this->ssid = "AP-Tesi-Tommasi";
     this->password = "123456789";
     this->setupAP();
     isAP = true;
@@ -101,7 +101,7 @@ void WiFiManager::connect()
     {
         Serial.println("Errore durante la connessione alla rete Wi-Fi!");
         //throw new std::runtime_error("Errore durante la connessione alla rete Wi-Fi!");
-        this->ssid = "ESP32-Access-Point";
+        this->ssid = "AP-Tesi-Tommasi";
         this->password = "123456789";
         this->setupAP();
         isAP = true;

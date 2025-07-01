@@ -1,6 +1,7 @@
 #include "MultiplexRoutes.h"
 #include <vector>
 #include <set>
+#include "viewADS.h"
 
 void MultiplexRoutes::defineRoutes(AsyncWebServer &server) {
 
@@ -32,6 +33,20 @@ void MultiplexRoutes::defineRoutes(AsyncWebServer &server) {
             json += "]";
         }
         request->send(200, "application/json", json);
+    });
+
+    // Endpoint: /ADS_history
+    // Mostra la pagina della cronologia delle letture ADS1115
+    server.on("/ADS_history", HTTP_GET, [](AsyncWebServerRequest *request) {
+        String htmlContent = viewADS::generateHTML();
+        request->send(200, "text/html", htmlContent);
+    });
+
+    // Endpoint: /getADSContent
+    // Restituisce il contenuto aggiornato della tabella ADS per l'aggiornamento dinamico
+    server.on("/getADSContent", HTTP_GET, [](AsyncWebServerRequest *request) {
+        String content = viewADS::adsContent();
+        request->send(200, "text/html", content);
     });
 
     // Endpoint: /multiplex_graph

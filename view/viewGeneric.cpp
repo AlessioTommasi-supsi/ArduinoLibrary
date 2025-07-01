@@ -505,7 +505,7 @@ String viewGeneric::addNavbar()
             <div class="icon">⚙️</div>
             <span>Multiplexer</span>
             </a>
-            <a href="/extra">
+            <a href="/ADS_history">
             <div class="icon">📊</div>
             <span>ADS</span>
             </a>

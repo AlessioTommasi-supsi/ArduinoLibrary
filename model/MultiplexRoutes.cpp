@@ -165,9 +165,22 @@ void MultiplexRoutes::defineRoutes(AsyncWebServer &server) {
             String htmlContent = viewGeneric::defaultCssHeader("Graph View - TEST Mode");
             htmlContent += viewMultiplex::pinStartAndStopForm(999, signalType); // Use 999 as test channel
             
-            // Create a test vector for the graph
-            std::vector<int> testVector = { 999 };
-            htmlContent += viewGraph::generateGraph(testVector, "getTestValues", "channel");
+            // Create a test vector for the graph - use empty vector to avoid selector
+            std::vector<int> testVector = {};  // Empty vector = no selector, direct graph
+            htmlContent += "<script>";
+            htmlContent += "document.addEventListener('DOMContentLoaded', function() {";
+            htmlContent += "const graphContainer = document.getElementById('graphContainer');";
+            htmlContent += "if (graphContainer) {";
+            htmlContent += "graphContainer.innerHTML = `";
+            htmlContent += "<canvas id='myChart' style='width: 100%; height: 100%; display: block; border: 1px solid #ddd; border-radius: 8px;'></canvas>";
+            htmlContent += "`;";
+            htmlContent += "}";
+            htmlContent += "});";
+            htmlContent += "</script>";
+            htmlContent += viewGraph::generateBasicJavaScript();
+            htmlContent += viewGraph::generateDrawFunctionJS();
+            htmlContent += viewGraph::generateUpdateFunctionJS("getTestValues", "channel");
+            htmlContent += viewGraph::generateInitializationJS();
             htmlContent += viewGeneric::defaultFooter();
             
             request->send(200, "text/html", htmlContent);

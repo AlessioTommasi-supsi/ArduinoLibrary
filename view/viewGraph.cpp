@@ -30,217 +30,214 @@ String viewGraph::generateHTML()
 String viewGraph::generateGraph(std::vector<int> addresses, String apiFetch, String apiFetchParam)
 {
     String var_html = "";
+    
+    // Riserva memoria per evitare continue riallocazioni
+    var_html.reserve(2048);
+
+    // Creo il contenitore del grafico con dimensioni responsive
+    var_html += "<div id='graphWrapper' style='width: 100%; height: 100%; min-height: 400px; position: relative; padding: 20px; box-sizing: border-box;'>";
 
     // Only show the selector if there are multiple addresses
     if (addresses.size() > 1) {
-        // Menu a tendina per selezionare l'indirizzo del registro
-        var_html += "<div style='margin-bottom: 10px; text-align: center;'>";
-        var_html += "<label for='register-select' style='font-weight: bold; margin-right: 8px; font-size: 14px;'>Seleziona:</label>";
-        var_html += "<select id='register-select' onchange='updateGraph()' style='padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;'>";
-
-        std::set<int> seen;
-
-        for (int addr : addresses)
-        {
-            if (seen.find(addr) != seen.end()) {
-                // Se l'indirizzo è già stato aggiunto, salto la generazione dell'option.
-                continue;
-            }
-            seen.insert(addr);
-
-            if (addr > 0 && addr < 1000) {
-                var_html += "<option value='" + String(addr) + "'>" + String(addr) + "</option>";
-            } else if (addr <= 0) 
-            {
-                var_html += "<option value='" + String(addr) + "'>Multiplex:" + String(-addr) + "</option>";
-            }
-            else if (addr >= 1000 && addr < 2000) {
-                var_html += "<option value='" + String(addr - 1000) + "'>ModbusValue:" + String(addr - 1000) + "</option>";
-            } else if (addr == 999) {
-                // TEST MODE - special case
-                var_html += "<option value='999'>🧪 TEST Mode</option>";
-            } else {
-                var_html += "<option value='" + String(addr) + "'>Errore inserimento!" + String(addr - 3000) + "</option>";
-            }
-        }
-
-        var_html += "</select>";
-        var_html += "</div>";
+        var_html += generateSelectorHTML(addresses);
     }
 
-    // Canvas che si adatta perfettamente al container esistente
-    var_html += "<canvas id='myChart'></canvas>";
+    // Canvas responsive all'interno del contenitore
+    var_html += "<canvas id='myChart' style='width: 100%; height: 100%; display: block; border: 1px solid #ddd; border-radius: 8px;'></canvas>";
 
-    // Script JavaScript ottimizzato per il container esistente
-    var_html += R"(
-<script>
-let chartData = [];
+    var_html += "</div>";
 
-function resizeCanvas() {
-    const canvas = document.getElementById('myChart');
-    if (canvas && canvas.parentElement) {
-        const container = canvas.parentElement;
-        const rect = container.getBoundingClientRect();
-        
-        // Imposta dimensioni esatte del container
-        canvas.width = rect.width;
-        canvas.height = rect.height;
-        
-        // Ridisegna se ci sono dati
-        if (chartData.length > 0) {
-            drawChart(canvas, chartData);
-        }
-    }
-}
-
-function drawChart(canvas, data) {
-    const ctx = canvas.getContext('2d');
-    const width = canvas.width;
-    const height = canvas.height;
-    const padding = 40;
-    const chartWidth = width - 2 * padding;
-    const chartHeight = height - 2 * padding;
-    
-    // Pulisce il canvas
-    ctx.clearRect(0, 0, width, height);
-    
-    if (data.length === 0) {
-        ctx.fillStyle = '#666';
-        ctx.font = '14px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('Nessun dato disponibile', width / 2, height / 2);
-        return;
-    }
-    
-    // Scala dinamica per Y
-    const minValue = Math.min(...data);
-    const maxValue = Math.max(...data);
-    const valueRange = maxValue - minValue || 1;
-    
-    // Griglia di sfondo
-    ctx.strokeStyle = '#f0f0f0';
-    ctx.lineWidth = 1;
-    for (let i = 0; i <= 5; i++) {
-        const y = padding + (chartHeight * i / 5);
-        ctx.beginPath();
-        ctx.moveTo(padding, y);
-        ctx.lineTo(width - padding, y);
-        ctx.stroke();
-    }
-    
-    // Assi principali
-    ctx.strokeStyle = '#333';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(padding, padding);
-    ctx.lineTo(padding, height - padding);
-    ctx.lineTo(width - padding, height - padding);
-    ctx.stroke();
-    
-    // Etichette Y (più compatte)
-    ctx.fillStyle = '#333';
-    ctx.font = '11px Arial';
-    ctx.textAlign = 'right';
-    for (let i = 0; i <= 5; i++) {
-        const value = minValue + (valueRange * i / 5);
-        const y = height - padding - (chartHeight * i / 5);
-        ctx.fillText(value.toFixed(1), padding - 5, y + 3);
-    }
-    
-    // Linea del grafico
-    ctx.strokeStyle = '#4CAF50';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    
-    const stepX = chartWidth / Math.max(data.length - 1, 1);
-    for (let i = 0; i < data.length; i++) {
-        const x = padding + (stepX * i);
-        const normalizedValue = (data[i] - minValue) / valueRange;
-        const y = height - padding - (chartHeight * normalizedValue);
-        
-        if (i === 0) {
-            ctx.moveTo(x, y);
-        } else {
-            ctx.lineTo(x, y);
-        }
-    }
-    ctx.stroke();
-    
-    // Punti (solo se dataset non troppo grande)
-    if (data.length <= 30) {
-        ctx.fillStyle = '#2196F3';
-        for (let i = 0; i < data.length; i++) {
-            const x = padding + (stepX * i);
-            const normalizedValue = (data[i] - minValue) / valueRange;
-            const y = height - padding - (chartHeight * normalizedValue);
-            
-            ctx.beginPath();
-            ctx.arc(x, y, 2, 0, 2 * Math.PI);
-            ctx.fill();
-        }
-    }
-    
-    // Valore corrente (in alto a sinistra)
-    if (data.length > 0) {
-        const lastValue = data[data.length - 1];
-        ctx.fillStyle = '#2196F3';
-        ctx.font = 'bold 12px Arial';
-        ctx.textAlign = 'left';
-        ctx.fillText('Ultimo: ' + lastValue.toFixed(2), padding, 20);
-    }
-}
-
-function updateGraph() {
-    const selectElement = document.getElementById('register-select');
-    const address = selectElement ? selectElement.value : 0;
-    
-    fetch('/)";
-    
-    var_html += apiFetch + "?" + apiFetchParam + "=' + address)";
-    
-    var_html += R"(
-        .then(response => response.json())
-        .then(data => {
-            chartData = data;
-            const canvas = document.getElementById('myChart');
-            if (canvas) {
-                drawChart(canvas, data);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            const canvas = document.getElementById('myChart');
-            if (canvas) {
-                const ctx = canvas.getContext('2d');
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#f44336';
-                ctx.font = '14px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('Errore nel caricamento dei dati', canvas.width / 2, canvas.height / 2);
-            }
-        });
-}
-
-// Inizializzazione quando il DOM è pronto
-document.addEventListener('DOMContentLoaded', function() {
-    // Aspetta un frame per essere sicuri che il layout sia completo
-    requestAnimationFrame(() => {
-        resizeCanvas();
-        updateGraph();
-        
-        // Aggiornamento automatico ogni 2 secondi
-        setInterval(updateGraph, 2000);
-        
-        // Ridimensionamento della finestra
-        window.addEventListener('resize', () => {
-            setTimeout(resizeCanvas, 100);
-        });
-    });
-});
-</script>
-)";
+    // JavaScript diviso in parti più piccole
+    var_html += generateBasicJavaScript();
+    var_html += generateDrawFunctionJS();
+    var_html += generateUpdateFunctionJS(apiFetch, apiFetchParam);
+    var_html += generateInitializationJS();
 
     return var_html;
+}
+
+String viewGraph::generateSelectorHTML(std::vector<int> addresses)
+{
+    String html = "";
+    html.reserve(512);
+    
+    html += "<div style='margin-bottom: 10px; text-align: center;'>";
+    html += "<label for='register-select' style='font-weight: bold; margin-right: 8px; font-size: 14px;'>Seleziona:</label>";
+    html += "<select id='register-select' onchange='updateGraph()' style='padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;'>";
+
+    std::set<int> seen;
+    for (int addr : addresses)
+    {
+        if (seen.find(addr) != seen.end()) {
+            continue;
+        }
+        seen.insert(addr);
+
+        if (addr > 0 && addr < 1000) {
+            html += "<option value='" + String(addr) + "'>" + String(addr) + "</option>";
+        } else if (addr <= 0) {
+            html += "<option value='" + String(addr) + "'>Multiplex:" + String(-addr) + "</option>";
+        } else if (addr >= 1000 && addr < 2000) {
+            html += "<option value='" + String(addr - 1000) + "'>ModbusValue:" + String(addr - 1000) + "</option>";
+        } else if (addr == 999) {
+            html += "<option value='999'>🧪 TEST Mode</option>";
+        } else {
+            html += "<option value='" + String(addr) + "'>Errore inserimento!" + String(addr - 3000) + "</option>";
+        }
+    }
+
+    html += "</select></div>";
+    return html;
+}
+
+String viewGraph::generateBasicJavaScript()
+{
+    return "<script>let chartData = [];</script>";
+}
+
+String viewGraph::generateDrawFunctionJS()
+{
+    String js = "";
+    js.reserve(1024);
+    
+    js += "<script>";
+    js += "function resizeCanvas() {";
+    js += "const canvas = document.getElementById('myChart');";
+    js += "if (canvas && canvas.parentElement) {";
+    js += "const container = canvas.parentElement;";
+    js += "const rect = container.getBoundingClientRect();";
+    js += "canvas.width = rect.width - 40;";  // Sottrae il padding
+    js += "canvas.height = rect.height - 40;";
+    js += "if (chartData.length > 0) { drawChart(canvas, chartData); }";
+    js += "}}";
+    
+    js += "function drawChart(canvas, data) {";
+    js += "const ctx = canvas.getContext('2d');";
+    js += "const width = canvas.width;";
+    js += "const height = canvas.height;";
+    js += "const padding = 40;";
+    js += "const chartWidth = width - 2 * padding;";
+    js += "const chartHeight = height - 2 * padding;";
+    js += "ctx.clearRect(0, 0, width, height);";
+    js += "if (data.length === 0) {";
+    js += "ctx.fillStyle = '#666';";
+    js += "ctx.font = '14px Arial';";
+    js += "ctx.textAlign = 'center';";
+    js += "ctx.fillText('Nessun dato disponibile', width / 2, height / 2);";
+    js += "return;";
+    js += "}";
+    js += "const minValue = Math.min(...data);";
+    js += "const maxValue = Math.max(...data);";
+    js += "const valueRange = maxValue - minValue || 1;";
+    js += "ctx.strokeStyle = '#f0f0f0';";
+    js += "ctx.lineWidth = 1;";
+    js += "for (let i = 0; i <= 5; i++) {";
+    js += "const y = padding + (chartHeight * i / 5);";
+    js += "ctx.beginPath();";
+    js += "ctx.moveTo(padding, y);";
+    js += "ctx.lineTo(width - padding, y);";
+    js += "ctx.stroke();";
+    js += "}";
+    js += "ctx.strokeStyle = '#333';";
+    js += "ctx.lineWidth = 2;";
+    js += "ctx.beginPath();";
+    js += "ctx.moveTo(padding, padding);";
+    js += "ctx.lineTo(padding, height - padding);";
+    js += "ctx.lineTo(width - padding, height - padding);";
+    js += "ctx.stroke();";
+    js += "ctx.fillStyle = '#333';";
+    js += "ctx.font = '11px Arial';";
+    js += "ctx.textAlign = 'right';";
+    js += "for (let i = 0; i <= 5; i++) {";
+    js += "const value = minValue + (valueRange * i / 5);";
+    js += "const y = height - padding - (chartHeight * i / 5);";
+    js += "ctx.fillText(value.toFixed(1), padding - 5, y + 3);";
+    js += "}";
+    js += "ctx.strokeStyle = '#4CAF50';";
+    js += "ctx.lineWidth = 2;";
+    js += "ctx.beginPath();";
+    js += "const stepX = chartWidth / Math.max(data.length - 1, 1);";
+    js += "for (let i = 0; i < data.length; i++) {";
+    js += "const x = padding + (stepX * i);";
+    js += "const normalizedValue = (data[i] - minValue) / valueRange;";
+    js += "const y = height - padding - (chartHeight * normalizedValue);";
+    js += "if (i === 0) { ctx.moveTo(x, y); } else { ctx.lineTo(x, y); }";
+    js += "}";
+    js += "ctx.stroke();";
+    js += "if (data.length <= 30) {";
+    js += "ctx.fillStyle = '#2196F3';";
+    js += "for (let i = 0; i < data.length; i++) {";
+    js += "const x = padding + (stepX * i);";
+    js += "const normalizedValue = (data[i] - minValue) / valueRange;";
+    js += "const y = height - padding - (chartHeight * normalizedValue);";
+    js += "ctx.beginPath();";
+    js += "ctx.arc(x, y, 2, 0, 2 * Math.PI);";
+    js += "ctx.fill();";
+    js += "}}";
+    js += "if (data.length > 0) {";
+    js += "const lastValue = data[data.length - 1];";
+    js += "ctx.fillStyle = '#2196F3';";
+    js += "ctx.font = 'bold 12px Arial';";
+    js += "ctx.textAlign = 'left';";
+    js += "ctx.fillText('Ultimo: ' + lastValue.toFixed(2), padding, 20);";
+    js += "}}";
+    js += "</script>";
+    
+    return js;
+}
+
+String viewGraph::generateUpdateFunctionJS(String apiFetch, String apiFetchParam)
+{
+    String js = "";
+    js.reserve(512);
+    
+    js += "<script>";
+    js += "function updateGraph() {";
+    js += "const selectElement = document.getElementById('register-select');";
+    js += "const address = selectElement ? selectElement.value : 0;";
+    js += "fetch('" + apiFetch + "?" + apiFetchParam + "=' + address)";
+    js += ".then(response => response.json())";
+    js += ".then(data => {";
+    js += "chartData = data;";
+    js += "const canvas = document.getElementById('myChart');";
+    js += "if (canvas) { drawChart(canvas, data); }";
+    js += "})";
+    js += ".catch(error => {";
+    js += "console.error('Error:', error);";
+    js += "const canvas = document.getElementById('myChart');";
+    js += "if (canvas) {";
+    js += "const ctx = canvas.getContext('2d');";
+    js += "ctx.clearRect(0, 0, canvas.width, canvas.height);";
+    js += "ctx.fillStyle = '#f44336';";
+    js += "ctx.font = '14px Arial';";
+    js += "ctx.textAlign = 'center';";
+    js += "ctx.fillText('Errore nel caricamento dei dati', canvas.width / 2, canvas.height / 2);";
+    js += "}});";
+    js += "}";
+    js += "</script>";
+    
+    return js;
+}
+
+String viewGraph::generateInitializationJS()
+{
+    String js = "";
+    js.reserve(512);
+    
+    js += "<script>";
+    js += "document.addEventListener('DOMContentLoaded', function() {";
+    js += "requestAnimationFrame(() => {";
+    js += "resizeCanvas();";
+    js += "updateGraph();";
+    js += "setInterval(updateGraph, 2000);";
+    js += "window.addEventListener('resize', () => {";
+    js += "setTimeout(resizeCanvas, 100);";
+    js += "});";
+    js += "});";
+    js += "});";
+    js += "</script>";
+    
+    return js;
 }
 
 String viewGraph::initCirularProgressBarGraph()

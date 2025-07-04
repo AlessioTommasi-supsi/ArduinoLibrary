@@ -10,12 +10,13 @@ String cssMultiplexLayout::getCSS() {
                     grid-template-columns: 300px 1fr;
                     grid-template-rows: auto 1fr;
                     gap: 5px;  /* Ridotto da 10px a 5px */
-                    height: 100vh;
-                    width: 100vw;  /* Aggiunto width: 100vw per occupare tutta la larghezza */
+                    height: 80vh;  /* Ridotto da 100vh a 80vh per fare spazio alla navbar */
+                    width: 80vw;  /* Ridotto da 100vw a 80vw per margini laterali */
                     padding: 4px;  /* Ridotto da 8px a 4px */
                     box-sizing: border-box;
                     overflow: hidden;
-                    margin: 0;  /* Aggiunto margin: 0 */
+                    margin: 0 auto;  /* Centrato orizzontalmente */
+                    margin-top: 20px;  /* Margine superiore per distanza dalla header */
                 }
                 
                 .multiplex-header {

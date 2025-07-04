@@ -34,18 +34,27 @@ void MultiplexRoutes::defineRoutes(AsyncWebServer &server) {
     server.on("/getMultiplexValue", HTTP_GET, [](AsyncWebServerRequest *request) {
         ADS1115_controller* adsCtrl = ADS1115_controller::getInstance();
         
-        // Check if ADS is initialized
+        String signalType = "";
+        if (request->hasParam("signalType")) {
+            signalType = request->getParam("signalType")->value();
+        }
+        
+        // TEST MODE - simulate random values
+        if (signalType == "TEST") {
+            float simulatedValue = random(100, 500) / 10.0; // Random value between 10.0 and 50.0
+            String json = "{\"value\":" + String(simulatedValue, 2) + ",\"signalType\":\"TEST\",\"mode\":\"simulation\"}";
+            request->send(200, "application/json", json);
+            return;
+        }
+        
+        // Check if ADS is initialized for real signals
         if (adsCtrl->isInitializationFailed()) {
             String errorJson = "{\"error\":\"ADS1115 not initialized\",\"value\":0}";
             request->send(500, "application/json", errorJson);
             return;
         }
         
-        String signalType = "";
-        if (request->hasParam("signalType")) {
-            signalType = request->getParam("signalType")->value();
-            adsCtrl->setChannel(signalType);
-        }
+        adsCtrl->setChannel(signalType);
         
         // Try to read current value safely
         float currentValue = 0.0;
@@ -86,19 +95,38 @@ void MultiplexRoutes::defineRoutes(AsyncWebServer &server) {
         request->send(200, "text/html", content);
     });
 
+    // Endpoint for TEST mode - simulated graph data
+    server.on("/getTestValues", HTTP_GET, [](AsyncWebServerRequest *request) {
+        // Generate simulated data for the graph
+        String json = "[";
+        int numPoints = 20; // Generate 20 data points
+        
+        for (int i = 0; i < numPoints; i++) {
+            if (i > 0) json += ",";
+            
+            // Create realistic looking data with some variation
+            float baseValue = 25.0; // Base temperature value
+            float variation = sin(i * 0.3) * 5.0; // Sine wave variation
+            float noise = (random(-100, 100) / 100.0); // Small random noise
+            float simulatedValue = baseValue + variation + noise;
+            
+            json += String(simulatedValue, 2);
+        }
+        
+        json += "]";
+        request->send(200, "application/json", json);
+    });
+
     // Endpoint: /multiplex_graph
     // Gestisce l'input della configurazione e avvia/ferma la registrazione.
     // Genera la pagina HTML con il grafico, inserendo anche un eventuale messaggio d'errore
     // e un bottone "Riprova inizializzazione" se l'ADS1115 non è stato inizializzato correttamente.
     server.on("/multiplex_graph", HTTP_GET, [](AsyncWebServerRequest *request) {
         String signalType;
-        String action;
+        String action = "";
         String milliseconds;
         String ErrorMessage = "";
 
-        
-        ADS1115_controller* adsCtrl = ADS1115_controller::getInstance();
-        
         if (request->hasParam("signalType")) {
             signalType = request->getParam("signalType")->value();
             Serial.println("Signal type: " + signalType);
@@ -116,13 +144,45 @@ void MultiplexRoutes::defineRoutes(AsyncWebServer &server) {
         
         if (request->hasParam("milliseconds")) {
             milliseconds = request->getParam("milliseconds")->value();
-            adsCtrl->recordingInterval = milliseconds.toInt();
             Serial.println("Milliseconds: " + milliseconds);
         } else {
             milliseconds = "1000";
         }
         
-        // Check ADS initialization before proceeding
+        // TEST MODE - skip ADS initialization check BEFORE accessing ADS controller
+        if (signalType == "TEST") {
+            Serial.println("TEST mode activated - bypassing ADS1115");
+            
+            // In modalità TEST, non chiamare MAI l'ADS1115_controller
+            // Gestisci solo le azioni che non richiedono hardware
+            if (action == "start_recording" || action == "stop_recording" || 
+                action == "start_monitor" || action == "stop_monitor" ||
+                action == "start_monitor_alert" || action == "stop_monitor_alert") {
+                Serial.println("TEST mode: Azione " + action + " simulata (nessun hardware coinvolto)");
+            }
+            
+            // Generate test page without ADS operations
+            String htmlContent = viewGeneric::defaultCssHeader("Graph View - TEST Mode");
+            htmlContent += viewMultiplex::pinStartAndStopForm(999, signalType); // Use 999 as test channel
+            
+            // Create a test vector for the graph
+            std::vector<int> testVector = { 999 };
+            htmlContent += viewGraph::generateGraph(testVector, "getTestValues", "channel");
+            htmlContent += viewGeneric::defaultFooter();
+            
+            request->send(200, "text/html", htmlContent);
+            return;
+        }
+
+        // Only access ADS controller for NON-TEST modes
+        ADS1115_controller* adsCtrl = ADS1115_controller::getInstance();
+        
+        // Set recording interval only for real ADS operations
+        if (request->hasParam("milliseconds")) {
+            adsCtrl->recordingInterval = milliseconds.toInt();
+        }
+        
+        // Check ADS initialization before proceeding (only for real signals)
         if (adsCtrl->isInitializationFailed()) {
             ErrorMessage = "<h1>Error: ADS1115 Initialization Failed.</h1>";
             ErrorMessage += "<p>Impossibile procedere senza ADS1115 funzionante.</p>";

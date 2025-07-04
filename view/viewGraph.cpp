@@ -34,9 +34,9 @@ String viewGraph::generateGraph(std::vector<int> addresses, String apiFetch, Str
     // Only show the selector if there are multiple addresses
     if (addresses.size() > 1) {
         // Menu a tendina per selezionare l'indirizzo del registro
-        var_html += "<div style='margin-bottom: 15px; text-align: center;'>";
-        var_html += "<label for='register-select' style='font-weight: bold; margin-right: 10px;'>Seleziona:</label>";
-        var_html += "<select id='register-select' onchange='updateGraph()' style='padding: 5px 10px; border: 1px solid #ccc; border-radius: 4px;'>";
+        var_html += "<div style='margin-bottom: 10px; text-align: center;'>";
+        var_html += "<label for='register-select' style='font-weight: bold; margin-right: 8px; font-size: 14px;'>Seleziona:</label>";
+        var_html += "<select id='register-select' onchange='updateGraph()' style='padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;'>";
 
         std::set<int> seen;
 
@@ -56,7 +56,9 @@ String viewGraph::generateGraph(std::vector<int> addresses, String apiFetch, Str
             }
             else if (addr >= 1000 && addr < 2000) {
                 var_html += "<option value='" + String(addr - 1000) + "'>ModbusValue:" + String(addr - 1000) + "</option>";
-            
+            } else if (addr == 999) {
+                // TEST MODE - special case
+                var_html += "<option value='999'>🧪 TEST Mode</option>";
             } else {
                 var_html += "<option value='" + String(addr) + "'>Errore inserimento!" + String(addr - 3000) + "</option>";
             }
@@ -66,25 +68,25 @@ String viewGraph::generateGraph(std::vector<int> addresses, String apiFetch, Str
         var_html += "</div>";
     }
 
-    // Contenitore per il grafico - responsive
-    var_html += "<div style='width: 100%; height: 100%; min-height: 300px; position: relative;'>";
-    var_html += "<canvas id='myChart' style='width: 100%; height: 100%; border: 1px solid #ccc; border-radius: 4px;'></canvas>";
-    var_html += "</div>";
+    // Canvas che si adatta perfettamente al container esistente
+    var_html += "<canvas id='myChart'></canvas>";
 
-    // Script JavaScript per grafico personalizzato - usando template literals per evitare errori di sintassi
+    // Script JavaScript ottimizzato per il container esistente
     var_html += R"(
 <script>
 let chartData = [];
-let chartCanvas = null;
 
 function resizeCanvas() {
     const canvas = document.getElementById('myChart');
-    if (canvas) {
+    if (canvas && canvas.parentElement) {
         const container = canvas.parentElement;
-        canvas.width = container.offsetWidth;
-        canvas.height = container.offsetHeight;
+        const rect = container.getBoundingClientRect();
         
-        // Ridisegna il grafico dopo il ridimensionamento
+        // Imposta dimensioni esatte del container
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        
+        // Ridisegna se ci sono dati
         if (chartData.length > 0) {
             drawChart(canvas, chartData);
         }
@@ -95,7 +97,7 @@ function drawChart(canvas, data) {
     const ctx = canvas.getContext('2d');
     const width = canvas.width;
     const height = canvas.height;
-    const padding = 50;
+    const padding = 40;
     const chartWidth = width - 2 * padding;
     const chartHeight = height - 2 * padding;
     
@@ -103,62 +105,54 @@ function drawChart(canvas, data) {
     ctx.clearRect(0, 0, width, height);
     
     if (data.length === 0) {
-        // Mostra messaggio se non ci sono dati
         ctx.fillStyle = '#666';
-        ctx.font = '16px Arial';
+        ctx.font = '14px Arial';
         ctx.textAlign = 'center';
         ctx.fillText('Nessun dato disponibile', width / 2, height / 2);
         return;
     }
     
-    // Trova min e max per la scala Y
+    // Scala dinamica per Y
     const minValue = Math.min(...data);
     const maxValue = Math.max(...data);
     const valueRange = maxValue - minValue || 1;
     
-    // Disegna gli assi
-    ctx.strokeStyle = '#333';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    // Asse Y
-    ctx.moveTo(padding, padding);
-    ctx.lineTo(padding, height - padding);
-    // Asse X
-    ctx.lineTo(width - padding, height - padding);
-    ctx.stroke();
-    
-    // Etichette asse Y
-    ctx.fillStyle = '#333';
-    ctx.font = '12px Arial';
-    ctx.textAlign = 'right';
+    // Griglia di sfondo
+    ctx.strokeStyle = '#f0f0f0';
+    ctx.lineWidth = 1;
     for (let i = 0; i <= 5; i++) {
-        const value = minValue + (valueRange * i / 5);
-        const y = height - padding - (chartHeight * i / 5);
-        ctx.fillText(value.toFixed(1), padding - 10, y + 4);
-        
-        // Linee griglia orizzontali
-        ctx.strokeStyle = '#eee';
-        ctx.lineWidth = 1;
+        const y = padding + (chartHeight * i / 5);
         ctx.beginPath();
         ctx.moveTo(padding, y);
         ctx.lineTo(width - padding, y);
         ctx.stroke();
     }
     
-    // Etichette asse X (meno dense per evitare sovrapposizioni)
-    ctx.textAlign = 'center';
-    const stepX = chartWidth / Math.max(data.length - 1, 1);
-    const labelStep = Math.max(1, Math.floor(data.length / 8));
-    for (let i = 0; i < data.length; i += labelStep) {
-        const x = padding + (stepX * i);
-        ctx.fillText((i + 1).toString(), x, height - padding + 20);
+    // Assi principali
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(padding, padding);
+    ctx.lineTo(padding, height - padding);
+    ctx.lineTo(width - padding, height - padding);
+    ctx.stroke();
+    
+    // Etichette Y (più compatte)
+    ctx.fillStyle = '#333';
+    ctx.font = '11px Arial';
+    ctx.textAlign = 'right';
+    for (let i = 0; i <= 5; i++) {
+        const value = minValue + (valueRange * i / 5);
+        const y = height - padding - (chartHeight * i / 5);
+        ctx.fillText(value.toFixed(1), padding - 5, y + 3);
     }
     
-    // Disegna la linea del grafico
+    // Linea del grafico
     ctx.strokeStyle = '#4CAF50';
     ctx.lineWidth = 2;
     ctx.beginPath();
     
+    const stepX = chartWidth / Math.max(data.length - 1, 1);
     for (let i = 0; i < data.length; i++) {
         const x = padding + (stepX * i);
         const normalizedValue = (data[i] - minValue) / valueRange;
@@ -172,8 +166,8 @@ function drawChart(canvas, data) {
     }
     ctx.stroke();
     
-    // Disegna i punti (solo se non troppi dati)
-    if (data.length <= 50) {
+    // Punti (solo se dataset non troppo grande)
+    if (data.length <= 30) {
         ctx.fillStyle = '#2196F3';
         for (let i = 0; i < data.length; i++) {
             const x = padding + (stepX * i);
@@ -181,24 +175,18 @@ function drawChart(canvas, data) {
             const y = height - padding - (chartHeight * normalizedValue);
             
             ctx.beginPath();
-            ctx.arc(x, y, 3, 0, 2 * Math.PI);
+            ctx.arc(x, y, 2, 0, 2 * Math.PI);
             ctx.fill();
         }
     }
     
-    // Titolo del grafico
-    ctx.fillStyle = '#333';
-    ctx.font = '14px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('Valori in Tempo Reale', width / 2, 25);
-    
-    // Mostra ultimo valore
+    // Valore corrente (in alto a sinistra)
     if (data.length > 0) {
         const lastValue = data[data.length - 1];
         ctx.fillStyle = '#2196F3';
-        ctx.font = 'bold 16px Arial';
-        ctx.textAlign = 'right';
-        ctx.fillText('Ultimo: ' + lastValue.toFixed(2), width - 20, 40);
+        ctx.font = 'bold 12px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText('Ultimo: ' + lastValue.toFixed(2), padding, 20);
     }
 }
 
@@ -226,25 +214,28 @@ function updateGraph() {
                 const ctx = canvas.getContext('2d');
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = '#f44336';
-                ctx.font = '16px Arial';
+                ctx.font = '14px Arial';
                 ctx.textAlign = 'center';
                 ctx.fillText('Errore nel caricamento dei dati', canvas.width / 2, canvas.height / 2);
             }
         });
 }
 
+// Inizializzazione quando il DOM è pronto
 document.addEventListener('DOMContentLoaded', function() {
-    // Inizializza il canvas
-    resizeCanvas();
-    
-    // Aggiorna il grafico
-    updateGraph();
-    
-    // Aggiorna automaticamente ogni 2 secondi
-    setInterval(updateGraph, 2000);
-    
-    // Gestisce il ridimensionamento della finestra
-    window.addEventListener('resize', resizeCanvas);
+    // Aspetta un frame per essere sicuri che il layout sia completo
+    requestAnimationFrame(() => {
+        resizeCanvas();
+        updateGraph();
+        
+        // Aggiornamento automatico ogni 2 secondi
+        setInterval(updateGraph, 2000);
+        
+        // Ridimensionamento della finestra
+        window.addEventListener('resize', () => {
+            setTimeout(resizeCanvas, 100);
+        });
+    });
 });
 </script>
 )";

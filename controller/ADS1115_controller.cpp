@@ -62,6 +62,8 @@ int ADS1115_controller::signalTypeToChannel(const String &signalType) {
         return 12; // Aggiunto per PT1000 CN2
     } else if (signalType == "PT1000_cn10") {
         return 13;
+    } else if (signalType == "TEST") {
+        return 999; // Canale speciale per la modalità TEST
     } else {
         return -1;
     }
@@ -136,6 +138,11 @@ float ADS1115_controller::signalCorrectionValue(int channel, float volts) {
         volts = (volts * 2700) / (2.5 - volts); //ritorna dato in Ohm!
         // Usa la classe PT1000 per convertire la resistenza in temperatura
         volts = pt1000->getTemperature(volts); // Input: Ohm, Output: °C
+        break;
+    case 999:// TEST MODE - return simulated value
+        // In modalità TEST, restituisce un valore simulato senza elaborazioni
+        Serial.println("TEST mode: returning simulated value");
+        volts = 20.0 + random(-50, 50) / 10.0; // Simula temperatura 15-25°C
         break;
     default:
         Serial.println("Default Case! channel not set!  Channel: "+ channel);

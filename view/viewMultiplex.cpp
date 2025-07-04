@@ -48,6 +48,8 @@ String viewMultiplex::pageContent(){
                         <option value="termocoppia_cn10">Termocoppia K CN10</option>
                         <option value="PT100_cn10">PT100 CN10</option>
                         <option value="PT1000_cn10">PT1000 CN10</option>
+                        
+                        <option value="TEST">🧪 TEST - Simulazione valori casuali</option>
 
                     </select>
                 </fieldset>
@@ -90,8 +92,15 @@ String viewMultiplex::pageContent(){
                     case "CN10_tensione_amp_0.216":
                         messageDiv.textContent = "Collegare al morsetto 1 dekka morsettiera CN10.";
                         break;
+                    case "TEST":
+                        messageDiv.textContent = "🧪 Modalità TEST: Simulazione con valori casuali per testare l'interfaccia senza hardware ADS1115.";
+                        messageDiv.style.color = "#FF9800";
+                        messageDiv.style.fontWeight = "bold";
+                        break;
                     default:
                         messageDiv.textContent = "";
+                        messageDiv.style.color = "";
+                        messageDiv.style.fontWeight = "";
                 }
             }
             
@@ -248,7 +257,8 @@ String viewMultiplex::pinStartAndStopForm(int channelAdsNumber, String signalTyp
                     'CN10_resistenza': 'Ω',
                     'CN10_tensione_non_amplificato': 'mA',
                     'CN10_tensione_amp_331': 'V',
-                    'CN10_tensione_amp_0.216': 'μV'
+                    'CN10_tensione_amp_0.216': 'μV',
+                    'TEST': '🧪'
                 };
                 return units[signalType] || '';
             }

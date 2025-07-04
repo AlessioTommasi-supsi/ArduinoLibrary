@@ -26,26 +26,63 @@ void MultiplexRoutes::defineRoutes(AsyncWebServer &server) {
                 json += ",";
             json += String(values[i]);
         }
-        // Se non ci sono valori, restituisce un array vuoto (oppure puoi decidere di restituire [0])
-        if(values.size() == 0) {
-            json = "[]";
-        } else {
-            json += "]";
-        }
+        json += "]";
         request->send(200, "application/json", json);
     });
 
-    // Endpoint: /ADS_history
-    // Mostra la pagina della cronologia delle letture ADS1115
-    server.on("/ADS_history", HTTP_GET, [](AsyncWebServerRequest *request) {
-        String htmlContent = viewADS::generateHTML();
-        request->send(200, "text/html", htmlContent);
+    // New endpoint for real-time value
+    server.on("/getMultiplexValue", HTTP_GET, [](AsyncWebServerRequest *request) {
+        ADS1115_controller* adsCtrl = ADS1115_controller::getInstance();
+        
+        // Check if ADS is initialized
+        if (adsCtrl->isInitializationFailed()) {
+            String errorJson = "{\"error\":\"ADS1115 not initialized\",\"value\":0}";
+            request->send(500, "application/json", errorJson);
+            return;
+        }
+        
+        String signalType = "";
+        if (request->hasParam("signalType")) {
+            signalType = request->getParam("signalType")->value();
+            adsCtrl->setChannel(signalType);
+        }
+        
+        // Try to read current value safely
+        float currentValue = 0.0;
+        try {
+            currentValue = adsCtrl->read();
+        } catch (...) {
+            Serial.println("Error reading ADS1115 value");
+            String errorJson = "{\"error\":\"Failed to read ADS1115\",\"value\":0}";
+            request->send(500, "application/json", errorJson);
+            return;
+        }
+        
+        String json = "{\"value\":" + String(currentValue, 4) + ",\"signalType\":\"" + signalType + "\"}";
+        request->send(200, "application/json", json);
     });
 
-    // Endpoint: /getADSContent
-    // Restituisce il contenuto aggiornato della tabella ADS per l'aggiornamento dinamico
-    server.on("/getADSContent", HTTP_GET, [](AsyncWebServerRequest *request) {
-        String content = viewADS::adsContent();
+    // Endpoint to retry ADS initialization
+    server.on("/reinitialize_ads", HTTP_GET, [](AsyncWebServerRequest *request) {
+        ADS1115_controller* adsCtrl = ADS1115_controller::getInstance();
+        adsCtrl->reinitialize();
+        
+        if (adsCtrl->isInitializationFailed()) {
+            String htmlContent = "<h1>Reinitializzazione Fallita</h1>";
+            htmlContent += "<p>L'ADS1115 non riesce ancora a inizializzarsi. Controlla i collegamenti I2C.</p>";
+            htmlContent += "<form action='/reinitialize_ads' method='get'><button type='submit'>Riprova</button></form>";
+            htmlContent += "<br><a href='/multiplex_config'>Torna alla configurazione</a>";
+            request->send(500, "text/html", htmlContent);
+        } else {
+            String htmlContent = "<h1>Reinizializzazione Riuscita!</h1>";
+            htmlContent += "<p>L'ADS1115 è stato inizializzato correttamente.</p>";
+            htmlContent += "<br><a href='/multiplex_config'>Torna alla configurazione</a>";
+            request->send(200, "text/html", htmlContent);
+        }
+    });
+
+    server.on("/ads", HTTP_GET, [](AsyncWebServerRequest *request) {
+        String content = viewADS::generateHTML();
         request->send(200, "text/html", content);
     });
 
@@ -85,10 +122,19 @@ void MultiplexRoutes::defineRoutes(AsyncWebServer &server) {
             milliseconds = "1000";
         }
         
-        // Imposta il canale del multiplexer in base al signalType
-        adsCtrl->setChannel(signalType);
-
+        // Check ADS initialization before proceeding
+        if (adsCtrl->isInitializationFailed()) {
+            ErrorMessage = "<h1>Error: ADS1115 Initialization Failed.</h1>";
+            ErrorMessage += "<p>Impossibile procedere senza ADS1115 funzionante.</p>";
+            ErrorMessage += "<form action='/reinitialize_ads' method='get'><button type='submit'>Riprova inizializzazione</button></form>";
+            ErrorMessage += "<br><a href='/multiplex_config'>Torna alla configurazione</a>";
+            Serial.println("Initialization failed: " + ErrorMessage);
+            request->send(500, "text/html", ErrorMessage);
+            return;
+        }
         
+        // Imposta il canale del multiplexer in base al signalType (only if ADS is working)
+        adsCtrl->setChannel(signalType);
 
         //gestione pin che monitora un altro pin! posso fare monitor di 1 solo pi di out per volta! e solo o monitor o solo alert!!
         if (action == "start_monitor") {
@@ -111,13 +157,6 @@ void MultiplexRoutes::defineRoutes(AsyncWebServer &server) {
             adsCtrl->stopRecording();
         }
         
-        if (adsCtrl->isInitializationFailed()) {
-            // Aggiunge un messaggio d'errore e un form con un bottone per tentare la re-inizializzazione.
-            ErrorMessage = "<h1>Error: ADS1115 Initialization Failed.</h1>";
-            ErrorMessage += "<form action='/reinitialize_ads' method='get'><button type='submit'>Riprova inizializzazione</button></form><br><br><br><br><br>";
-            Serial.println("Initialization failed: " + ErrorMessage);
-        }
-        
         Serial.println("Action completed, preparing response...");
         
         // Prepara un vettore contenente il canale selezionato (un singolo elemento)
@@ -125,24 +164,9 @@ void MultiplexRoutes::defineRoutes(AsyncWebServer &server) {
         
         String htmlContent = viewGeneric::defaultCssHeader("Graph View");
         htmlContent += viewMultiplex::pinStartAndStopForm(adsCtrl->getCurrentChannel(), signalType);
-        htmlContent += viewGraph::generateGraph(channelVector, "getADSValues", "ads1115");
-        htmlContent += ErrorMessage;
+        htmlContent += viewGraph::generateGraph(channelVector, "getADSValues", "channel");
+        htmlContent += viewGeneric::defaultFooter();
         
         request->send(200, "text/html", htmlContent);
-    });
-
-    // Endpoint: /reinitialize_ads
-    // Tenta di re-inizializzare l'ADS1115 e restituisce il risultato (con un link per tornare al Graph)
-    server.on("/reinitialize_ads", HTTP_GET, [](AsyncWebServerRequest *request) {
-        ADS1115_controller* adsCtrl = ADS1115_controller::getInstance();
-        adsCtrl->reinitialize();
-        String Message = "";
-        if (adsCtrl->isInitializationFailed()) {
-            Message = "<h1>Riprova inizializzazione fallita.</h1>";
-        } else {
-            Message = "<h1>ADS1115 re-inizializzato con successo!</h1>";
-        }
-        Message += "<a href='/multiplex_config'>Torna alle configurazioni</a>";
-        request->send(200, "text/html", Message);
     });
 }

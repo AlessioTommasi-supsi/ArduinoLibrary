@@ -108,85 +108,249 @@ String viewMultiplex::pageContent(){
 String viewMultiplex::pinStartAndStopForm(int channelAdsNumber, String signalType){
     String form = "";
 
-    //form+= viewGeneric::dynamicUpdateContent("", "/pinStyle", -1); e richiesto da mettere al chiamante!
-    form += R"(
-        <div class="pin-container">
-            <h3>
-                <div class="pin-info">Tipo di segnale: )" + signalType + R"(</div>
-            </h3>
-            <div class="pin-actions">
-                <form action="/multiplex_graph" method="get">
-                    <label for="milliseconds">Milliseconds:</label>
-                    <input type="text" id="milliseconds" name="milliseconds" required="" value="1000">
-                    <input type="hidden" name="signalType" value=")" + signalType + R"(">
-                    <input type="hidden" name="channelAdsNumber" value=")" + String(channelAdsNumber) + R"(">
-                    <input type="hidden" name="action" value="start_recording">
-                    <button type="submit" class="start">Start</button>
-                </form>
-                <form action="/multiplex_graph" method="get">
-                    <input type="hidden" name="signalType" value=")" + signalType + R"(">
-                    <input type="hidden" name="channelAdsNumber" value=")" + String(channelAdsNumber) + R"rawliteral(">
-                    <input type="hidden" name="action" value="stop_recording">
-                    <button type="submit" class="stop">Stop</button>
-                </form>
-
-                <!-- Sezione: Seleziona il tipo di USCITA! -->
+    // Include CSS classes
+    form += cssToggleButton::getCSS();
+    form += cssMultiplexLayout::getCSS();
+    form += cssStatusIndicator::getCSS();
+    form += cssControlGroup::getCSS();
+    
+    form += R"rawliteral(
+        <div class="desktop-multiplex-layout">
+            <!-- Header Section -->
+            <div class="multiplex-header">
+                <h2 style="margin: 0; color: #333;">Multiplex Graph - )rawliteral" + signalType + R"rawliteral(</h2>
+            </div>
+            
+            <!-- Controls Section -->
+            <div class="multiplex-controls">
+                <div class="control-group">
+                    <label>Registra:</label>
+                    <label class="ios-toggle-switch">
+                        <input type="checkbox" id="recordingToggle" onchange="toggleRecording(')rawliteral" + signalType + R"rawliteral(')">
+                        <span class="ios-toggle-slider"></span>
+                    </label>
+                </div>
                 
-                <br><br><br>
-
-                <form action="/multiplex_graph" method="get">
-                    <fieldset>
-                    
-                    <label for="exit_type">Tipo di uscita:</label>
+                <div class="control-group">
+                    <label for="milliseconds">Intervallo:</label>
+                    <input type="number" id="milliseconds" name="milliseconds" value="1000" min="100" max="10000">
+                    <span class="unit-label">ms</span>
+                </div>
+                
+                <div class="control-group">
+                    <label>Monitor:</label>
+                    <label class="ios-toggle-switch">
+                        <input type="checkbox" id="monitorToggle" onchange="toggleMonitor(')rawliteral" + signalType + R"rawliteral(')">
+                        <span class="ios-toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="control-group">
+                    <label for="exit_type">Uscita:</label>
                     <select id="exit_type" name="out_pin_number">
-                        <option value="25">uscita digitale</option>
-                        <option value="26">uscita analogica</option>    
+                        <option value="25">Pin 25 (Digitale)</option>
+                        <option value="26">Pin 26 (Analogico)</option>    
                     </select>
-                    </fieldset>
-                    <input type="hidden" name="signalType" value=")rawliteral" + signalType + R"(">
-                    <input type="hidden" name="action" value="start_monitor">
-                    <button type="submit" class="start">StartMonitor</button>
-                </form>
-                <form action="/multiplex_graph" method="get">
-                    <input type="hidden" name="signalType" value=")" + signalType + R"rawliteral(">
-                    <input type="hidden" name="pinToMonitorNumber" value=")" + String(channelAdsNumber) + R"rawliteral(">
-                    <input type="hidden" name="action" value="stop_monitor">
-                    <button type="submit" class="stop">StopMonitor</button>
-                </form>
-                )rawliteral";
-    form += R"(
-                <br><br><br>
-
-                <form action="/multiplex_graph" method="get">
-                    <label for="alert_value">inserisci la soglia di allarme: </label>
-                    <input type="text" id="alert_value" name="alert_value" required="" value="0">
-                    <input type="hidden" name="signalType" value=")" + signalType + R"(">
-                    <input type="hidden" name="channelAdsNumber" value=")" + String(channelAdsNumber) + R"(">
-                    <input type="hidden" name="action" value="start_monitor_alert">
-                    <fieldset>
-                    
-                    <label for="exit_type">Tipo di uscita:</label>
-                    <select id="exit_type" name="out_pin_number">
-                        <option value="25">uscita digitale</option>
-                        <option value="26">uscita analogica</option>    
+                </div>
+                
+                <div class="control-group">
+                    <label>Allarme:</label>
+                    <label class="ios-toggle-switch">
+                        <input type="checkbox" id="alertToggle" onchange="toggleAlert(')rawliteral" + signalType + R"rawliteral(')">
+                        <span class="ios-toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="control-group">
+                    <label for="alert_value">Soglia:</label>
+                    <input type="number" id="alert_value" name="alert_value" value="0" step="0.1">
+                </div>
+                
+                <div class="control-group">
+                    <label for="alert_exit_type">Uscita Allarme:</label>
+                    <select id="alert_exit_type" name="alert_out_pin_number">
+                        <option value="25">Pin 25 (Digitale)</option>
+                        <option value="26">Pin 26 (Analogico)</option>    
                     </select>
-                    </fieldset>
-                    
-                    <button type="submit" class="start">Start</button>
-                </form>
-                <form action="/multiplex_graph" method="get">
-                    <input type="hidden" name="signalType" value=")" + signalType + R"(">
-                    <input type="hidden" name="channelAdsNumber" value=")" + String(channelAdsNumber) + R"rawliteral(">
-                    <input type="hidden" name="action" value="stop_monitor_alert">
-                    <button type="submit" class="stop">Stop</button>
-                </form>
-
+                </div>
+                
+                <!-- Status Indicator -->
+                <div id="status" class="status-indicator" style="position: static; margin-top: 15px; text-align: center;">
+                    Pronto per uso
+                </div>
+            </div>
+            
+            <!-- Graph Section -->
+            <div class="multiplex-graph">
+                <div class="graph-header">
+                    <h3 style="margin: 0; color: #333;">Grafico in Tempo Reale</h3>
+                </div>
+                <div class="graph-container">
+                    <!-- Real-time value display -->
+                    <div id="realtimeValue" class="realtime-value">
+                        -- --
+                    </div>
+                    <div id="graphContainer" style="width: 100%; height: 100%;">
+                    </div>
+                </div>
             </div>
         </div>
+        
+        <script>
+            let recordingActive = false;
+            let monitoringActive = false;
+            let alertActive = false;
+            let currentValue = 0;
+            let updateInterval = null;
+            
+            // Function to update real-time value
+            function updateRealtimeValue() {
+                fetch('/getMultiplexValue?signalType=)rawliteral" + signalType + R"rawliteral(')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('ADS1115 not available');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.error) {
+                            document.getElementById('realtimeValue').textContent = 'ADS Error';
+                            document.getElementById('realtimeValue').style.color = '#f44336';
+                            return;
+                        }
+                        currentValue = data.value || 0;
+                        const unit = getSignalUnit(')rawliteral" + signalType + R"rawliteral(');
+                        const displayElement = document.getElementById('realtimeValue');
+                        displayElement.textContent = currentValue.toFixed(2) + ' ' + unit;
+                        displayElement.style.color = '#2196F3';
+                    })
+                    .catch(error => {
+                        console.error('Error fetching realtime value:', error);
+                        const displayElement = document.getElementById('realtimeValue');
+                        displayElement.textContent = 'ADS Error';
+                        displayElement.style.color = '#f44336';
+                    });
+            }
+            
+            // Function to get signal unit
+            function getSignalUnit(signalType) {
+                const units = {
+                    'resistenza': 'Ω',
+                    'tensione_non_amplificato': 'mA',
+                    'tensione_amp_331': 'V',
+                    'tensione_amp_0.216': 'μV',
+                    'termocoppia_cn2': '°C',
+                    'termocoppia_cn10': '°C',
+                    'PT100_cn2': '°C',
+                    'PT100_cn10': '°C',
+                    'PT1000_cn2': '°C',
+                    'PT1000_cn10': '°C',
+                    'CN10_resistenza': 'Ω',
+                    'CN10_tensione_non_amplificato': 'mA',
+                    'CN10_tensione_amp_331': 'V',
+                    'CN10_tensione_amp_0.216': 'μV'
+                };
+                return units[signalType] || '';
+            }
+            
+            function toggleRecording(signalType) {
+                const toggle = document.getElementById('recordingToggle');
+                const milliseconds = document.getElementById('milliseconds').value;
+                const status = document.getElementById('status');
+                
+                if (toggle.checked) {
+                    recordingActive = true;
+                    fetch(`/multiplex_graph?signalType=${signalType}&milliseconds=${milliseconds}&action=start_recording`)
+                        .then(response => response.text())
+                        .then(data => {
+                            status.textContent = 'Registrazione attiva';
+                            status.className = 'status-indicator success';
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            toggle.checked = false;
+                            recordingActive = false;
+                            status.textContent = 'Errore nella registrazione';
+                            status.className = 'status-indicator error';
+                        });
+                } else {
+                    recordingActive = false;
+                    fetch(`/multiplex_graph?signalType=${signalType}&action=stop_recording`)
+                        .then(response => response.text())
+                        .then(data => {
+                            status.textContent = 'Registrazione fermata';
+                            status.className = 'status-indicator default';
+                        });
+                }
+            }
+            
+            function toggleMonitor(signalType) {
+                const toggle = document.getElementById('monitorToggle');
+                const outPin = document.getElementById('exit_type').value;
+                const status = document.getElementById('status');
+                
+                if (toggle.checked) {
+                    monitoringActive = true;
+                    fetch(`/multiplex_graph?signalType=${signalType}&out_pin_number=${outPin}&action=start_monitor`)
+                        .then(response => response.text())
+                        .then(data => {
+                            status.textContent = 'Monitoraggio attivo';
+                            status.className = 'status-indicator info';
+                        });
+                } else {
+                    monitoringActive = false;
+                    fetch(`/multiplex_graph?signalType=${signalType}&action=stop_monitor`)
+                        .then(response => response.text())
+                        .then(data => {
+                            status.textContent = 'Monitoraggio fermato';
+                            status.className = 'status-indicator default';
+                        });
+                }
+            }
+            
+            function toggleAlert(signalType) {
+                const toggle = document.getElementById('alertToggle');
+                const alertValue = document.getElementById('alert_value').value;
+                const outPin = document.getElementById('alert_exit_type').value;
+                const status = document.getElementById('status');
+                
+                if (toggle.checked) {
+                    alertActive = true;
+                    fetch(`/multiplex_graph?signalType=${signalType}&alert_value=${alertValue}&out_pin_number=${outPin}&action=start_monitor_alert`)
+                        .then(response => response.text())
+                        .then(data => {
+                            status.textContent = 'Allarme attivo';
+                            status.className = 'status-indicator warning';
+                        });
+                } else {
+                    alertActive = false;
+                    fetch(`/multiplex_graph?signalType=${signalType}&action=stop_monitor_alert`)
+                        .then(response => response.text())
+                        .then(data => {
+                            status.textContent = 'Allarme fermato';
+                            status.className = 'status-indicator default';
+                        });
+                }
+            }
+            
+            // Initialize page
+            document.addEventListener('DOMContentLoaded', function() {
+                // Start updating real-time value every second
+                updateRealtimeValue();
+                updateInterval = setInterval(updateRealtimeValue, 1000);
+                
+                // Initialize graph if needed
+                // Add your graph initialization code here
+            });
+            
+            // Cleanup on page unload
+            window.addEventListener('beforeunload', function() {
+                if (updateInterval) {
+                    clearInterval(updateInterval);
+                }
+            });
+        </script>
     )rawliteral";
 
-
-    
     return form;
-
 }

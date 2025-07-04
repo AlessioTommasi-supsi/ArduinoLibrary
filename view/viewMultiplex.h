@@ -3,6 +3,10 @@
 
 #include <Arduino.h>
 #include "viewGeneric.h"
+#include "cssToggleButton.h"
+#include "cssMultiplexLayout.h"
+#include "cssStatusIndicator.h"
+#include "cssControlGroup.h"
 
 
 class viewMultiplex

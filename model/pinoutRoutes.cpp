@@ -58,8 +58,7 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
 
     server.on("/pinoutContent", HTTP_GET, [](AsyncWebServerRequest *request)
               {
-        if(SystemState::getInstance()->getPinoutLock())
-        {
+        
             
             try
             {  
@@ -91,7 +90,7 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
                     content += "    </div>";
                     content += "</div>";
                 }
-                SystemState::getInstance()->releasePinoutLock();
+                //SystemState::getInstance()->releasePinoutLock();
                 
                 // Prepara la risposta includendo gli header e il contenuto
                 AsyncWebServerResponse *response = request->beginResponse(200, "text/html", content);
@@ -101,15 +100,15 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
             }
             catch(const std::exception& e)
             {
-                SystemState::getInstance()->releasePinoutLock();
+                //SystemState::getInstance()->releasePinoutLock();
                 request->send(200, "text/html", "Error: " + String(e.what()));
             }
             catch(...)
             {
-                SystemState::getInstance()->releasePinoutLock();
+                //SystemState::getInstance()->releasePinoutLock();
                 request->send(200, "text/html", "Unknown error occurred");
             } 
-        }
+        
     });
 
     server.on("/startRecordingPin", HTTP_GET, [](AsyncWebServerRequest *request)

@@ -229,7 +229,7 @@ String viewGraph::generateInitializationJS()
     js += "requestAnimationFrame(() => {";
     js += "resizeCanvas();";
     js += "updateGraph();";
-    js += "setInterval(updateGraph, 2000);";
+    js += "setInterval(updateGraph, 10000);";
     js += "window.addEventListener('resize', () => {";
     js += "setTimeout(resizeCanvas, 100);";
     js += "});";

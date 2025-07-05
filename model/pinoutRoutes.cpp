@@ -1,4 +1,3 @@
-
 #include "pinoutRoutes.h"
 
 
@@ -63,35 +62,39 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
             try
             {  
                 
-                String content = "";
+                String content = "Errore aquisizione Lock";
                 PinoutData *pinoutData = SystemState::getInstance()->pinoutData;
-                pinoutData->readPins();
-                for (auto pin = pinoutData->begin(); pin != pinoutData->end(); ++pin)
-                {
-                    content += "<div class=\"pin-container\">";
-                    content += "    <div class=\"pin-info\">";
-                    content += "        Pin number: " + String(pin->number) + ", Type: " + pin->getType() + ", Voltage: " + String(pin->voltage / 1000.0, 3) + " V, Input: " + (pin->isInput ? "Yes" : "No") + ", Note: " + String(pin->note);
-                    content += "    </div>";
-                    content += "    <div class=\"pin-actions\">";
-                    content += "        <form action=\"/startRecordingPin\" method=\"get\">";
-                    content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->number) + "\">";
-                    content += "            <label for=\"milliseconds\">Milliseconds:</label>";
-                    content += "            <input type=\"text\" id=\"milliseconds\" name=\"milliseconds\" required value=\"1000\">";
-                    content += "            <button type=\"submit\" class=\"start\">Start Recording</button>";
-                    content += "        </form>";
-                    content += "        <form action=\"/stopRecordingPin\" method=\"get\">";
-                    content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->number) + "\">";
-                    content += "            <button type=\"submit\" class=\"stop\">Stop Recording</button>";
-                    content += "        </form>";
-                    content += "        <form action=\"/editPin\" method=\"get\">";
-                    content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->number) + "\">";
-                    content += "            <button type=\"submit\" class=\"edit\">Edit</button>";
-                    content += "        </form>";
-                    content += "    </div>";
-                    content += "</div>";
+                if(SystemState::getInstance()->getPinoutLock()){
+                    content = "";
+                    pinoutData->readPins();
+                    
+                    for (auto pin = pinoutData->begin(); pin != pinoutData->end(); ++pin)
+                    {
+                        content += "<div class=\"pin-container\">";
+                        content += "    <div class=\"pin-info\">";
+                        content += "        Pin number: " + String(pin->number) + ", Type: " + pin->getType() + ", Voltage: " + String(pin->voltage / 1000.0, 3) + " V, Input: " + (pin->isInput ? "Yes" : "No") + ", Note: " + String(pin->note);
+                        content += "    </div>";
+                        content += "    <div class=\"pin-actions\">";
+                        content += "        <form action=\"/startRecordingPin\" method=\"get\">";
+                        content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->number) + "\">";
+                        content += "            <label for=\"milliseconds\">Milliseconds:</label>";
+                        content += "            <input type=\"text\" id=\"milliseconds\" name=\"milliseconds\" required value=\"1000\">";
+                        content += "            <button type=\"submit\" class=\"start\">Start Recording</button>";
+                        content += "        </form>";
+                        content += "        <form action=\"/stopRecordingPin\" method=\"get\">";
+                        content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->number) + "\">";
+                        content += "            <button type=\"submit\" class=\"stop\">Stop Recording</button>";
+                        content += "        </form>";
+                        content += "        <form action=\"/editPin\" method=\"get\">";
+                        content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->number) + "\">";
+                        content += "            <button type=\"submit\" class=\"edit\">Edit</button>";
+                        content += "        </form>";
+                        content += "    </div>";
+                        content += "</div>";
+                    }
+                    
+                    SystemState::getInstance()->releasePinoutLock(); // Releasing the pinout lock
                 }
-                //SystemState::getInstance()->releasePinoutLock();
-                
                 // Prepara la risposta includendo gli header e il contenuto
                 AsyncWebServerResponse *response = request->beginResponse(200, "text/html", content);
                 response->addHeader("Access-Control-Allow-Origin", "*"); // Aggiungi header CORS
@@ -100,12 +103,12 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
             }
             catch(const std::exception& e)
             {
-                //SystemState::getInstance()->releasePinoutLock();
+                SystemState::getInstance()->releasePinoutLock();
                 request->send(200, "text/html", "Error: " + String(e.what()));
             }
             catch(...)
             {
-                //SystemState::getInstance()->releasePinoutLock();
+                SystemState::getInstance()->releasePinoutLock();
                 request->send(200, "text/html", "Unknown error occurred");
             } 
         
@@ -138,7 +141,8 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
             String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(500, "text/html", htmlContentPtr);
-    } });
+        }
+    });
 
     server.on("/stopRecordingPin", HTTP_GET, [](AsyncWebServerRequest *request)
               {
@@ -165,7 +169,8 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
             String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(500, "text/html", htmlContentPtr);
-    } });
+        }
+    });
 
 
     
@@ -221,44 +226,54 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
             try
             {
                 String pin = request->getParam("pin")->value();
-    
+                String json = "[]"; // Default empty JSON array
+                
                 // SystemState::getInstance()->pinoutData->getPin(pin.toInt())  ritrna sempre qualcosa al massimo default p[in con pinnumber= -1!!]
-                std::vector<float> values = SystemState::getInstance()->pinoutData->getPin(pin.toInt()).getValuesVoltage();
-    
-                if (values.size() == 0 ) 
+                if(SystemState::getInstance()->getPinoutLock()){
+                    std::vector<float> values = SystemState::getInstance()->pinoutData->getPin(pin.toInt()).getValuesVoltage();
+        
+                    if (values.size() == 0 ) 
+                    {
+                        json = "[]";
+                    }
+                    else
+                    {
+                        json = "[";
+                        for (size_t i = 0; i < values.size(); ++i)
+                        {
+                            if (i > 0)
+                                json += ",";
+                            json += String(values[i]);
+                        }
+                        json += "]";
+                    }
+                    
+                    SystemState::getInstance()->releasePinoutLock();
+                }
+                else
                 {
-                    return request->send(200, "application/json", "[]");
+                    json = "[]"; // If lock acquisition fails, return empty array
                 }
                 
-    
-                String json = "[";
-                for (size_t i = 0; i < values.size(); ++i)
-                {
-                    if (i > 0)
-                        json += ",";
-                    json += String(values[i]);
-                }
-                json += "]";
-    
-                request->send(200, "application/json", json);
-                 
+                request->send(200, "application/json", json); 
             }
             catch(...)
             {
-                request->send(200, "application/json", "[]" );
-                 
+                request->send(200, "application/json", "[]");
             }
-            
-            
         } else {
             request->send(200, "application/json", "{\"error\":\"Pin parameter missing\"}");
-             
         } 
-        });
+    });
 
-        server.on("/getPinValuesHistory", HTTP_GET, [](AsyncWebServerRequest *request) {
+    server.on("/getPinValuesHistory", HTTP_GET, [](AsyncWebServerRequest *request) {
+        if(SystemState::getInstance()->getPinoutLock()){
             String content = viewHistory::pinoutContent();
+            SystemState::getInstance()->releasePinoutLock();
             request->send(200, "text/html", content);
-        });
+        } else {
+            request->send(200, "text/html", "Errore aquisizione Lock");
+        }
+    });
         
 }

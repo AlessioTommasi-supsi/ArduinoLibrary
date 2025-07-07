@@ -22,11 +22,11 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
                     float outputValue = request->getParam("outputValue")->value().toFloat();
                     bool goHigh = outputValue > 0;
                     String pinNote = request->getParam("pinNote")->value();
-
+                    
                     Pin *pin = &SystemState::getInstance()->pinoutData->getPin(pinNumber.toInt());
 
                     Serial.println("Saving pin " + pinNumber + " with type " + pinType + ", isInput " + String(isInput) + ", pinMode " + String(pinMode) + ", outputValue " + String(outputValue) + ", pinNote " + pinNote);
-                    pin->isInput = isInput;
+                    pin->setIsInput(isInput);
                     pin->setType(pinType);
                     pin->setMode(pinMode);
                     pin->setNote(pinNote.c_str());
@@ -48,11 +48,8 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
         }
         catch (const std::exception &e)
         {
-            request->send(500, "text/html", "Error: " + String(e.what()));
-        }
-        catch (...)
-        {
-            request->send(500, "text/html", "Unknown error occurred");
+            Serial.println("Error: " + String(e.what()));
+            request->send(500, "text/plain", "Internal Server Error");
         } });
 
     server.on("/pinoutContent", HTTP_GET, [](AsyncWebServerRequest *request)
@@ -72,21 +69,23 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
                     {
                         content += "<div class=\"pin-container\">";
                         content += "    <div class=\"pin-info\">";
-                        content += "        Pin number: " + String(pin->number) + ", Type: " + pin->getType() + ", Voltage: " + String(pin->voltage / 1000.0, 3) + " V, Input: " + (pin->isInput ? "Yes" : "No") + ", Note: " + String(pin->note);
+                        char noteBuffer[200];
+                        pin->getNote(noteBuffer, sizeof(noteBuffer));
+                        content += "        Pin number: " + String(pin->getNumber()) + ", Type: " + pin->getType() + ", Voltage: " + String(pin->getVoltage() / 1000.0, 3) + " V, Input: " + (pin->getIsInput() ? "Yes" : "No") + ", Note: " + String(noteBuffer);
                         content += "    </div>";
                         content += "    <div class=\"pin-actions\">";
                         content += "        <form action=\"/startRecordingPin\" method=\"get\">";
-                        content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->number) + "\">";
+                        content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->getNumber()) + "\">";
                         content += "            <label for=\"milliseconds\">Milliseconds:</label>";
                         content += "            <input type=\"text\" id=\"milliseconds\" name=\"milliseconds\" required value=\"1000\">";
                         content += "            <button type=\"submit\" class=\"start\">Start Recording</button>";
                         content += "        </form>";
                         content += "        <form action=\"/stopRecordingPin\" method=\"get\">";
-                        content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->number) + "\">";
+                        content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->getNumber()) + "\">";
                         content += "            <button type=\"submit\" class=\"stop\">Stop Recording</button>";
                         content += "        </form>";
                         content += "        <form action=\"/editPin\" method=\"get\">";
-                        content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->number) + "\">";
+                        content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->getNumber()) + "\">";
                         content += "            <button type=\"submit\" class=\"edit\">Edit</button>";
                         content += "        </form>";
                         content += "    </div>";
@@ -183,7 +182,7 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
                 Pin *pin = &SystemState::getInstance()->pinoutData->getPin(pinNumber.toInt());
 
                 Serial.println("Saving pin " + pinNumber + " with type " + pinType + ", isInput " + String(isInput) + ", pinMode " + String(pinMode) + ", outputValue " + String(outputValue) + ", pinNote " + pinNote);
-                pin->isInput = isInput;
+                pin->setIsInput(isInput);
                 pin->setType(pinType);
                 pin->setMode(pinMode);
                 pin->setNote(pinNote.c_str());
@@ -228,7 +227,7 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
                 Pin *pin = &SystemState::getInstance()->pinoutData->getPin(pinNumber.toInt());
                 
                 Serial.println("Saving pin " + pinNumber + " with type " + pinType + ", isInput " + String(isInput) + ", pinMode " + String(pinMode) + ", outputValue " + String(outputValue) + ", pinNote " + pinNote);
-                pin->isInput = isInput;
+                pin->setIsInput(isInput);
                 pin->setType(pinType);
                 pin->setMode(pinMode);
                 pin->setNote(pinNote.c_str());

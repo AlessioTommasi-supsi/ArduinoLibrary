@@ -379,14 +379,10 @@ void ADS1115_controller::monitorTaskFunction(void *parameter) {
                         Serial.println("Monitoraggio analogico attivo.");
                         pinMode(26, OUTPUT);
                         //devo convertrire: 0 - 3.3V in 0 - 255
-                        outputPin.voltage = volts; 
+                        outputPin.setVoltage(volts * 1000); // Converte V in mV e usa il setter thread-safe
                         int dacValue = static_cast<int>((volts / 3.3) * 255); // Converti 0-3.3V in 0-255
                         dacWrite(26, dacValue);  // Scrivi il valore convertito nel DAC
-
                     }
-                    
-
-                    
                     
                     controller->lastRecordTime = currentTime;
                 }
@@ -397,7 +393,6 @@ void ADS1115_controller::monitorTaskFunction(void *parameter) {
                 
                 xSemaphoreGive(controller->mutex);
             }
-            
         }
         vTaskDelay(10 / portTICK_PERIOD_MS);// aspetto ms prima di fare un'altra lettura
     }

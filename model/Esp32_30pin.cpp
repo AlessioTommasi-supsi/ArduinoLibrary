@@ -19,7 +19,7 @@ std::vector<int> Esp32_30pin::getPinNumbers()
     std::vector<int> pinNumbers;
     for (const auto &pin : pins)
     {
-        pinNumbers.push_back(pin.number);
+        pinNumbers.push_back(pin.getNumber());
     }
     return pinNumbers;
 }
@@ -31,181 +31,180 @@ void Esp32_30pin::initializePins()
         pins.clear();
 
         Pin &vspiMosiPin = getPin(23);
-        vspiMosiPin.number = 23;
-        vspiMosiPin.type = PinType::SPI;
-        vspiMosiPin.isInput = true;
-        sprintf(vspiMosiPin.note, "VSPI MOSI or input digital");
+        vspiMosiPin.setNumber(23);
+        vspiMosiPin.setPinType(PinType::SPI);
+        vspiMosiPin.setIsInput(true);
+        vspiMosiPin.setNote("VSPI MOSI or input digital");
         addPin(vspiMosiPin);
 
         Pin &adc0Pin = getPin(36);
-        adc0Pin.number = 36;
-        adc0Pin.type = PinType::ADC;
-        adc0Pin.isInput = true;
-        sprintf(adc0Pin.note, "ADC0 - SENSOR_VP input only");
+        adc0Pin.setNumber(36);
+        adc0Pin.setPinType(PinType::ADC);
+        adc0Pin.setIsInput(true);
+        adc0Pin.setNote("ADC0 - SENSOR_VP input only");
         addPin(adc0Pin);
 
         Pin &i2cSclPin = getPin(22);
-        i2cSclPin.number = 22;
-        i2cSclPin.type = PinType::I2C;
-        i2cSclPin.isInput = true;
-        sprintf(i2cSclPin.note, "I2C SCL");
+        i2cSclPin.setNumber(22);
+        i2cSclPin.setPinType(PinType::I2C);
+        i2cSclPin.setIsInput(true);
+        i2cSclPin.setNote("I2C SCL");
         addPin(i2cSclPin);
 
         Pin &adc3Pin = getPin(39);
-        adc3Pin.number = 39;
-        adc3Pin.type = PinType::ADC;
-        adc3Pin.isInput = true;
-        sprintf(adc3Pin.note, "ADC3 - SENSOR_VN input only");
+        adc3Pin.setNumber(39);
+        adc3Pin.setPinType(PinType::ADC);
+        adc3Pin.setIsInput(true);
+        adc3Pin.setNote("ADC3 - SENSOR_VN input only");
         addPin(adc3Pin);
 
         Pin &uartTxd0Pin = getPin(1);
-        uartTxd0Pin.number = 1;
-        uartTxd0Pin.type = PinType::UART;
-        uartTxd0Pin.isInput = true;
-        sprintf(uartTxd0Pin.note, "UART TXD0 or input digital");
+        uartTxd0Pin.setNumber(1);
+        uartTxd0Pin.setPinType(PinType::UART);
+        uartTxd0Pin.setIsInput(true);
+        uartTxd0Pin.setNote("UART TXD0 or input digital");
         addPin(uartTxd0Pin);
 
         Pin &adc6Pin = getPin(34);
-        adc6Pin.number = 34;
-        adc6Pin.type = PinType::ADC;
-        adc6Pin.isInput = true;
-        sprintf(adc6Pin.note, "ADC6 - Input only input only");
+        adc6Pin.setNumber(34);
+        adc6Pin.setPinType(PinType::ADC);
+        adc6Pin.setIsInput(true);
+        adc6Pin.setNote("ADC6 - Input only input only");
         addPin(adc6Pin);
 
         Pin &uartRxd0Pin = getPin(3);
-        uartRxd0Pin.number = 3;
-        uartRxd0Pin.type = PinType::UART;
-        uartRxd0Pin.isInput = true;
-        sprintf(uartRxd0Pin.note, "UART RXD0");
+        uartRxd0Pin.setNumber(3);
+        uartRxd0Pin.setPinType(PinType::UART);
+        uartRxd0Pin.setIsInput(true);
+        uartRxd0Pin.setNote("UART RXD0");
         addPin(uartRxd0Pin);
 
         Pin &adc7Pin = getPin(35);
-        adc7Pin.number = 35;
-        adc7Pin.type = PinType::ADC;
-        adc7Pin.isInput = true;
-        sprintf(adc7Pin.note, "ADC7 - Input only");
+        adc7Pin.setNumber(35);
+        adc7Pin.setPinType(PinType::ADC);
+        adc7Pin.setIsInput(true);
+        adc7Pin.setNote("ADC7 - Input only");
         addPin(adc7Pin);
 
         Pin &i2cSdaPin = getPin(21);
-        i2cSdaPin.number = 21;
-        i2cSdaPin.type = PinType::I2C;
-        i2cSdaPin.isInput = true;
-        sprintf(i2cSdaPin.note, "I2C SDA");
+        i2cSdaPin.setNumber(21);
+        i2cSdaPin.setPinType(PinType::I2C);
+        i2cSdaPin.setIsInput(true);
+        i2cSdaPin.setNote("I2C SDA");
         addPin(i2cSdaPin);
 
         Pin &adc4Pin = getPin(32);
-        adc4Pin.number = 32;
-        adc4Pin.type = PinType::ADC;
-        adc4Pin.isInput = true;
-        sprintf(adc4Pin.note, "ADC4, TOUCH9");
+        adc4Pin.setNumber(32);
+        adc4Pin.setPinType(PinType::ADC);
+        adc4Pin.setIsInput(true);
+        adc4Pin.setNote("ADC4, TOUCH9");
         addPin(adc4Pin);
 
         Pin &vspiMisoPin = getPin(19);
-        vspiMisoPin.number = 19;
-        vspiMisoPin.type = PinType::SPI;
-        vspiMisoPin.isInput = true;
-        sprintf(vspiMisoPin.note, "VSPI MISO");
+        vspiMisoPin.setNumber(19);
+        vspiMisoPin.setPinType(PinType::SPI);
+        vspiMisoPin.setIsInput(true);
+        vspiMisoPin.setNote("VSPI MISO");
         addPin(vspiMisoPin);
 
         Pin &adc5Pin = getPin(33);
-        adc5Pin.number = 33;
-        adc5Pin.type = PinType::ADC;
-        adc5Pin.isInput = true;
-        sprintf(adc5Pin.note, "ADC5, TOUCH8");
+        adc5Pin.setNumber(33);
+        adc5Pin.setPinType(PinType::ADC);
+        adc5Pin.setIsInput(true);
+        adc5Pin.setNote("ADC5, TOUCH8");
         addPin(adc5Pin);
 
         Pin &vspiClkPin = getPin(18);
-        vspiClkPin.number = 18;
-        vspiClkPin.type = PinType::SPI;
-        vspiClkPin.isInput = true;
-        sprintf(vspiClkPin.note, "VSPI CLK or input digital");
+        vspiClkPin.setNumber(18);
+        vspiClkPin.setPinType(PinType::SPI);
+        vspiClkPin.setIsInput(true);
+        vspiClkPin.setNote("VSPI CLK or input digital");
         addPin(vspiClkPin);
 
         Pin &dac1Pin = getPin(25);
-        dac1Pin.number = 25;
-        dac1Pin.type = PinType::ADC;
-        dac1Pin.isInput = false;
-        dac1Pin.voltage = 3300;
-        sprintf(dac1Pin.note, "ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
+        dac1Pin.setNumber(25);
+        dac1Pin.setPinType(PinType::ADC);
+        dac1Pin.setIsInput(false);
+        dac1Pin.setVoltage(3300);
+        dac1Pin.setNote("ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
         addPin(dac1Pin);
 
         Pin &pwmPin = getPin(5);
-        pwmPin.number = 5;
-        pwmPin.type = PinType::PWM;
-        pwmPin.isInput = true;
-        sprintf(pwmPin.note, "input digital VSPI CS0, PWM");
+        pwmPin.setNumber(5);
+        pwmPin.setPinType(PinType::PWM);
+        pwmPin.setIsInput(true);
+        pwmPin.setNote("input digital VSPI CS0, PWM");
         addPin(pwmPin);
 
         Pin &dac2Pin = getPin(26);
-        dac2Pin.number = 26;
-        dac2Pin.type = PinType::ADC;
-        dac2Pin.isInput = false;
-        dac2Pin.voltage = 3300;
-        sprintf(dac2Pin.note, "ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
+        dac2Pin.setNumber(26);
+        dac2Pin.setPinType(PinType::ADC);
+        dac2Pin.setIsInput(false);
+        dac2Pin.setVoltage(3300);
+        dac2Pin.setNote("ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
         addPin(dac2Pin);
 
         Pin &uartRxd1Pin = getPin(17);
-        uartRxd1Pin.number = 17;
-        uartRxd1Pin.type = PinType::UART;
-        uartRxd1Pin.isInput = true;
-        sprintf(uartRxd1Pin.note, "UART RXD1");
+        uartRxd1Pin.setNumber(17);
+        uartRxd1Pin.setPinType(PinType::UART);
+        uartRxd1Pin.setIsInput(true);
+        uartRxd1Pin.setNote("UART RXD1");
         addPin(uartRxd1Pin);
 
         Pin &adc27Pin = getPin(27);
-        adc27Pin.number = 27;
-        adc27Pin.type = PinType::ADC;
-        adc27Pin.isInput = false;
-        sprintf(adc27Pin.note, "ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
+        adc27Pin.setNumber(27);
+        adc27Pin.setPinType(PinType::ADC);
+        adc27Pin.setIsInput(false);
+        adc27Pin.setNote("ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
         addPin(adc27Pin);
 
         Pin &uartTxd2Pin = getPin(16);
-        uartTxd2Pin.number = 16;
-        uartTxd2Pin.type = PinType::UART;
-        uartTxd2Pin.isInput = true;
-        sprintf(uartTxd2Pin.note, "UART TXD2");
+        uartTxd2Pin.setNumber(16);
+        uartTxd2Pin.setPinType(PinType::UART);
+        uartTxd2Pin.setIsInput(true);
+        uartTxd2Pin.setNote("UART TXD2");
         addPin(uartTxd2Pin);
 
         Pin &adc14Pin = getPin(14);
-        adc14Pin.number = 14;
-        adc14Pin.type = PinType::ADC;
-        adc14Pin.isInput = false;
-        sprintf(adc14Pin.note, "ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
+        adc14Pin.setNumber(14);
+        adc14Pin.setPinType(PinType::ADC);
+        adc14Pin.setIsInput(false);
+        adc14Pin.setNote("ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
         addPin(adc14Pin);
 
         Pin &adc10Pin = getPin(4);
-        adc10Pin.number = 4;
-        adc10Pin.type = PinType::ADC;
-        adc10Pin.isInput = true;
-        sprintf(adc10Pin.note, "ADC10, TOUCH0");
+        adc10Pin.setNumber(4);
+        adc10Pin.setPinType(PinType::ADC);
+        adc10Pin.setIsInput(true);
+        adc10Pin.setNote("ADC10, TOUCH0");
         addPin(adc10Pin);
 
         Pin &adc12Pin = getPin(12);
-        adc12Pin.number = 12;
-        adc12Pin.type = PinType::ADC;
-        adc12Pin.isInput = false;
-        sprintf(adc12Pin.note, "ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
+        adc12Pin.setNumber(12);
+        adc12Pin.setPinType(PinType::ADC);
+        adc12Pin.setIsInput(false);
+        adc12Pin.setNote("ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
         addPin(adc12Pin);
 
         Pin &adc2Pin = getPin(2);
-        adc2Pin.number = 2;
-        adc2Pin.type = PinType::ADC;
-        adc2Pin.isInput = false;
-        sprintf(adc2Pin.note, "ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
+        adc2Pin.setNumber(2);
+        adc2Pin.setPinType(PinType::ADC);
+        adc2Pin.setIsInput(false);
+        adc2Pin.setNote("ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
         addPin(adc2Pin);
 
-
         Pin &adc13Pin = getPin(13);
-        adc13Pin.number = 13;
-        adc13Pin.type = PinType::ADC;
-        adc13Pin.isInput = false;
-        sprintf(adc13Pin.note, "ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
+        adc13Pin.setNumber(13);
+        adc13Pin.setPinType(PinType::ADC);
+        adc13Pin.setIsInput(false);
+        adc13Pin.setNote("ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
         addPin(adc13Pin);
 
         Pin &adc15Pin = getPin(15);
-        adc15Pin.number = 15;
-        adc15Pin.type = PinType::ADC;
-        adc15Pin.isInput = false;
-        sprintf(adc15Pin.note, "ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
+        adc15Pin.setNumber(15);
+        adc15Pin.setPinType(PinType::ADC);
+        adc15Pin.setIsInput(false);
+        adc15Pin.setNote("ADC2 is in use by Wi-Fi. Please see https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations for more info");
         addPin(adc15Pin);
     }
     catch (...)
@@ -261,7 +260,7 @@ Pin &Esp32_30pin::getPin(int GPIOPin)
 {
     for (auto &pin : pins)
     {
-        if (pin.number == GPIOPin)
+        if (pin.getNumber() == GPIOPin)
         {
             return pin;
         }

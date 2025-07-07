@@ -38,13 +38,13 @@ void MonitorResource::defineRoutes(AsyncWebServer &server)
             // Loop through each pin in the pinout data
             for (auto pin = pinoutData->begin(); pin != pinoutData->end(); ++pin)
             {
-                if (pin->recordingTask != NULL)
+                if (pin->getRecordingTask() != NULL)
                 {
                     // STANPO GRAFICO CON LO STACK LIB
                     size_t stackUsed = pin->getUsedStackInWords() * 4; // trasformo da parole a byte
                     size_t stackTotal = pin->getStackSizeInWords() * 4;
 
-                    htmlContent += viewGraph::generateCirularProgressBarGraph("Pin" + String(pin->number) + "Stack", stackUsed, stackTotal, "/monitorPinStack?pin=" + String(pin->number), 1000);
+                    htmlContent += viewGraph::generateCirularProgressBarGraph("Pin" + String(pin->getNumber()) + "Stack", stackUsed, stackTotal, "/monitorPinStack?pin=" + String(pin->getNumber()), 1000);
                 }
             }
             htmlContent += viewGraph::endCirularProgressBarGraph();
@@ -79,13 +79,13 @@ void MonitorResource::defineRoutes(AsyncWebServer &server)
             // Loop through each pin in the pinout data
             for (auto pin = pinoutData->begin(); pin != pinoutData->end(); ++pin)
             {
-                if (pin->recordingTask != NULL)
+                if (pin->getRecordingTask() != NULL)
                 {
                     // STANPO GRAFICO CON LO STACK LIB
                     size_t stackUsed = pin->getUsedStackInWords() * 4; // trasformo da parole a byte
                     size_t stackTotal = pin->getStackSizeInWords() * 4;
 
-                    htmlContent += viewGraph::generateCirularProgressBarGraph("Pin" + String(pin->number) + "Stack", stackUsed, stackTotal, "/monitorPinStack?pin=" + String(pin->number), 1000);
+                    htmlContent += viewGraph::generateCirularProgressBarGraph("Pin" + String(pin->getNumber()) + "Stack", stackUsed, stackTotal, "/monitorPinStack?pin=" + String(pin->getNumber()), 1000);
                 }
             }
             htmlContent += "</div>";
@@ -105,32 +105,47 @@ void MonitorResource::defineRoutes(AsyncWebServer &server)
     server.on("/monitorPinStack", HTTP_GET, [](AsyncWebServerRequest *request){
         try
         {
-            String json = "{";
+            String htmlContent = "";
+
+            // Generate monitor content for all pins
+            for (auto pin = SystemState::getInstance()->pinoutData->begin(); pin != SystemState::getInstance()->pinoutData->end(); ++pin)
+            {
+                if (pin->getRecordingTask() != NULL)
+                {
+                    size_t stackUsed = pin->getUsedStackInWords();
+                    size_t stackTotal = pin->getStackSizeInWords();
+
+                    htmlContent += viewGraph::generateCirularProgressBarGraph("Pin" + String(pin->getNumber()) + "Stack", stackUsed, stackTotal, "/monitorPinStack?pin=" + String(pin->getNumber()), 1000);
+                }
+            }
+
             if (request->hasParam("pin"))
             {
                 String pin = request->getParam("pin")->value();
-                PinoutData *pinoutData = SystemState::getInstance()->pinoutData;
-                Pin *pinData = &pinoutData->getPin(pin.toInt());
+                String json = "[]";
 
-                // STANPO GRAFICO CON LO STACK LIB
-                size_t stackUsed = pinData->getUsedStackInWords() * 4; // trasformo da parole a byte
-                size_t stackTotal = pinData->getStackSizeInWords() * 4;
+                Pin &selectedPin = SystemState::getInstance()->pinoutData->getPin(pin.toInt());
+                size_t stackUsed = selectedPin.getUsedStackInWords();
+                size_t stackTotal = selectedPin.getStackSizeInWords();
 
-                json += "\"used\":" + String(stackUsed) + ",";
-                json += "\"total\":" + String(stackTotal);
+                json = "[" + String(stackUsed) + "," + String(stackTotal) + "]";
+                request->send(200, "application/json", json);
             }
             else
             {
-                json += "\"error\":\"Pin parameter missing\"";
+                // Use viewGeneric instead of monitorGeneric
+                String fullHtml = viewGeneric::defaultCssHeader("Monitor Pin Stack");
+                fullHtml += htmlContent;
+                fullHtml += viewGeneric::defaultFooter();
+                
+                const char *htmlContentPtr = fullHtml.c_str();
+                request->send(200, "text/html", htmlContentPtr);
             }
-            json += "}";
-
-            request->send(200, "application/json", json);
         }
-        catch(...)
+        catch (const std::exception &e)
         {
-            String json = "{\"error\":\"An error occurred\"}";
-            request->send(500, "application/json", json);
+            Serial.println("Error: " + String(e.what()));
+            request->send(500, "text/plain", "Internal Server Error");
         }
     });
 
@@ -162,4 +177,3 @@ void MonitorResource::defineRoutes(AsyncWebServer &server)
         }
     });
 }
-    

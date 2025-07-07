@@ -27,10 +27,10 @@ String viewEditPin::generateForm( int pinNumber)
             <input type="text" id="pin" name="pin" value=")" +String(pinNumber) + R"("required>
             <label for="pinType">Pin Type:</label>
             <select id="pinType" name="pinType" required> )";
-    String current_type = selectedPin->pinTypeToString(selectedPin->type);
+    String current_type = selectedPin->getType();
     for (int i = 0; i < static_cast<int>(PinType::SIZE); ++i)
     {
-        String pin_type = selectedPin->pinTypeToString(static_cast<PinType>(i));
+        String pin_type = Pin::pinTypeToString(static_cast<PinType>(i));
         form += "<option value=\"" + pin_type + "\" " + (current_type == pin_type ? "selected" : "") + ">" + pin_type + "</option>";
     }
     form += R"(
@@ -44,20 +44,22 @@ String viewEditPin::generateForm( int pinNumber)
                 >False</option>
             </select>
             <div id="outputValueContainer" style="display: )" ;
-    form+= (selectedPin->isInput ? "none" : "block");
+    form+= (selectedPin->getIsInput() ? "none" : "block");
     form+= R"(">
                 <label for="outputValue">Output Value:</label>
                 <select id="outputValue" name="outputValue">
                     <option value="0">0V</option>
                     <option value="3.3" )";
-    form += (selectedPin->voltage != 0  ? "selected" : "");
+    form += (selectedPin->getVoltage() != 0  ? "selected" : "");
     form += R"(
                         >3.3V</option>
                 </select>
             </div>
             <label for="pinNote">Note:</label>
             <input type="text" id="pinNote" name="pinNote" value=")";
-    form += selectedPin->note;
+    char noteBuffer[200];
+    selectedPin->getNote(noteBuffer, sizeof(noteBuffer));
+    form += String(noteBuffer);
     form += R"(">
             <button type="button" onclick="applyConfig() ">Apply</button>
             <label> </label> <!-- Add a space between the two buttons -->

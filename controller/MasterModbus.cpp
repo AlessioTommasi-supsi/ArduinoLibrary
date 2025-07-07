@@ -17,27 +17,15 @@ void MasterModbus::processError()
 void MasterModbus::registerPins(PinoutData *pinoutData)
 {
     Pin &rxPin = pinoutData->getPin(this->rxPin);
-    rxPin.isInput = false;
+    rxPin.setIsInput(false);
     rxPin.setNote("rxPin pin for Modbus communication");
-    /*
-    rxPin.isInput = true;
-    rxPin.type = PinType::DIGITAL;
-    rxPin.number = 11;
-    sprintf(rxPin.note, "SPICS0 CMD");
-    //rxPin.note = note;
-    pinoutData->addPin(rxPin);*/
-
-    //static Pin gpio11 = Pin(11, PinType::DIGITAL, true, "SPICS0 CMD");
-    //pinoutData->addPin(gpio11);
-    //static Pin defaultasdPin(11, PinType::UNKNOWN, true, "aaa pin");
-    //pinoutData->addPin(defaultasdPin);
 
     Pin &txPin = pinoutData->getPin(this->txPin);
-    txPin.isInput = false;
+    txPin.setIsInput(false);
     txPin.setNote("txPin pin for Modbus communication");
 
     Pin &dePin = pinoutData->getPin(this->dePin);
-    dePin.isInput = false;
+    dePin.setIsInput(false);
     dePin.setNote("dePin pin for Modbus communication");
 }
 

@@ -9,7 +9,7 @@
 
 class Pin
 {
-public:
+private:
     uint8_t number;   // Numero del pin
     PinType type;     // Tipo del pin
     uint16_t voltage; // Voltaggio in mV
@@ -21,9 +21,49 @@ public:
     std::vector<uint16_t> valuesVoltage; // Valori registrati del voltaggio
 
     TaskHandle_t recordingTask = NULL; // Task per la registrazione
+    
+    // Mutex per thread safety
+    mutable SemaphoreHandle_t mutex;
 
+public:
     // Costruttore
     Pin(uint8_t num, PinType t, uint8_t input, const char *n, uint16_t volt = 0);
+    
+    // Distruttore
+    ~Pin();
+    
+    // Copy constructor
+    Pin(const Pin& other);
+    
+    // Assignment operator
+    Pin& operator=(const Pin& other);
+
+    // Equality operator for std::remove operations
+    bool operator==(const Pin& other) const;
+
+    // Getter e Setter thread-safe
+    uint8_t getNumber() const;
+    void setNumber(uint8_t num);
+    
+    PinType getPinType() const;
+    void setPinType(PinType t);
+    
+    uint16_t getVoltage() const;
+    void setVoltage(uint16_t volt);
+    
+    bool getIsInput() const;
+    void setIsInput(bool input);
+    
+    void getNote(char* buffer, size_t bufferSize) const;
+    void setNote(const char *newNote);
+    
+    size_t getStackSize() const;
+    void setStackSize(size_t size);
+    
+    size_t getTimeToRecord() const;
+    void setTimeToRecord(size_t time);
+    
+    TaskHandle_t getRecordingTask() const;
 
     // Metodi per configurazione e utilizzo del pin
     void setMode(uint8_t mode);
@@ -31,8 +71,6 @@ public:
     uint16_t read();
     void setType(String type);
     String getType();
-    bool getIsInput();
-    void setNote(const char *newNote);
 
     // Metodi per la registrazione
     void startRecording(int milliseconds);

@@ -11,19 +11,17 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
     });
     
     server.on("/history", HTTP_GET, [](AsyncWebServerRequest *request){
-
-        String htmlContent = "Errore Aquisizione Lock";
-        if (SystemState::getInstance()->getPinoutLock()) {
-            htmlContent = viewHistory::generateHTML();
-            
-            SystemState::getInstance()->releasePinoutLock();
-            
+        try {
+            String htmlContent = viewHistory::generateHTML();
+            const char *htmlContentPtr = htmlContent.c_str();
+            request->send(200, "text/html", htmlContentPtr);
+        } catch (const std::exception& e) {
+            Serial.println("Error in /history route: " + String(e.what()));
+            request->send(500, "text/html", "Error loading history page");
+        } catch (...) {
+            Serial.println("Unknown error in /history route");
+            request->send(500, "text/html", "Unknown error occurred");
         }
-
-        const char *htmlContentPtr = htmlContent.c_str();
-        request->send(200, "text/html", htmlContentPtr);
-        
-       
     });
 
     server.on("/getHistoryContent", HTTP_GET, [](AsyncWebServerRequest *request){

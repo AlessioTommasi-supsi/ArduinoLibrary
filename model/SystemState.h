@@ -61,16 +61,10 @@ private:
     static int sd_pin;
 
     SystemState() {
-        // Inizializza il mutex per la sincronizzazione
-        modbus_mutex = xSemaphoreCreateMutex();
-        pinout_mutex = xSemaphoreCreateMutex();
+        // Removed mutex initialization for better robustness
     }
 
 public:
-    SemaphoreHandle_t modbus_mutex; // Mutex per sincronizzazione thread-safe
-    SemaphoreHandle_t pinout_mutex; // Mutex per sincronizzazione thread-safe
-
-
     static PinoutData *pinoutData;
 
     static MasterModbus *masterModbus;
@@ -124,15 +118,6 @@ public:
     void deleteValue(int index);
 
     void editValue(int index, float value);
-
-    bool getPinoutLock()
-    {
-        return xSemaphoreTake(pinout_mutex, portMAX_DELAY);
-    }
-    void releasePinoutLock()
-    {
-        xSemaphoreGive(pinout_mutex);
-    }
     
 };
 

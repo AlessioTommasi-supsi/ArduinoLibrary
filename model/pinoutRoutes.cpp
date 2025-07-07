@@ -62,10 +62,10 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
             try
             {  
                 
-                String content = "Errore aquisizione Lock";
+                String content = "";
                 PinoutData *pinoutData = SystemState::getInstance()->pinoutData;
-                if(SystemState::getInstance()->getPinoutLock()){
-                    content = "";
+                
+                if (pinoutData) {
                     pinoutData->readPins();
                     
                     for (auto pin = pinoutData->begin(); pin != pinoutData->end(); ++pin)
@@ -92,24 +92,25 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
                         content += "    </div>";
                         content += "</div>";
                     }
-                    
-                    SystemState::getInstance()->releasePinoutLock(); // Releasing the pinout lock
+                } else {
+                    content = "Error: Pinout data not available";
                 }
+                
                 // Prepara la risposta includendo gli header e il contenuto
                 AsyncWebServerResponse *response = request->beginResponse(200, "text/html", content);
-                response->addHeader("Access-Control-Allow-Origin", "*"); // Aggiungi header CORS
-                request->send(response); // Invia la risposta al client
+                response->addHeader("Access-Control-Allow-Origin", "*");
+                request->send(response);
                 
             }
-            catch(const std::exception& e)
+            catch (const std::exception& e)
             {
-                SystemState::getInstance()->releasePinoutLock();
-                request->send(200, "text/html", "Error: " + String(e.what()));
+                Serial.println("Error in /pinoutContent route: " + String(e.what()));
+                request->send(500, "text/html", "Error: " + String(e.what()));
             }
-            catch(...)
+            catch (...)
             {
-                SystemState::getInstance()->releasePinoutLock();
-                request->send(200, "text/html", "Unknown error occurred");
+                Serial.println("Unknown error in /pinoutContent route");
+                request->send(500, "text/html", "Unknown error occurred");
             } 
         
     });
@@ -130,17 +131,11 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
             request->send(200, "text/html", htmlContentPtr);
              
         } catch (const std::exception &e) {
-            String errorMessage = "Error: ";
-            errorMessage += e.what();
-            String popupScript = "showPopup('" + errorMessage + "');";
-            String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
-            const char *htmlContentPtr = htmlContent.c_str();
-            request->send(500, "text/html", htmlContentPtr);
+            Serial.println("Error in /startRecordingPin route: " + String(e.what()));
+            request->send(500, "text/html", "Error: " + String(e.what()));
         } catch (...) {
-            String popupScript = "showPopup('Unknown error occurred');";
-            String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
-            const char *htmlContentPtr = htmlContent.c_str();
-            request->send(500, "text/html", htmlContentPtr);
+            Serial.println("Unknown error in /startRecordingPin route");
+            request->send(500, "text/html", "Unknown error occurred");
         }
     });
 
@@ -148,27 +143,19 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
               {
         try {
             String registerAddress = request->getParam("pin")->value();
-
             SystemState::getInstance()->pinoutData->getPin(registerAddress.toInt()).stopRecording();
-            //SystemState::getInstance()->stopRecordingRegister(registerAddress.toInt());
-            Serial.println("Stop recording Pin " + registerAddress);
-            String popupScript = "showPopup('Recording stopped');";
+
+            String popupScript = "showPopup('Recording stopped for pin " + registerAddress + "');";
             String htmlContent = Pinout::generateHTML(popupScript);
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(200, "text/html", htmlContentPtr);
              
         } catch (const std::exception &e) {
-            String errorMessage = "Error: ";
-            errorMessage += e.what();
-            String popupScript = "showPopup('" + errorMessage + "');";
-            String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
-            const char *htmlContentPtr = htmlContent.c_str();
-            request->send(500, "text/html", htmlContentPtr);
+            Serial.println("Error in /stopRecordingPin route: " + String(e.what()));
+            request->send(500, "text/html", "Error: " + String(e.what()));
         } catch (...) {
-            String popupScript = "showPopup('Unknown error occurred');";
-            String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
-            const char *htmlContentPtr = htmlContent.c_str();
-            request->send(500, "text/html", htmlContentPtr);
+            Serial.println("Unknown error in /stopRecordingPin route");
+            request->send(500, "text/html", "Unknown error occurred");
         }
     });
 
@@ -221,6 +208,53 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
     });
 
 
+    server.on("/savePin", HTTP_POST, [](AsyncWebServerRequest *request) {
+        try {
+            String htmlContent = "";
+            
+            if (request->hasParam("pinNumber", true)) {
+                String pinNumber = request->getParam("pinNumber", true)->value();
+                String pinType = request->getParam("pinType", true)->value();
+                String pinInputCheck = request->getParam("pinInputCheck", true) ? request->getParam("pinInputCheck", true)->value() : "";
+                String pinModeSelect = request->getParam("pinModeSelect", true)->value();
+                String pinHighValue = request->getParam("pinHighValue", true) ? request->getParam("pinHighValue", true)->value() : "";
+                String pinNote = request->getParam("pinNote", true)->value();
+                
+                bool isInput = (pinInputCheck == "on");
+                int pinMode = pinModeSelect.toInt();
+                int outputValue = pinHighValue.toInt();
+                bool goHigh = (outputValue == 1);
+                
+                Pin *pin = &SystemState::getInstance()->pinoutData->getPin(pinNumber.toInt());
+                
+                Serial.println("Saving pin " + pinNumber + " with type " + pinType + ", isInput " + String(isInput) + ", pinMode " + String(pinMode) + ", outputValue " + String(outputValue) + ", pinNote " + pinNote);
+                pin->isInput = isInput;
+                pin->setType(pinType);
+                pin->setMode(pinMode);
+                pin->setNote(pinNote.c_str());
+                
+                if (!isInput) {
+                    pin->write(goHigh);
+                }
+
+                String script = "Pin " + pinNumber + " saved!";
+                script += viewEditPin::addDefaultScript();
+                htmlContent = viewEditPin::generateHTML(pinNumber.toInt(), script);
+            } else {
+                htmlContent = viewEditPin::generateHTML();
+            }
+            
+            const char *htmlContentPtr = htmlContent.c_str();
+            request->send(200, "text/html", htmlContentPtr);
+        } catch (const std::exception& e) {
+            Serial.println("Error in /savePin route: " + String(e.what()));
+            request->send(500, "text/html", "Error: " + String(e.what()));
+        } catch (...) {
+            Serial.println("Unknown error in /savePin route");
+            request->send(500, "text/html", "Unknown error occurred");
+        }
+    });
+
     server.on("/getPinValues", HTTP_GET, [](AsyncWebServerRequest *request){
         if (request->hasParam("pin")) {
             try
@@ -228,52 +262,76 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
                 String pin = request->getParam("pin")->value();
                 String json = "[]"; // Default empty JSON array
                 
-                // SystemState::getInstance()->pinoutData->getPin(pin.toInt())  ritrna sempre qualcosa al massimo default p[in con pinnumber= -1!!]
-                if(SystemState::getInstance()->getPinoutLock()){
-                    std::vector<float> values = SystemState::getInstance()->pinoutData->getPin(pin.toInt()).getValuesVoltage();
-        
-                    if (values.size() == 0 ) 
-                    {
-                        json = "[]";
+                std::vector<float> values = SystemState::getInstance()->pinoutData->getPin(pin.toInt()).getValuesVoltage();
+                
+                if (values.size() == 0) {
+                    json = "[]";
+                } else {
+                    json = "[";
+                    for (size_t i = 0; i < values.size(); ++i) {
+                        if (i > 0)
+                            json += ",";
+                        json += String(values[i]);
                     }
-                    else
-                    {
-                        json = "[";
-                        for (size_t i = 0; i < values.size(); ++i)
-                        {
-                            if (i > 0)
-                                json += ",";
-                            json += String(values[i]);
-                        }
-                        json += "]";
-                    }
-                    
-                    SystemState::getInstance()->releasePinoutLock();
-                }
-                else
-                {
-                    json = "[]"; // If lock acquisition fails, return empty array
+                    json += "]";
                 }
                 
-                request->send(200, "application/json", json); 
-            }
-            catch(...)
-            {
+                request->send(200, "application/json", json);
+            } catch (...) {
                 request->send(200, "application/json", "[]");
             }
         } else {
             request->send(200, "application/json", "{\"error\":\"Pin parameter missing\"}");
-        } 
+        }
     });
 
     server.on("/getPinValuesHistory", HTTP_GET, [](AsyncWebServerRequest *request) {
-        if(SystemState::getInstance()->getPinoutLock()){
+        try {
             String content = viewHistory::pinoutContent();
-            SystemState::getInstance()->releasePinoutLock();
             request->send(200, "text/html", content);
-        } else {
-            request->send(200, "text/html", "Errore aquisizione Lock");
+        } catch (const std::exception& e) {
+            Serial.println("Error in /getPinValuesHistory route: " + String(e.what()));
+            request->send(500, "text/html", "Error loading pin history");
+        } catch (...) {
+            Serial.println("Unknown error in /getPinValuesHistory route");
+            request->send(500, "text/html", "Unknown error occurred");
         }
     });
-        
+
+    server.on("/editPinValue", HTTP_GET, [](AsyncWebServerRequest *request) {
+        try {
+            String pinNumber = request->getParam("pin")->value();
+            String index = request->getParam("index")->value();
+            String value = request->getParam("value")->value();
+            
+            SystemState::getInstance()->pinoutData->getPin(pinNumber.toInt()).editValue(index.toInt(), value.toFloat());
+            
+            String content = viewHistory::pinoutContent();
+            request->send(200, "text/html", content);
+        } catch (const std::exception& e) {
+            Serial.println("Error in /editPinValue route: " + String(e.what()));
+            request->send(500, "text/html", "Error editing pin value");
+        } catch (...) {
+            Serial.println("Unknown error in /editPinValue route");
+            request->send(500, "text/html", "Unknown error occurred");
+        }
+    });
+
+    server.on("/deletePinValue", HTTP_GET, [](AsyncWebServerRequest *request) {
+        try {
+            String pinNumber = request->getParam("pin")->value();
+            String index = request->getParam("index")->value();
+            
+            SystemState::getInstance()->pinoutData->getPin(pinNumber.toInt()).deleteValue(index.toInt());
+            
+            String content = viewHistory::pinoutContent();
+            request->send(200, "text/html", content);
+        } catch (const std::exception& e) {
+            Serial.println("Error in /deletePinValue route: " + String(e.what()));
+            request->send(500, "text/html", "Error deleting pin value");
+        } catch (...) {
+            Serial.println("Unknown error in /deletePinValue route");
+            request->send(500, "text/html", "Unknown error occurred");
+        }
+    });
 }

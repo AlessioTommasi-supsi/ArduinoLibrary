@@ -8,8 +8,6 @@ Pin::Pin(uint8_t num, PinType t, uint8_t input, const char *n, uint16_t volt)
     strncpy(note, n, sizeof(note));
     note[sizeof(note) - 1] = '\0';
 
-    isPinUsable_Mutex = xSemaphoreCreateMutex(); // Inizializza il mutex
-
     if (number != static_cast<uint8_t>(-1))
     {
         pinMode(number, input ? INPUT : OUTPUT);
@@ -19,14 +17,10 @@ Pin::Pin(uint8_t num, PinType t, uint8_t input, const char *n, uint16_t volt)
 // Imposta la modalità del pin
 void Pin::setMode(uint8_t mode)
 {
-    if (xSemaphoreTake(isPinUsable_Mutex, portMAX_DELAY))
+    isInput = mode == INPUT;
+    if (number != static_cast<uint8_t>(-1))
     {
-        isInput = mode == INPUT;
-        if (number != static_cast<uint8_t>(-1))
-        {
-            pinMode(number, mode);
-        }
-        xSemaphoreGive(isPinUsable_Mutex);
+        pinMode(number, mode);
     }
 }
 
@@ -38,36 +32,21 @@ void Pin::setMode(uint8_t mode)
  */
 bool Pin::write(bool goHigh)
 {
-    if (xSemaphoreTake(isPinUsable_Mutex, portMAX_DELAY))
-    {
-        isInput = false;
-        voltage = goHigh ? 3300 : 0;
-        xSemaphoreGive(isPinUsable_Mutex); // devo rilasciarlo prima di fare chiamata a funzione se no blocca sicuro!
-        setMode(OUTPUT);
-        digitalWrite(number, goHigh ? HIGH : LOW);
-        return true;
-    }
-    return false;
+    isInput = false;
+    voltage = goHigh ? 3300 : 0;
+    setMode(OUTPUT);
+    digitalWrite(number, goHigh ? HIGH : LOW);
+    return true;
 }
 
 void Pin::setType(String type)
 {
-    if (xSemaphoreTake(isPinUsable_Mutex, portMAX_DELAY))
-    {
-        this->type = StringToPinType(type); // Converte la stringa in PinType e la assegna
-        xSemaphoreGive(isPinUsable_Mutex);
-    }
+    this->type = StringToPinType(type); // Converte la stringa in PinType e la assegna
 }
 
 String Pin::getType()
 {
-    if (xSemaphoreTake(isPinUsable_Mutex, portMAX_DELAY))
-    {
-        String typeStr = pinTypeToString(this->type); // Converte PinType in stringa
-        xSemaphoreGive(isPinUsable_Mutex);
-        return typeStr;
-    }
-    return "UNKNOWN";
+    return pinTypeToString(this->type); // Converte PinType in stringa
 }
 
 // Restituisce se il pin è input
@@ -79,12 +58,8 @@ bool Pin::getIsInput()
 // Imposta una nota
 void Pin::setNote(const char *newNote)
 {
-    if (xSemaphoreTake(isPinUsable_Mutex, portMAX_DELAY))
-    {
-        strncpy(note, newNote, sizeof(note));
-        note[sizeof(note) - 1] = '\0';
-        xSemaphoreGive(isPinUsable_Mutex);
-    }
+    strncpy(note, newNote, sizeof(note));
+    note[sizeof(note) - 1] = '\0';
 }
 
 // Conversione tipo pin in stringa
@@ -158,19 +133,14 @@ PinType Pin::StringToPinType(String type)
 // Legge il valore del pin
 uint16_t Pin::read()
 {
-    if (xSemaphoreTake(isPinUsable_Mutex, portMAX_DELAY))
+    uint16_t result = voltage;
+    if (isInput)
     {
-        uint16_t result = voltage;
-        if (isInput)
-        {
-            result = (type == PinType::ANALOGIC) ? analogRead(number) * (3300.0 / 4095.0)
-                                                 : digitalRead(number) * 1000;
-        }
-        voltage = result;
-        xSemaphoreGive(isPinUsable_Mutex);
-        return result;
+        result = (type == PinType::ANALOGIC) ? analogRead(number) * (3300.0 / 4095.0)
+                                             : digitalRead(number) * 1000;
     }
-    return 0;
+    voltage = result;
+    return result;
 }
 
 // Funzione per registrare valori dal pin
@@ -182,11 +152,7 @@ void Pin::recordingFunction()
         {
             uint16_t value = read();
             Serial.println("Recording value: " + String(value) + " at pin " + String(number));
-            if (xSemaphoreTake(isPinUsable_Mutex, portMAX_DELAY))
-            {
-                valuesVoltage.push_back(value);
-                xSemaphoreGive(isPinUsable_Mutex);
-            }
+            valuesVoltage.push_back(value);
             delay(timeToRecord);
         }
     }
@@ -238,25 +204,15 @@ void Pin::stopRecording()
 // Ottiene i valori registrati
 std::vector<float> Pin::getValuesVoltage()
 {
-    if (xSemaphoreTake(isPinUsable_Mutex, portMAX_DELAY))
-    {
-        std::vector<float> copyValues(valuesVoltage.begin(), valuesVoltage.end());
-        xSemaphoreGive(isPinUsable_Mutex);
-        return copyValues;
-    }
-    return {};
+    std::vector<float> copyValues(valuesVoltage.begin(), valuesVoltage.end());
+    return copyValues;
 }
 
 // Dimensione stack usato
 size_t Pin::getUsedStackInWords()
 {
-    if (xSemaphoreTake(isPinUsable_Mutex, portMAX_DELAY))
-    {
-        size_t size = valuesVoltage.size() * sizeof(valuesVoltage[0]) / 4;
-        xSemaphoreGive(isPinUsable_Mutex);
-        return size;
-    }
-    return 0;
+    size_t size = valuesVoltage.size() * sizeof(valuesVoltage[0]) / 4;
+    return size;
 }
 
 // Dimensione stack totale
@@ -268,15 +224,27 @@ size_t Pin::getStackSizeInWords()
 // Ritorna descrizione del pin
 String Pin::toString() const
 {
-    if (xSemaphoreTake(isPinUsable_Mutex, portMAX_DELAY))
+    String result = "Pin number: " + String(number) +
+                    ", Type: " + pinTypeToString(type) +
+                    ", Voltage: " + String(voltage / 1000.0, 3) + " V" +
+                    ", Input: " + (isInput ? "Yes" : "No") +
+                    ", Note: " + String(note);
+    return result;
+}
+
+// Add methods for editing and deleting values without locks
+void Pin::editValue(int index, float value)
+{
+    if (index >= 0 && index < valuesVoltage.size())
     {
-        String result = "Pin number: " + String(number) +
-                        ", Type: " + pinTypeToString(type) +
-                        ", Voltage: " + String(voltage / 1000.0, 3) + " V" +
-                        ", Input: " + (isInput ? "Yes" : "No") +
-                        ", Note: " + String(note);
-        xSemaphoreGive(isPinUsable_Mutex);
-        return result;
+        valuesVoltage[index] = value;
     }
-    return "Accesso non disponibile";
+}
+
+void Pin::deleteValue(int index)
+{
+    if (index >= 0 && index < valuesVoltage.size())
+    {
+        valuesVoltage.erase(valuesVoltage.begin() + index);
+    }
 }

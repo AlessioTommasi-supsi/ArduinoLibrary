@@ -1,4 +1,3 @@
-
 #include "SystemState.h"
 #include "WiFiManager.h"
 
@@ -60,12 +59,8 @@ void SystemState::logCurrentState() {
 
 void SystemState::pushRegister(int addr, float val)
 {
-    if (xSemaphoreTake(modbus_mutex, portMAX_DELAY))
-    {
-        address.push_back(addr);
-        value.push_back(val);
-        xSemaphoreGive(modbus_mutex);
-    }
+    address.push_back(addr);
+    value.push_back(val);
 }
 
 void SystemState::startRecordingRegister(int addr, int milliseconds)
@@ -77,8 +72,6 @@ void SystemState::startRecordingRegister(int addr, int milliseconds)
             milliseconds = 1000; // Imposta un minimo di 1 secondo per non sovraccaricare il sistema
         }
         
-        //std::lock_guard<std::mutex> lock(recordingMutex);//togliendo questo ho risolto anche monitor di piu registri in parallelo non ho ben chiaro perche ma funziona, watchdog si triggerava perche sistema andava in deadlock!
-
         // Se c'è già una registrazione in corso per questo indirizzo, fermala prima di iniziarne una nuova
         if (recordingActive[addr].load()) {
             stopRecordingRegister(addr);
@@ -92,39 +85,28 @@ void SystemState::startRecordingRegister(int addr, int milliseconds)
                 SystemState::getInstance()->pushRegister(addr, val);
                 //stampo su seriale notifica
                 Serial.println("Recording value: " + String(val) + " at address " + String(addr));
-                /*
-                yield();
-                std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
-                */
 
                 // Utilizza vTaskDelay per cedere il controllo al sistema operativo
                 vTaskDelay(milliseconds / portTICK_PERIOD_MS);
             }
         });
-        }
+    }
     catch(const std::exception& e)
     {
         stopRecordingRegister(addr);
         setError(("Error: " + String(e.what())).c_str());
     }
-    
-    
 }
 
 void SystemState::stopRecordingRegister(int addr)
 {
-    
-    if (xSemaphoreTake(modbus_mutex, portMAX_DELAY))
-    {
-        if (recordingActive[addr].load()) {
-            recordingActive[addr].store(false);
-            if (recordingThreads[addr].joinable()) {
-                recordingThreads[addr].join();
-            }
-            recordingThreads.erase(addr);
-            recordingActive.erase(addr);
+    if (recordingActive[addr].load()) {
+        recordingActive[addr].store(false);
+        if (recordingThreads[addr].joinable()) {
+            recordingThreads[addr].join();
         }
-        xSemaphoreGive(modbus_mutex);
+        recordingThreads.erase(addr);
+        recordingActive.erase(addr);
     }
 }
 
@@ -132,25 +114,20 @@ void SystemState::stopRecordingRegister(int addr)
 std::vector<float> SystemState::getAllRegisterValue(int addres)
 {
     std::vector<float> values;
-    if (xSemaphoreTake(modbus_mutex, portMAX_DELAY))
+    try
     {
-        try
+        for (int i = 0; i < address.size(); i++)
         {
-            for (int i = 0; i < address.size(); i++)
+            if (address[i] == addres)
             {
-                if (address[i] == addres)
-                {
-                    values.push_back(value[i]);
-                }
+                values.push_back(value[i]);
             }
         }
-        catch(...)
-        {
-            Serial.println("Error during get all register value");
-        }
-        xSemaphoreGive(modbus_mutex);
     }
-    
+    catch(...)
+    {
+        Serial.println("Error during get all register value");
+    }
     
     return values;
 }
@@ -158,20 +135,16 @@ std::vector<float> SystemState::getAllRegisterValue(int addres)
 std::vector<float> SystemState::getAllRegisterValue()
 {
     std::vector<float> values;
-    if (xSemaphoreTake(modbus_mutex, portMAX_DELAY))
+    try
     {
-        try
+        for (size_t  i = 0; i < address.size(); i++)
         {
-            for (size_t  i = 0; i < address.size(); i++)
-            {
-                values.push_back(value[i]);
-            }
+            values.push_back(value[i]);
         }
-        catch(...)
-        {
-            Serial.println("Error during get all register value");
-        }
-        xSemaphoreGive(modbus_mutex);
+    }
+    catch(...)
+    {
+        Serial.println("Error during get all register value");
     }
         
     return values;
@@ -180,33 +153,25 @@ std::vector<float> SystemState::getAllRegisterValue()
 std::vector<int> SystemState::getAllRegisterAddress()
 {
     std::vector<int> addreses;
-    if (xSemaphoreTake(modbus_mutex, portMAX_DELAY))
-    { 
-        try
+    try
+    {
+        for (size_t  i = 0; i < address.size(); i++)
         {
-            for (size_t  i = 0; i < address.size(); i++)
-            {
-                addreses.push_back(address[i]);
-            }
+            addreses.push_back(address[i]);
         }
-        catch(...)
-        {
-            Serial.println("Error during get all register value");
-        }
-        xSemaphoreGive(modbus_mutex);
+    }
+    catch(...)
+    {
+        Serial.println("Error during get all register value");
     }
 
     return addreses;
 }
 
 void SystemState::clearRegisters()
-{
-    if (xSemaphoreTake(modbus_mutex, portMAX_DELAY))
-    { 
-        address.clear();
-        value.clear();
-        xSemaphoreGive(modbus_mutex);
-    }
+{ 
+    address.clear();
+    value.clear();
 }
 
 
@@ -287,21 +252,18 @@ void SystemState::switchNetwork(const char *ssid, const char *password)
 }
 
 void SystemState::deleteValue(int index)
-{
-    if (xSemaphoreTake(modbus_mutex, portMAX_DELAY))
-    { 
+{ 
+    if (index >= 0 && index < address.size())
+    {
         address.erase(address.begin() + index);
         value.erase(value.begin() + index);
-        xSemaphoreGive(modbus_mutex);
     }
 }
 
 void SystemState::editValue(int index, float value)
 {   
-    if (xSemaphoreTake(modbus_mutex, portMAX_DELAY))
+    if (index >= 0 && index < this->value.size())
     {
         this->value[index] = value;
-        xSemaphoreGive(modbus_mutex);
     }
-    
 }

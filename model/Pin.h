@@ -22,33 +22,34 @@ public:
 
     TaskHandle_t recordingTask = NULL; // Task per la registrazione
 
-    SemaphoreHandle_t isPinUsable_Mutex; // Mutex per sincronizzazione thread-safe
-
     // Costruttore
     Pin(uint8_t num, PinType t, uint8_t input, const char *n, uint16_t volt = 0);
 
     // Metodi per configurazione e utilizzo del pin
     void setMode(uint8_t mode);
     bool write(bool goHigh);
-    void setNote(const char *newNote);
-    String toString() const;
     uint16_t read();
-    PinType StringToPinType(String type);
     void setType(String type);
-    void startRecording(int milliseconds);
-    void stopRecording();
     String getType();
     bool getIsInput();
+    void setNote(const char *newNote);
+
+    // Metodi per la registrazione
+    void startRecording(int milliseconds);
+    void stopRecording();
     void recordingFunction();
-
     std::vector<float> getValuesVoltage();
+    void editValue(int index, float value);
+    void deleteValue(int index);
 
-    // Metodi per gestione dello stack
+    // Metodi di utilità
     size_t getUsedStackInWords();
     size_t getStackSizeInWords();
+    String toString() const;
 
-    // Conversioni per il tipo di pin
+    // Metodi statici per conversione
     static String pinTypeToString(PinType type);
+    static PinType StringToPinType(String type);
 };
 
 #endif // PIN_H

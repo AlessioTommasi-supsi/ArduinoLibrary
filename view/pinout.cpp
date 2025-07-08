@@ -35,7 +35,7 @@ String Pinout::pageContent()
     html += "        .then(data => {";
     html += "          document.getElementById('pinData').innerHTML = data;";
     html += "        });";
-    html += "    }, 5000);"; // Aggiorna ogni 5 secondi (puoi cambiare il valore a k*1000 per k secondi)
+    html += "    }, 15000);"; // Aggiorna ogni 5 secondi (puoi cambiare il valore a k*1000 per k secondi)
     html += "  };";
     html += "  const stopInterval = () => {";
     html += "    clearInterval(intervalId);";
@@ -56,7 +56,7 @@ String Pinout::pageContent()
 
     html += "<br><br><br><br><br><br><br><br><br><br>";
 
-    html += viewGraph::generateGraph(SystemState::getInstance()->pinoutData->getPinNumbers(), "getPinValues", "pin");
+    //html += viewGraph::generateGraph(SystemState::getInstance()->pinoutData->getPinNumbers(), "getPinValues", "pin");
     //aggiungo grafico da ViewGraph
     /*in realta al prof non interessa grafico quindi forse e meglio cosi!!
      html += viewGraph::generateGraph(SystemState::getInstance()->pinoutData->getPinNumbers(), "getPinValues", "pin");

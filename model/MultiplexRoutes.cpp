@@ -162,11 +162,12 @@ void MultiplexRoutes::defineRoutes(AsyncWebServer &server) {
             }
             
             // Generate test page without ADS operations
-            String htmlContent = viewGeneric::defaultCssHeader("Graph View - TEST Mode");
-            htmlContent += viewMultiplex::pinStartAndStopForm(999, signalType); // Use 999 as test channel
+            //String htmlContent = viewGeneric::defaultCssHeader("Graph View - TEST Mode");
+            String htmlContent = viewGeneric::basicHeader("Graph View - TEST Mode");
+             htmlContent += viewMultiplex::pinStartAndStopForm(999, signalType); // Use 999 as test channel
             
             // Create a test vector for the graph - use empty vector to avoid selector
-            std::vector<int> testVector = {};  // Empty vector = no selector, direct graph
+            
             htmlContent += "<script>";
             htmlContent += "document.addEventListener('DOMContentLoaded', function() {";
             htmlContent += "const graphContainer = document.getElementById('graphContainer');";

@@ -114,7 +114,7 @@ String viewMultiplex::pageContent(){
 }
 
 /*Devo ancora modificare grafico, se prende in input un determinato numero di pin non mostra tutto menu a tendina ma fa diverso! solo signaltype!*/
-String viewMultiplex::pinStartAndStopForm(int channelAdsNumber, String signalType){
+String viewMultiplex::  pinStartAndStopForm(int channelAdsNumber, String signalType){
     String form = "";
 
     // Include CSS classes

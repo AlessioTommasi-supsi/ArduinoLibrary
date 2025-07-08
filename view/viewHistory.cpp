@@ -4,8 +4,8 @@ String viewHistory::html = "";
 
 String viewHistory::generateHTML()
 {
-    html = viewGeneric::defaultCssHeader("History Register");
-
+    //html = viewGeneric::defaultCssHeader("History Register");
+    html = viewGeneric::basicHeader("History Register");
     html += "<h1>History</h1>";
     html += "<div class='scrollable-container' style='overflow-y: auto; max-height: 80vh;'>"; // Add inline style for scrollbar
     // Creazione della tabella con header fisso

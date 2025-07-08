@@ -84,48 +84,48 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
 
 
     server.on("/modbusMaster", HTTP_GET, [](AsyncWebServerRequest *request){
-        try
-        {
+        try {
             String registerAddress = request->getParam("registerAddress")->value();
             String registerType = request->getParam("registerType")->value();
 
-            Serial.println("request of modbusMaster");
-            Serial.println("registerAddress: " + registerAddress);
-            Serial.println("registerType: " + registerType);
+            Serial.println("Request for modbusMaster");
+            Serial.println("Register Address: " + registerAddress);
+            Serial.println("Register Type: " + registerType);
 
-            if(registerType == "int")
-            {
-                //float registerValue = SystemState::masterModbus->readHoldingIntRegisters(registerAddress.toInt());
-                String popupScript = "showPopup('Selezionata modalita master!!');";
-                String registerValue = "0"; // Placeholder for register value, replace with actual logic
-                
-                // Usa il metodo offline-safe invece di quello normale
-                String htmlContent = viewCurrentRegister::generateOfflineHTML(
-                    registerAddress, 
-                    registerValue.toFloat(), 
-                    popupScript
-                );
-                const char *htmlContentPtr = htmlContent.c_str();
-                
-                request->send(200, "text/html", htmlContentPtr);
+            float registerValue = 0.0;
+            
+            if (registerType == "int") {
+                // Read integer register from Modbus Master
+                registerValue = (float)SystemState::masterModbus->readHoldingIntRegisters(registerAddress.toInt());
             }
-            else if(registerType == "float")
-            {
-                float registerValue = SystemState::masterModbus->readHoldingFloatRegisters(registerAddress.toInt());
-                String htmlContent = viewCurrentRegister::generateOfflineHTML(registerAddress, registerValue);
-                const char *htmlContentPtr = htmlContent.c_str();
-                request->send(200, "text/html", htmlContentPtr); 
+            else if (registerType == "float") {
+                // Read float register from Modbus Master
+                registerValue = SystemState::masterModbus->readHoldingFloatRegisters(registerAddress.toInt());
             }
-            else
-            {
+            else {
                 request->send(400, "text/plain", "Invalid register type");
+                return;
             }
+
+            // Generate HTML response with register monitoring interface and full CSS
+            String htmlContent = viewCurrentRegister::generateOfflineHTML(registerAddress, registerValue, "");
+            const char *htmlContentPtr = htmlContent.c_str();
+            request->send(200, "text/html", htmlContentPtr);
         }
-        catch(...)
-        {
-            Serial.println("Error during get modbusMaster");
-            request->send(200, "text/html", "Error: An error occurred");
-        }  
+        catch (const std::exception& e) {
+            Serial.println("Error in modbusMaster: " + String(e.what()));
+            String popupScript = "showPopup('Error reading register: " + String(e.what()) + "');";
+            String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
+            const char *htmlContentPtr = htmlContent.c_str();
+            request->send(500, "text/html", htmlContentPtr);
+        }
+        catch (...) {
+            Serial.println("Unknown error in modbusMaster");
+            String popupScript = "showPopup('Unknown error occurred while reading register');";
+            String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
+            const char *htmlContentPtr = htmlContent.c_str();
+            request->send(500, "text/html", htmlContentPtr);
+        }
     });
 
     server.on("/modbusSlave", HTTP_GET, [](AsyncWebServerRequest *request){
@@ -133,6 +133,11 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
             String registerAddress = request->getParam("registerAddress")->value();
             String registerValue   = request->getParam("registerValue")->value();
             String registerType    = request->getParam("registerType")->value();
+
+            Serial.println("Request for modbusSlave");
+            Serial.println("Register Address: " + registerAddress);
+            Serial.println("Register Value: " + registerValue);
+            Serial.println("Register Type: " + registerType);
         
             if (registerType == "int") {
                 ModBusSlaveController::getInstance()->writeIntRegister(registerAddress.toInt(), registerValue.toInt());
@@ -141,27 +146,37 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
                 ModBusSlaveController::getInstance()->writeFloatRegister(registerAddress.toInt(), registerValue.toFloat());
             }
             else {
-                request->send(400, "text/plain", "Tipo di registro non valido");
+                request->send(400, "text/plain", "Invalid register type");
                 return;
             }
         
-            // Inizializzo o verifico lo stato del polling
+            // Initialize or verify polling state
             ModBusSlaveController::getInstance()->poll();
         
-            // NOTA: popupScript non cambia, viene wrappato da generateHTML
+            // Generate success popup and return to current register page
             String popupScript = "showPopup('Scrittura come slave avviata con successo!');";
             String htmlContent = viewCurrentRegister::generateHTML(
                 registerAddress, 
                 registerValue.toFloat(), 
                 popupScript
             );
-        
-            request->send(200, "text/html", htmlContent.c_str()); 
+            const char *htmlContentPtr = htmlContent.c_str();
+            request->send(200, "text/html", htmlContentPtr);
         }
-        catch(...) {
-            Serial.println("Errore durante la richiesta modbusSlave");
-            request->send(500, "text/html", "Errore: si è verificato un problema");
-        }  
+        catch (const std::exception& e) {
+            Serial.println("Error in modbusSlave: " + String(e.what()));
+            String popupScript = "showPopup('Error writing register: " + String(e.what()) + "');";
+            String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
+            const char *htmlContentPtr = htmlContent.c_str();
+            request->send(500, "text/html", htmlContentPtr);
+        }
+        catch (...) {
+            Serial.println("Unknown error in modbusSlave");
+            String popupScript = "showPopup('Unknown error occurred while writing register');";
+            String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
+            const char *htmlContentPtr = htmlContent.c_str();
+            request->send(500, "text/html", htmlContentPtr);
+        }
     });
     
     

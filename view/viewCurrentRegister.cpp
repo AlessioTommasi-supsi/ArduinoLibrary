@@ -17,7 +17,7 @@ String viewCurrentRegister::generateEmptyFormRegister()
     form += "            <option value=\"int\">int</option>";
     form += "            <option value=\"float\">float</option>";
     form += "        </select>";
-    form += "        <button type=\"submit\">Monitor</button>";
+    form += "        <button type=\"submit\">Monitor as Master</button>";
     form += "    </form>";
     form += "</div>";
 
@@ -88,7 +88,7 @@ String viewCurrentRegister::generateHTML(String registerAddress, float registerV
                     "transform:translate(-50%,-50%);padding:20px;"
                     "background-color:white;border:1px solid black;z-index:1000;\">"
                     "<p id=\"popupMessage\"></p>"
-                    "<button onclick=\"document.getElementById('popup').style.display='none';\">Close</button>"
+                    "<button onclick=\"window.location.href='/currentregister';\">Close</button>"
                     "</div>";
 
     // 3) Se c'è uno script di popup, lo wrappo in DOMContentLoaded
@@ -178,7 +178,7 @@ String viewCurrentRegister::pageContent(String registerAddress, float registerVa
     // Aggiunta del popup
     page_content += "<div id=\"popup\" style=\"display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); padding:20px; background-color:white; border:1px solid black; z-index:1000;\">";
     page_content += "    <p id=\"popupMessage\"></p>";
-    page_content += "    <button onclick=\"document.getElementById('popup').style.display='none';\">Close</button>";
+    page_content += "    <button onclick=\"window.location.href='/currentregister';\">Close</button>";
     page_content += "</div>";
 
     // Chiusura del contenitore principale

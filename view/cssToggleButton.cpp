@@ -7,7 +7,7 @@ String cssToggleButton::getCSS() {
             .ios-toggle-switch {
                 position: relative;
                 display: inline-block;
-                width: 50px;
+                width: 20px;
                 height: 28px;
                 margin: 0;
             }
@@ -51,7 +51,7 @@ String cssToggleButton::getCSS() {
             }
             
             .ios-toggle-switch input:checked + .ios-toggle-slider:before {
-                transform: translateX(22px);
+                transform: translateX(50px);
             }
             
             /* Hover effects */

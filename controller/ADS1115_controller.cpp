@@ -173,7 +173,8 @@ void ADS1115_controller::startRecording(const String &signalType, int interval) 
         Serial.println("Errore: signalType non valido: " + signalType);
         return;
     }
-    if (initializationFailed) {
+    // Se non è in modalità TEST e l'ADS ha fallito l'inizializzazione, esci.
+    if (signalType != "TEST" && initializationFailed) {
         Serial.println("Errore: ads non inizializzato!: " + signalType);
         return;
     }
@@ -185,19 +186,22 @@ void ADS1115_controller::startRecording(const String &signalType, int interval) 
         recordedValues.clear();
         currentChannel = channel;
         
-        // Configura il multiplexer
-        adsModel->setChannel(currentChannel);
-        
-        // Lettura immediata
-        int16_t adc = ads.readADC_SingleEnded(0);
-        float volts = ads.computeVolts(adc);
-        volts =  signalCorrectionValue(currentChannel, volts); // Applica la correzione del segnale
-        recordedValues.push_back(volts);
-        Serial.print("Lettura iniziale ADS (canale ");
-        Serial.print(currentChannel);
-        Serial.print("): ");
-        Serial.print(volts);
-        Serial.println(" V");
+        // Se non è in modalità TEST, esegui una lettura immediata.
+        if (signalType != "TEST") {
+            // Configura il multiplexer
+            adsModel->setChannel(currentChannel);
+            
+            // Lettura immediata
+            int16_t adc = ads.readADC_SingleEnded(0);
+            float volts = ads.computeVolts(adc);
+            volts =  signalCorrectionValue(currentChannel, volts); // Applica la correzione del segnale
+            recordedValues.push_back(volts);
+            Serial.print("Lettura iniziale ADS (canale ");
+            Serial.print(currentChannel);
+            Serial.print("): ");
+            Serial.print(volts);
+            Serial.println(" V");
+        }
         
         if (recordingTask == NULL) {
             xTaskCreatePinnedToCore(
@@ -211,7 +215,7 @@ void ADS1115_controller::startRecording(const String &signalType, int interval) 
             );
         }
         xSemaphoreGive(mutex);
-        Serial.print("Registrazione avviata sul canale ADS ");
+        Serial.print("Registrazione avviata sul canale ");
         Serial.print(currentChannel);
         Serial.print(" con intervallo ");
         Serial.print(interval);
@@ -450,21 +454,25 @@ void ADS1115_controller::recordingTaskFunction(void *parameter) {
             unsigned long currentTime = millis();
             if (currentTime - controller->lastRecordTime >= (unsigned long)controller->recordingInterval) {
                 if (xSemaphoreTake(controller->mutex, portMAX_DELAY) == pdTRUE) {
-                    controller->adsModel->setChannel(controller->currentChannel);
-                    int16_t adc = controller->ads.readADC_SingleEnded(0);
-                    float volts = controller->ads.computeVolts(adc);
-                    float correction = controller->signalCorrectionValue(controller->currentChannel,volts); 
-                    volts =  correction; // Applica la correzione del segnale
-                    Serial.println("Selected correction value: "+String(correction));
-                    controller->recordedValues.push_back(volts);
+                    float valueToRecord;
+                    if (controller->currentChannel == 999) { // Modalità TEST
+                        valueToRecord = 20.0 + random(-50, 50) / 10.0; // Simula temperatura 15-25°C
+                        Serial.println("TEST mode: generating random value: " + String(valueToRecord));
+                    } else {
+                        controller->adsModel->setChannel(controller->currentChannel);
+                        int16_t adc = controller->ads.readADC_SingleEnded(0);
+                        float volts = controller->ads.computeVolts(adc);
+                        valueToRecord = controller->signalCorrectionValue(controller->currentChannel,volts); 
+                        Serial.println("Selected correction value: "+String(valueToRecord));
+                    }
+                    
+                    controller->recordedValues.push_back(valueToRecord);
                     controller->lastRecordTime = currentTime;
-                    Serial.print("Lettura ADS (canale ");
+                    Serial.print("Lettura (canale ");
                     Serial.print(controller->currentChannel);
                     Serial.print("): ");
-                    Serial.print(volts);
+                    Serial.print(valueToRecord);
                     Serial.println(" V");
-                    // Stampa tutte le letture
-                    //controller->printAllReadingsFromADS1115();
                     xSemaphoreGive(controller->mutex);
                 }
             }
@@ -494,6 +502,15 @@ void ADS1115_controller::reinitialize() {
         } else {
             initializationFailed = true;
             Serial.println("Reinizializzazione fallita.");
+        }
+        xSemaphoreGive(mutex);
+    }
+}
+
+void ADS1115_controller::deleteRecordedValue(int index) {
+    if (xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE) {
+        if (index >= 0 && index < recordedValues.size()) {
+            recordedValues.erase(recordedValues.begin() + index);
         }
         xSemaphoreGive(mutex);
     }

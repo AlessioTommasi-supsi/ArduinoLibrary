@@ -41,6 +41,8 @@ public:
     
     // Riprova a inizializzare l'ADS1115 (aggiorna il flag)
     void reinitialize();
+
+    void deleteRecordedValue(int index);
     
     // Mappatura dal signalType (stringa) al canale multiplexer (0..7)
     static int signalTypeToChannel(const String &signalType);

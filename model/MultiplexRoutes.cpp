@@ -2,6 +2,7 @@
 #include <vector>
 #include <set>
 #include "viewADS.h"
+#include "viewADSHistory.h"
 
 void MultiplexRoutes::defineRoutes(AsyncWebServer &server) {
 
@@ -153,16 +154,19 @@ void MultiplexRoutes::defineRoutes(AsyncWebServer &server) {
         if (signalType == "TEST") {
             Serial.println("TEST mode activated - bypassing ADS1115");
             
-            // In modalità TEST, non chiamare MAI l'ADS1115_controller
-            // Gestisci solo le azioni che non richiedono hardware
-            if (action == "start_recording" || action == "stop_recording" || 
-                action == "start_monitor" || action == "stop_monitor" ||
-                action == "start_monitor_alert" || action == "stop_monitor_alert") {
-                Serial.println("TEST mode: Azione " + action + " simulata (nessun hardware coinvolto)");
+            // In modalità TEST, gestiamo start/stop recording ma bypassiamo il resto
+            if (action == "start_recording") {
+                ADS1115_controller::getInstance()->startRecording(signalType, milliseconds.toInt());
+                request->send(200, "text/plain", "OK");
+                return;
+            }
+            if (action == "stop_recording") {
+                ADS1115_controller::getInstance()->stopRecording();
+                request->send(200, "text/plain", "OK");
+                return;
             }
             
-            // Generate test page without ADS operations
-            //String htmlContent = viewGeneric::defaultCssHeader("Graph View - TEST Mode");
+            // Generate test page without ADS operations for other actions
             String htmlContent = viewGeneric::basicHeader("Graph View - TEST Mode");
              htmlContent += viewMultiplex::pinStartAndStopForm(999, signalType); // Use 999 as test channel
             
@@ -242,5 +246,23 @@ void MultiplexRoutes::defineRoutes(AsyncWebServer &server) {
         htmlContent += viewGeneric::defaultFooter();
         
         request->send(200, "text/html", htmlContent);
+    });
+
+    server.on("/ADS_history", HTTP_GET, [](AsyncWebServerRequest *request) {
+        String htmlContent = viewADSHistory::generateHTML();
+        request->send(200, "text/html", htmlContent);
+    });
+
+    server.on("/getADSValuesHistory", HTTP_GET, [](AsyncWebServerRequest *request) {
+        String content = viewADSHistory::adsContent();
+        request->send(200, "text/html", content);
+    });
+
+    server.on("/deleteADSValue", HTTP_GET, [](AsyncWebServerRequest *request) {
+        if (request->hasParam("index")) {
+            int index = request->getParam("index")->value().toInt();
+            ADS1115_controller::getInstance()->deleteRecordedValue(index);
+        }
+        request->redirect("/ADS_history");
     });
 }

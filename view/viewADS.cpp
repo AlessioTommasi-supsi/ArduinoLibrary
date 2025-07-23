@@ -4,7 +4,18 @@ String viewADS::html = "";
 
 String viewADS::generateHTML()
 {
-    html = viewGeneric::defaultCssHeader("ADS History");
+    html = "<!DOCTYPE html><html><head>";
+    html += "<meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1.0'>";
+    html += "<title>ADS History</title>";
+    html += "<style>";
+    html += viewGeneric::addCss();
+    html += viewGeneric::addFormCss();
+    html += viewGeneric::addNavbarCss();
+    html += "</style>";
+    html += "</head><body>";
+    
+    // Navbar sempre presente
+    html += viewGeneric::addNavbar();
 
     html += "<h1>ADS1115 History</h1>";
     html += "<div class='scrollable-container' style='overflow-y: auto; max-height: 80vh;'>";

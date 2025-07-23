@@ -4,7 +4,19 @@ String viewPinHistory::html = "";
 
 String viewPinHistory::generateHTML()
 {
-    html = viewGeneric::basicHeader("Pin History");
+    html = "<!DOCTYPE html><html><head>";
+    html += "<meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1.0'>";
+    html += "<title>Pin History</title>";
+    html += "<style>";
+    html += viewGeneric::addCss();
+    html += viewGeneric::addFormCss();
+    html += viewGeneric::addNavbarCss();
+    html += "</style>";
+    html += "</head><body>";
+    
+    // Navbar sempre presente
+    html += viewGeneric::addNavbar();
+    
     html += viewGeneric::addExportCSVScript(); // Aggiungo script per esportazione CSV
     html += "<h1>Pin History</h1>";
     

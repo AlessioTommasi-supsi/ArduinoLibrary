@@ -4,7 +4,18 @@
 String viewGraph::html = "";
 String viewGraph::generateHTML()
 {
-    html = viewGeneric::defaultCssHeader("Graph View");
+    html = "<!DOCTYPE html><html><head>";
+    html += "<meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1.0'>";
+    html += "<title>Graph View</title>";
+    html += "<style>";
+    html += viewGeneric::addCss();
+    html += viewGeneric::addFormCss();
+    html += viewGeneric::addNavbarCss();
+    html += "</style>";
+    html += "</head><body>";
+    
+    // Navbar sempre presente
+    html += viewGeneric::addNavbar();
 
     html += "<h1>Graph View</h1>";
 

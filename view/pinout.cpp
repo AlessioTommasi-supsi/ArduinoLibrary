@@ -102,18 +102,30 @@ String Pinout::pageContentCss(){
 
 String Pinout::generateHTML(String popupScript)
 {
-    html = "";
-    html = viewGeneric::defaultCssHeader("Pinout");
+    // Header completo con CSS e navbar
+    html = "<!DOCTYPE html><html><head>";
+    html += "<meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1.0'>";
+    html += "<title>Pinout</title>";
+    html += "<style>";
+    html += viewGeneric::addCss();
+    html += viewGeneric::addFormCss();
+    html += viewGeneric::addNavbarCss();
+    html += "</style>";
+    html += "</head><body>";
+    
+    // Navbar sempre presente
+    html += viewGeneric::addNavbar();
 
-    pageContent();
+    // Contenuto della pagina
+    html += pageContent();
 
-    // Aggiunta del popup
+    // Popup
     html += "<div id='popup' style='display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); padding:20px; background-color:white; border:1px solid black; z-index:1000;'>";
     html += "    <p id='popupMessage'></p>";
     html += "    <button onclick=\"document.getElementById('popup').style.display='none';\">Close</button>";
     html += "</div>";
 
-    // Aggiunta del JavaScript per gestire il popup
+    // JavaScript per popup
     html += "<script>";
     html += "function showPopup(message) {";
     html += "    document.getElementById('popupMessage').innerText = message;";
@@ -121,7 +133,7 @@ String Pinout::generateHTML(String popupScript)
     html += "}";
     html += "</script>";
 
-    // Esecuzione dello script passato come parametro
+    // Script personalizzato se fornito
     if (popupScript != "")
     {
         html += "<script>";

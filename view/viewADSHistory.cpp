@@ -60,10 +60,15 @@ String viewADSHistory::adsContent()
         for (size_t i = 0; i < values.size(); i++) {
             content += "<tr>";
             content += "<td>" + String(i) + "</td>";
+            
+            // Colonna Value con possibilità di edit (se necessario in futuro)
             content += "<td>" + String(values[i]) + "</td>";
+            
+            // Colonna Actions con Delete
             content += "<td>";
-            content += "<a href='/deleteADSValue?index=" + String(i) + "' class='action-link delete-link'>Delete</a>";
+            content += "<a href='/deleteADSValue?index=" + String(i) + "' class='action-link delete-link' style='background:#f44336;color:white;padding:4px 8px;border-radius:3px;text-decoration:none'>Delete</a>";
             content += "</td>";
+            
             content += "</tr>";
         }
     }

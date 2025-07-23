@@ -32,7 +32,7 @@ String Pinout::pageContent()
     html += ".pin-container{background:rgba(255,255,255,0.9);border-radius:8px;padding:15px;margin:10px auto;width:90%;max-width:500px}";
     html += ".pin-info{margin-bottom:8px;font-weight:bold;font-size:14px}";
     html += ".pin-actions{margin-top:10px}.pin-actions button{padding:6px 10px;border:none;border-radius:4px;margin-right:6px;font-size:12px;cursor:pointer}";
-    html += ".start{background:#f44336;color:white}.stop{background:#999;color:white}.edit{background:#2196F3;color:white}";
+    html += ".start{background:#4CAF50;color:white}.stop{background:#f44336;color:white}.edit{background:#2196F3;color:white}";
     html += "</style>";
 
     html += "<h1 style='text-align:center;margin:20px 0'>🔌 Pinout Configuration</h1>";
@@ -45,31 +45,34 @@ String Pinout::pageContent()
         Pin currentPin = SystemState::getInstance()->pinoutData->getPin(pinNumber);
         
         html += "<div class='pin-container'>";
-        html += "<div class='pin-info'>Pin " + String(pinNumber) + " - ";
-        html += currentPin.getIsInput() ? "INPUT" : "OUTPUT";
-        if (!currentPin.getIsInput()) {
-            // Usa getVoltage() invece di getOutputValue() e converti da mV a V
-            float voltageValue = currentPin.getVoltage() / 1000.0;
-            html += " (Value: " + String(voltageValue, 1) + "V)";
-        }
+        html += "<div class='pin-info'>";
+        char noteBuffer[200];
+        currentPin.getNote(noteBuffer, sizeof(noteBuffer));
+        html += "Pin number: " + String(pinNumber) + ", Type: " + currentPin.getType() + ", Voltage: " + String(currentPin.getVoltage() / 1000.0, 3) + " V, Input: " + (currentPin.getIsInput() ? "Yes" : "No") + ", Note: " + String(noteBuffer);
         html += "</div>";
-
+        
         html += "<div class='pin-actions'>";
         
-        // Form compatti
+        // Form per start recording (solo per pin input)
         if (currentPin.getIsInput()) {
-            html += "<form method='POST' action='/startPin' style='display:inline-block;margin-right:5px'>";
-            html += "<input type='hidden' name='pinNumber' value='" + String(pinNumber) + "'>";
-            html += "<button type='submit' class='start'>▶ Start</button></form>";
+            html += "<form action='/startRecordingPin' method='get' style='display:inline-block;margin-right:5px'>";
+            html += "<input type='hidden' name='pin' value='" + String(pinNumber) + "'>";
+            html += "<label for='milliseconds'>ms:</label>";
+            html += "<input type='text' name='milliseconds' value='1000' style='width:60px;margin-right:5px'>";
+            html += "<button type='submit' class='start'>Start Recording</button>";
+            html += "</form>";
             
-            html += "<form method='POST' action='/stopPin' style='display:inline-block;margin-right:5px'>";
-            html += "<input type='hidden' name='pinNumber' value='" + String(pinNumber) + "'>";
-            html += "<button type='submit' class='stop'>⏹ Stop</button></form>";
+            html += "<form action='/stopRecordingPin' method='get' style='display:inline-block;margin-right:5px'>";
+            html += "<input type='hidden' name='pin' value='" + String(pinNumber) + "'>";
+            html += "<button type='submit' class='stop'>Stop Recording</button>";
+            html += "</form>";
         }
         
-        html += "<form method='GET' action='/editPin' style='display:inline-block'>";
-        html += "<input type='hidden' name='pinNumber' value='" + String(pinNumber) + "'>";
-        html += "<button type='submit' class='edit'>✏ Edit</button></form>";
+        // Form per edit (sempre presente)
+        html += "<form action='/editPin' method='get' style='display:inline-block'>";
+        html += "<input type='hidden' name='pin' value='" + String(pinNumber) + "'>";
+        html += "<button type='submit' class='edit'>Edit</button>";
+        html += "</form>";
         
         html += "</div></div>";
     }

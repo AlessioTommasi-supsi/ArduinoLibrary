@@ -59,7 +59,7 @@ String viewPinHistory::pinContent() {
         if (valuesVector.empty()) {
             content += "<tr>";
             content += "<td>" + String(gpioPin) + "</td>";
-            content += "<td colspan='2'>Nessun valore registrato</td>";
+            content += "<td colspan='2'>No values recorded</td>";
             content += "</tr>";
         } else {
             for (size_t j = valuesVector.size(); j > 0; j--) {
@@ -67,22 +67,29 @@ String viewPinHistory::pinContent() {
                 content += "<tr>";
                 content += "<td>" + String(gpioPin) + "</td>";
                 
+                // Colonna Edit con form completo
                 content += "<td>";
-                content += "<form action='/editPinValue' method='GET'>";
+                content += "<form action='/editPinValue' method='GET' style='display:inline-block'>";
                 content += "<input type='hidden' name='pin' value='" + String(gpioPin) + "'>";
                 content += "<input type='hidden' name='index' value='" + String(index) + "'>";
-                content += "<input type='text' class='edit-input' name='value' value='" + String(valuesVector[index]) + "'>";
-                content += "<input type='submit' value='Edit' class='action-link edit-link'>";
+                content += "<input type='text' class='edit-input' name='value' value='" + String(valuesVector[index]) + "' style='width:80px'>";
+                content += "<input type='submit' value='Edit' class='action-link edit-link' style='background:#2196F3;color:white;border:none;padding:4px 8px;border-radius:3px;cursor:pointer'>";
                 content += "</form>";
                 content += "</td>";
                 
+                // Colonna Delete
                 content += "<td>";
-                content += "<a href='/deletePinValue?pin=" + String(gpioPin) + "&index=" + String(index) + "' class='action-link delete-link'>Delete</a>";
+                content += "<a href='/deletePinValue?pin=" + String(gpioPin) + "&index=" + String(index) + "' class='action-link delete-link' style='background:#f44336;color:white;padding:4px 8px;border-radius:3px;text-decoration:none'>Delete</a>";
                 content += "</td>";
                 
                 content += "</tr>";
             }
         }
     }
+    
+    if (content.length() == 0) {
+        content += "<tr><td colspan='3'>No pin values recorded</td></tr>";
+    }
+    
     return content;
 }

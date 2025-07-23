@@ -301,7 +301,7 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
 
     server.on("/getPinValuesHistory", HTTP_GET, [](AsyncWebServerRequest *request) {
         try {
-            String content = viewHistory::pinoutContent();
+            String content = viewPinHistory::pinContent();
             request->send(200, "text/html", content);
         } catch (const std::exception& e) {
             Serial.println("Error in /getPinValuesHistory route: " + String(e.what()));
@@ -320,7 +320,7 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
             
             SystemState::getInstance()->pinoutData->getPin(pinNumber.toInt()).editValue(index.toInt(), value.toFloat());
             
-            String content = viewHistory::pinoutContent();
+            String content = viewPinHistory::pinContent();
             request->send(200, "text/html", content);
         } catch (const std::exception& e) {
             Serial.println("Error in /editPinValue route: " + String(e.what()));
@@ -338,7 +338,7 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
             
             SystemState::getInstance()->pinoutData->getPin(pinNumber.toInt()).deleteValue(index.toInt());
             
-            String content = viewHistory::pinoutContent();
+            String content = viewPinHistory::pinContent();
             request->send(200, "text/html", content);
         } catch (const std::exception& e) {
             Serial.println("Error in /deletePinValue route: " + String(e.what()));

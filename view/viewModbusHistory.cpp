@@ -59,26 +59,30 @@ String viewModbusHistory::modbusContent()
         size_t index = i - 1;
         content += "<tr>";
         
+        // Solo registri Modbus (indirizzi positivi)
         if (addresses[index] > 0) { 
             content += "<td>" + String(addresses[index]) + "</td>"; 
-        } else { 
-            content += "<td>GPIO:" + String(-addresses[index]) + "</td>"; 
+            
+            content += "<td>";
+            content += "<form action='/editRegister' method='GET'>";
+            content += "<input type='hidden' name='index' value='" + String(index) + "'>";
+            content += "<input type='text' class='edit-input' name='value' value='" + String(valuesVector[index]) + "'>";
+            content += "<input type='submit' value='Edit' class='action-link edit-link'>";
+            content += "</form>";
+            content += "</td>";
+
+            content += "<td>";
+            content += "<a href='/deleteRegister?index=" + String(index) + "' class='action-link delete-link'>Delete</a>";
+            content += "</td>";
+
+            content += "</tr>";
         }
-
-        content += "<td>";
-        content += "<form action='/editRegister' method='GET'>";
-        content += "<input type='hidden' name='index' value='" + String(index) + "'>";
-        content += "<input type='text' class='edit-input' name='value' value='" + String(valuesVector[index]) + "'>";
-        content += "<input type='submit' value='Edit' class='action-link edit-link'>";
-        content += "</form>";
-        content += "</td>";
-
-        content += "<td>";
-        content += "<a href='/deleteRegister?index=" + String(index) + "' class='action-link delete-link'>Delete</a>";
-        content += "</td>";
-
-        content += "</tr>";
+        // Esclude completamente i pin (indirizzi negativi)
     }
 
+    if (content.length() == 0) {
+        content += "<tr><td colspan='3'>No Modbus register values recorded</td></tr>";
+    }
+    
     return content;
 }

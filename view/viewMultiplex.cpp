@@ -193,6 +193,8 @@ String viewMultiplex::  pinStartAndStopForm(int channelAdsNumber, String signalT
             <div class="multiplex-graph">
                 <div class="graph-header">
                     <h3 style="margin: 0; color: #333;">Grafico in Tempo Reale</h3>
+                    <!-- Aggiungo bottone export CSV per multiplex -->
+                    <button onclick=\"exportGraphDataToCSV('multiplex_data.csv', '/getADSValues', '')\" style='background-color: #2196F3; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; margin-left: 10px;'>📊 Export CSV</button>
                 </div>
                 <div class="graph-container">
                     <!-- Real-time value display -->

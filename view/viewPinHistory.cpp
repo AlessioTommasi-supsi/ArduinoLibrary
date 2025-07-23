@@ -1,0 +1,88 @@
+#include "viewPinHistory.h"
+
+String viewPinHistory::html = "";
+
+String viewPinHistory::generateHTML()
+{
+    html = viewGeneric::basicHeader("Pin History");
+    html += viewGeneric::addExportCSVScript(); // Aggiungo script per esportazione CSV
+    html += "<h1>Pin History</h1>";
+    
+    // Aggiungo bottone export CSV
+    html += "<div style='text-align: center; margin: 20px 0;'>";
+    html += "<button onclick=\"exportToCSV('pin_history_data.csv', 'pin-history-table')\" style='background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px;'>📥 Export Pin CSV</button>";
+    html += "</div>";
+    
+    html += "<div class='scrollable-container' style='overflow-y: auto; max-height: 80vh;'>";
+    html += "<table class='history-table' id='pin-history-table' border='1'>";
+    html += "<thead>";
+    html += "<tr>";
+    html += "<th>Pin</th>";
+    html += "<th>Value</th>";
+    html += "<th>Actions</th>";
+    html += "</tr>";
+    html += "</thead>";
+    
+    html += "<tbody id='pin-history-content'>";
+    html += viewPinHistory::pinContent(); 
+    html += "</tbody>";
+    html += "</table>";
+    html += "</div>";
+
+    // Script per aggiornamento automatico
+    html += "<script>";
+    html += "document.addEventListener('DOMContentLoaded', () => {";
+    html += "  setInterval(() => {";
+    html += "    fetch('/getPinValuesHistory')";
+    html += "      .then(response => response.text())";
+    html += "      .then(data => {";
+    html += "        document.getElementById('pin-history-content').innerHTML = data;";
+    html += "      });";
+    html += "  }, 3000);";
+    html += "});";
+    html += "</script>";
+
+    html += viewGeneric::defaultFooter();
+
+    return html;
+}
+
+String viewPinHistory::pinContent() {
+    String content = "";
+    std::vector<int> pinNumbers = SystemState::getInstance()->pinoutData->getPinNumbers();
+    
+    for (size_t i = 0; i < pinNumbers.size(); i++) {
+        int gpioPin = pinNumbers[i];
+        Pin &currentPin = SystemState::getInstance()->pinoutData->getPin(gpioPin);
+        std::vector<float> valuesVector = currentPin.getValuesVoltage();
+
+        if (valuesVector.empty()) {
+            content += "<tr>";
+            content += "<td>" + String(gpioPin) + "</td>";
+            content += "<td colspan='2'>Nessun valore registrato</td>";
+            content += "</tr>";
+        } else {
+            for (size_t j = valuesVector.size(); j > 0; j--) {
+                size_t index = j - 1;
+                content += "<tr>";
+                content += "<td>" + String(gpioPin) + "</td>";
+                
+                content += "<td>";
+                content += "<form action='/editPinValue' method='GET'>";
+                content += "<input type='hidden' name='pin' value='" + String(gpioPin) + "'>";
+                content += "<input type='hidden' name='index' value='" + String(index) + "'>";
+                content += "<input type='text' class='edit-input' name='value' value='" + String(valuesVector[index]) + "'>";
+                content += "<input type='submit' value='Edit' class='action-link edit-link'>";
+                content += "</form>";
+                content += "</td>";
+                
+                content += "<td>";
+                content += "<a href='/deletePinValue?pin=" + String(gpioPin) + "&index=" + String(index) + "' class='action-link delete-link'>Delete</a>";
+                content += "</td>";
+                
+                content += "</tr>";
+            }
+        }
+    }
+    return content;
+}

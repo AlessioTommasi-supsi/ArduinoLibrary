@@ -18,6 +18,7 @@ public:
     static String generateBasicJavaScript();
     static String generateDrawFunctionJS();
     static String generateUpdateFunctionJS(String apiFetch, String apiFetchParam);
+    static String generateGraphExportJS(String apiFetch, String apiFetchParam);
     static String generateInitializationJS();
     static String generateCirularProgressBarGraph(String circle_progressbar_label, float circle_progressbar_used_value, float circle_progressbar_total_value);
     static String generateCirularProgressBarGraph(String circle_progressbar_label, float circle_progressbar_used_value, float circle_progressbar_total_value, String apiFetchData, int timeToUpdate);

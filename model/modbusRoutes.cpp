@@ -24,6 +24,21 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
         }
     });
 
+    // Nuova rotta per la cronologia separata di Modbus
+    server.on("/modbus_history", HTTP_GET, [](AsyncWebServerRequest *request) {
+        try {
+            String htmlContent = viewModbusHistory::generateHTML();
+            const char *htmlContentPtr = htmlContent.c_str();
+            request->send(200, "text/html", htmlContentPtr);
+        } catch (const std::exception& e) {
+            Serial.println("Error in /modbus_history route: " + String(e.what()));
+            request->send(500, "text/html", "Error loading modbus history page");
+        } catch (...) {
+            Serial.println("Unknown error in /modbus_history route");
+            request->send(500, "text/html", "Unknown error occurred");
+        }
+    });
+
     server.on("/getHistoryContent", HTTP_GET, [](AsyncWebServerRequest *request){
         String content = "";
         std::vector<float> valuesVector = SystemState::getInstance()->getAllRegisterValue();
@@ -54,6 +69,20 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
         }
 
         request->send(200, "text/html", content);
+    });
+
+    // Nuovo endpoint per aggiornamento dinamico cronologia Modbus
+    server.on("/getModbusValuesHistory", HTTP_GET, [](AsyncWebServerRequest *request) {
+        try {
+            String content = viewModbusHistory::modbusContent();
+            request->send(200, "text/html", content);
+        } catch (const std::exception& e) {
+            Serial.println("Error in /getModbusValuesHistory route: " + String(e.what()));
+            request->send(500, "text/html", "Error loading modbus history");
+        } catch (...) {
+            Serial.println("Unknown error in /getModbusValuesHistory route");
+            request->send(500, "text/html", "Unknown error occurred");
+        }
     });
 
     server.on("/deleteRegister", HTTP_GET, [](AsyncWebServerRequest *request){

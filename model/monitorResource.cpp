@@ -19,6 +19,7 @@ void MonitorResource::defineRoutes(AsyncWebServer &server)
             
             size_t heapFree = heap_caps_get_free_size(MALLOC_CAP_8BIT);
             size_t heapTotal = heap_caps_get_total_size(MALLOC_CAP_8BIT);
+            heapTotal = heapTotal * 0.6; // ho visto da test che sopra il 70% da errore dunque mantengo questo fattore di correzione!
             size_t heapUsed = heapTotal - heapFree;
 
             //htmlContent += viewGraph::generateCirularProgressBarGraph("HEAP", heapUsed, heapTotal);

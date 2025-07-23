@@ -6,9 +6,16 @@ String viewADSHistory::html = "";
 String viewADSHistory::generateHTML()
 {
     html = viewGeneric::basicHeader("ADS History");
+    html += viewGeneric::addExportCSVScript(); // Aggiungo script per esportazione CSV
     html += "<h1>ADS History</h1>";
+    
+    // Aggiungo bottone export CSV
+    html += "<div style='text-align: center; margin: 20px 0;'>";
+    html += "<button onclick=\"exportToCSV('ads_history_data.csv', 'ads-history-table')\" style='background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px;'>📥 Export ADS CSV</button>";
+    html += "</div>";
+    
     html += "<div class='scrollable-container' style='overflow-y: auto; max-height: 80vh;'>";
-    html += "<table class='history-table' border='1'>";
+    html += "<table class='history-table' id='ads-history-table' border='1'>";
     html += "<thead>";
     html += "<tr>";
     html += "<th>#</th>";

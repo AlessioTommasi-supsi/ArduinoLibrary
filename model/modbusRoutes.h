@@ -13,6 +13,7 @@
 #include "viewGraph.h"
 #include "viewGeneric.h"
 #include "viewHistory.h"
+#include "viewModbusHistory.h"
 #include "viewCurrentRegister.h"
 
 #include "SystemState.h"

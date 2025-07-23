@@ -6,13 +6,21 @@ String viewHistory::generateHTML()
 {
     //html = viewGeneric::defaultCssHeader("History Register");
     html = viewGeneric::basicHeader("History Register");
+    html += viewGeneric::addExportCSVScript(); // Aggiungo script per esportazione CSV
     html += "<h1>History</h1>";
+    
+    // Aggiungo bottone export CSV
+    html += "<div style='text-align: center; margin: 20px 0;'>";
+    html += "<button onclick=\"exportToCSV('history_data.csv', 'history-table-combined')\" style='background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px;'>📥 Export History CSV</button>";
+    html += "</div>";
+    
     html += "<div class='scrollable-container' style='overflow-y: auto; max-height: 80vh;'>"; // Add inline style for scrollbar
-    // Creazione della tabella con header fisso
-    html += "<table class='history-table' border='1'>";
+    // Creazione della tabella con header fisso - aggiungo ID per esportazione
+    html += "<table class='history-table' id='history-table-combined' border='1'>";
     html += "<thead>";
     html += "<tr>";
-    html += "<th>Pin</th>";
+    html += "<th>Type</th>";
+    html += "<th>Pin/Address</th>";
     html += "<th>Value</th>";
     html += "<th>Actions</th>";
     html += "</tr>";
@@ -22,23 +30,11 @@ String viewHistory::generateHTML()
     html += "<tbody id='history-pin-content'>";
     html += viewHistory::pinoutContent(); 
     html += "</tbody>";
-    html += "</table>";
-    html += "<br>"; // Spazio tra le tabelle
-
-    html += "<table class='history-table'>";
-    html += "<tr>";
-    html += "<th>Address</th>";
-    html += "<th>Value</th>";
-    html += "<th>Actions</th>"; // Add Actions column header
-    html += "</tr>";
-
-    html += "<tbody id='history-content'>"; // Add tbody with id for updating content
-
+    
+    html += "<tbody id='history-content'>";
     html += viewHistory::modbusContent(); 
     html += "</tbody>";
     html += "</table>";
-
-
     html += "</div>";
 
     // Aggiungi lo script per aggiornare il div ogni k secondi
@@ -86,6 +82,7 @@ String viewHistory::modbusContent()
     {
         size_t index = i - 1;
         html += "<tr>";
+        html += "<td>Modbus</td>"; // Aggiungo colonna Type
         // Controlla se l'indirizzo è maggiore di 0 
         if (addresses[index] > 0) { 
             html += "<td>" + String(addresses[index]) + "</td>"; 
@@ -132,6 +129,7 @@ String viewHistory::pinoutContent() {
         // Se non sono presenti valori, stampa una riga informativa
         if (valuesVector.empty()) {
             content += "<tr>";
+            content += "<td>Pin</td>"; // Aggiungo colonna Type
             content += "<td>" + String(gpioPin) + "</td>";
             content += "<td colspan='2'>Nessun valore registrato</td>";
             content += "</tr>";
@@ -140,6 +138,7 @@ String viewHistory::pinoutContent() {
             for (size_t j = valuesVector.size(); j > 0; j--) {
                 size_t index = j - 1;
                 content += "<tr>";
+                content += "<td>Pin</td>"; // Aggiungo colonna Type
                 // Colonna 1: numero del pin (come indirizzo)
                 content += "<td>" + String(gpioPin) + "</td>";
                 

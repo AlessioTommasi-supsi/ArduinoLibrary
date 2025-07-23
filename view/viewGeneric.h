@@ -30,6 +30,7 @@ class viewGeneric
         static String dynamicUpdateContent(String divId, String api, int timeToUpdate);
         static String dynamicUpdateContentScript();
         static String fetchContentScript();
+        static String addExportCSVScript();
 };
 
 #endif // !VIEWGENERIC_H#define VIEWGENERIC_H

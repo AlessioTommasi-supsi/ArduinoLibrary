@@ -41,6 +41,11 @@ String viewGraph::generateGraph(std::vector<int> addresses, String apiFetch, Str
     if (addresses.size() > 1) {
         var_html += generateSelectorHTML(addresses);
     }
+    
+    // Aggiungo bottone export CSV per i grafici
+    var_html += "<div style='text-align: center; margin: 10px 0;'>";
+    var_html += "<button onclick=\"exportCurrentGraphData()\" style='background-color: #2196F3; color: white; padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px;'>📊 Export Graph CSV</button>";
+    var_html += "</div>";
 
     // Canvas responsive all'interno del contenitore
     var_html += "<canvas id='myChart' style='width: 100%; height: 100%; display: block; border: 1px solid #ddd; border-radius: 8px;'></canvas>";
@@ -51,6 +56,7 @@ String viewGraph::generateGraph(std::vector<int> addresses, String apiFetch, Str
     var_html += generateBasicJavaScript();
     var_html += generateDrawFunctionJS();
     var_html += generateUpdateFunctionJS(apiFetch, apiFetchParam);
+    var_html += generateGraphExportJS(apiFetch, apiFetchParam);
     var_html += generateInitializationJS();
 
     return var_html;
@@ -82,7 +88,8 @@ String viewGraph::generateSelectorHTML(std::vector<int> addresses)
         } else if (addr == 999) {
             html += "<option value='999'>🧪 TEST Mode</option>";
         } else {
-            html += "<option value='" + String(addr) + "'>Errore inserimento!" + String(addr - 3000) + "</option>";
+            //caso di scritture non valide non le inserisco
+            //html += "<option value='" + String(addr) + "'>Errore inserimento!" + String(addr - 3000) + "</option>";
         }
     }
 
@@ -213,6 +220,42 @@ String viewGraph::generateUpdateFunctionJS(String apiFetch, String apiFetchParam
     js += "ctx.textAlign = 'center';";
     js += "ctx.fillText('Errore nel caricamento dei dati', canvas.width / 2, canvas.height / 2);";
     js += "}});";
+    js += "}";
+    js += "</script>";
+    
+    return js;
+}
+
+String viewGraph::generateGraphExportJS(String apiFetch, String apiFetchParam)
+{
+    String js = "";
+    js.reserve(512);
+    
+    js += "<script>";
+    js += "function exportCurrentGraphData() {";
+    js += "const selectElement = document.getElementById('register-select');";
+    js += "const address = selectElement ? selectElement.value : 0;";
+    js += "fetch('" + apiFetch + "?" + apiFetchParam + "=' + address)";
+    js += ".then(response => response.json())";
+    js += ".then(data => {";
+    js += "if (data.length === 0) {";
+    js += "alert('Nessun dato disponibile per l\\'esportazione.');";
+    js += "return;";
+    js += "}";
+    js += "let csv = 'Index,Value\\n';";
+    js += "data.forEach((value, index) => {";
+    js += "csv += index + ',' + value + '\\n';";
+    js += "});";
+    js += "const csvFile = new Blob([csv], { type: 'text/csv' });";
+    js += "const downloadLink = document.createElement('a');";
+    js += "downloadLink.download = 'graph_data_' + address + '.csv';";
+    js += "downloadLink.href = window.URL.createObjectURL(csvFile);";
+    js += "downloadLink.style.display = 'none';";
+    js += "document.body.appendChild(downloadLink);";
+    js += "downloadLink.click();";
+    js += "document.body.removeChild(downloadLink);";
+    js += "})";
+    js += ".catch(error => console.error('Error exporting data:', error));";
     js += "}";
     js += "</script>";
     

@@ -489,9 +489,13 @@ String viewGeneric::addNavbar()
             <div class="icon">📋</div>
             <span>Register</span>
             </a>
-            <a href="/history">
-            <div class="icon">⏳</div>
-            <span>History</span>
+            <a href="/pin_history">
+            <div class="icon">📌</div>
+            <span>Pin History</span>
+            </a>
+            <a href="/modbus_history">
+            <div class="icon">📊</div>
+            <span>Modbus History</span>
             </a>
             <a href="/graph">
             <div class="icon">📈</div>
@@ -506,8 +510,8 @@ String viewGeneric::addNavbar()
             <span>Multiplexer</span>
             </a>
             <a href="/ADS_history">
-            <div class="icon">📊</div>
-            <span>ADS</span>
+            <div class="icon">🔢</div>
+            <span>ADS History</span>
             </a>
         </div>
         )";
@@ -586,7 +590,8 @@ String viewGeneric::defaultHeader(String title)
 
 String viewGeneric::defaultFooter()
 {
-    html = "</body>";
+    html = "<br><br><br><br><br><br>";
+    html += "</body>";
     html += "</html>";
     return html;
 }
@@ -644,6 +649,77 @@ String viewGeneric::fetchContentScript()
         </script>
     )";
 
+    return script;
+}
+
+String viewGeneric::addExportCSVScript()
+{
+    String script = R"(
+    <script>
+    function exportToCSV(filename, tableId) {
+        const table = document.getElementById(tableId);
+        if (!table) {
+            alert('Tabella non trovata!');
+            return;
+        }
+        
+        let csv = [];
+        const rows = table.querySelectorAll('tr');
+        
+        for (let i = 0; i < rows.length; i++) {
+            const row = [], cols = rows[i].querySelectorAll('td, th');
+            
+            for (let j = 0; j < cols.length; j++) {
+                // Gestisce celle con input per estrarre il valore
+                const input = cols[j].querySelector('input[type="text"]');
+                let cellText = input ? input.value : cols[j].innerText;
+                
+                // Pulisce il testo e gestisce le virgolette
+                cellText = cellText.replace(/"/g, '""');
+                if (cellText.search(/("|,|\n)/g) >= 0) {
+                    cellText = '"' + cellText + '"';
+                }
+                row.push(cellText);
+            }
+            csv.push(row.join(','));
+        }
+        
+        // Crea e scarica il file
+        const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
+        const downloadLink = document.createElement('a');
+        downloadLink.download = filename;
+        downloadLink.href = window.URL.createObjectURL(csvFile);
+        downloadLink.style.display = 'none';
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    }
+    
+    function exportGraphDataToCSV(filename, apiEndpoint, paramName, paramValue) {
+        fetch(apiEndpoint + '?' + paramName + '=' + paramValue)
+            .then(response => response.json())
+            .then(data => {
+                let csv = 'Index,Value\n';
+                data.forEach((value, index) => {
+                    csv += index + ',' + value + '\n';
+                });
+                
+                const csvFile = new Blob([csv], { type: 'text/csv' });
+                const downloadLink = document.createElement('a');
+                downloadLink.download = filename;
+                downloadLink.href = window.URL.createObjectURL(csvFile);
+                downloadLink.style.display = 'none';
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            })
+            .catch(error => {
+                console.error('Errore durante l\'esportazione:', error);
+                alert('Errore durante l\'esportazione dei dati del grafico');
+            });
+    }
+    </script>
+    )";
     return script;
 }
 

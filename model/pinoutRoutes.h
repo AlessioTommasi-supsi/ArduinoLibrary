@@ -1,4 +1,3 @@
-
 #ifndef PINOUTROUTES_H
 #define PINOUTROUTES_H
 
@@ -12,6 +11,7 @@
 #include "viewGraph.h"
 #include "viewGeneric.h"
 #include "viewEditPin.h"
+#include "viewPinHistory.h"
 #include "viewCurrentRegister.h"
 #include "viewHistory.h"
 

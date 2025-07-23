@@ -52,6 +52,21 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
             request->send(500, "text/plain", "Internal Server Error");
         } });
 
+    // Nuova rotta per la cronologia separata dei pin
+    server.on("/pin_history", HTTP_GET, [](AsyncWebServerRequest *request) {
+        try {
+            String htmlContent = viewPinHistory::generateHTML();
+            const char *htmlContentPtr = htmlContent.c_str();
+            request->send(200, "text/html", htmlContentPtr);
+        } catch (const std::exception& e) {
+            Serial.println("Error in /pin_history route: " + String(e.what()));
+            request->send(500, "text/html", "Error loading pin history page");
+        } catch (...) {
+            Serial.println("Unknown error in /pin_history route");
+            request->send(500, "text/html", "Unknown error occurred");
+        }
+    });
+
     server.on("/pinoutContent", HTTP_GET, [](AsyncWebServerRequest *request)
               {
         

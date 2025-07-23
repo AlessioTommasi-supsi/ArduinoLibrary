@@ -118,134 +118,207 @@ void MultiplexRoutes::defineRoutes(AsyncWebServer &server) {
         request->send(200, "application/json", json);
     });
 
-    // Endpoint: /multiplex_graph
-    // Gestisce l'input della configurazione e avvia/ferma la registrazione.
-    // Genera la pagina HTML con il grafico, inserendo anche un eventuale messaggio d'errore
-    // e un bottone "Riprova inizializzazione" se l'ADS1115 non è stato inizializzato correttamente.
+    // Versione ottimizzata per bassa memoria di multiplex_graph con grafico leggero
     server.on("/multiplex_graph", HTTP_GET, [](AsyncWebServerRequest *request) {
         String signalType;
         String action = "";
         String milliseconds;
-        String ErrorMessage = "";
 
         if (request->hasParam("signalType")) {
             signalType = request->getParam("signalType")->value();
-            Serial.println("Signal type: " + signalType);
         } else {
-            request->send(400, "text/plain", "Error: Missing parameter signalType");
+            request->send(400, "text/plain", "Error: Missing signalType");
             return;
         }
         
         if (request->hasParam("action")) {
             action = request->getParam("action")->value();
-            Serial.println("Action received: " + action);
-        } else {
-            action = "first_entry_on_this_page";
         }
         
         if (request->hasParam("milliseconds")) {
             milliseconds = request->getParam("milliseconds")->value();
-            Serial.println("Milliseconds: " + milliseconds);
         } else {
             milliseconds = "1000";
         }
-        
-        // TEST MODE - skip ADS initialization check BEFORE accessing ADS controller
+
+        // TEST MODE - modalità semplificata con grafico leggero
         if (signalType == "TEST") {
-            Serial.println("TEST mode activated - bypassing ADS1115");
-            
-            // In modalità TEST, gestiamo start/stop recording ma bypassiamo il resto
             if (action == "start_recording") {
                 ADS1115_controller::getInstance()->startRecording(signalType, milliseconds.toInt());
-                request->send(200, "text/plain", "OK");
+                request->send(200, "text/plain", "Recording started");
                 return;
             }
             if (action == "stop_recording") {
                 ADS1115_controller::getInstance()->stopRecording();
-                request->send(200, "text/plain", "OK");
+                request->send(200, "text/plain", "Recording stopped");
                 return;
             }
             
-            // Generate test page without ADS operations for other actions
-            String htmlContent = viewGeneric::basicHeader("Graph View - TEST Mode");
-             htmlContent += viewMultiplex::pinStartAndStopForm(999, signalType); // Use 999 as test channel
+            // Pagina TEST con grafico leggero
+            String html = "<!DOCTYPE html><html><head>";
+            html += "<meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'>";
+            html += "<title>TEST Mode</title>";
+            html += "<style>";
+            html += "body{font-family:Arial;margin:10px;text-align:center;background:#f5f5f5;}";
+            html += ".container{max-width:900px;margin:0 auto;background:white;padding:20px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1);}";
+            html += ".value{font-size:24px;margin:15px 0;padding:20px;background:linear-gradient(45deg,#ff6b6b,#feca57);color:white;border-radius:10px;}";
+            html += ".btn{padding:10px 20px;margin:8px;background:#4CAF50;color:white;border:none;border-radius:5px;cursor:pointer;font-size:14px;}";
+            html += ".btn:hover{background:#45a049;}.btn.stop{background:#f44336;}.btn.stop:hover{background:#da190b;}";
+            html += ".graph{width:100%;height:300px;border:2px solid #ddd;border-radius:8px;margin:20px 0;background:white;}";
+            html += ".controls{margin:15px 0;padding:15px;background:#f9f9f9;border-radius:8px;}";
+            html += ".status{margin:10px;padding:8px;border-radius:5px;font-weight:bold;}";
+            html += ".recording{background:#d4edda;color:#155724;}.stopped{background:#f8d7da;color:#721c24;}";
+            html += "</style></head><body>";
+            html += "<div class='container'>";
+            html += "<h1>🧪 TEST Mode</h1>";
+            html += "<div class='value' id='currentValue'>Loading...</div>";
             
-            // Create a test vector for the graph - use empty vector to avoid selector
+            html += "<canvas class='graph' id='chart' width='800' height='300'></canvas>";
             
-            htmlContent += "<script>";
-            htmlContent += "document.addEventListener('DOMContentLoaded', function() {";
-            htmlContent += "const graphContainer = document.getElementById('graphContainer');";
-            htmlContent += "if (graphContainer) {";
-            htmlContent += "graphContainer.innerHTML = `";
-            htmlContent += "<canvas id='myChart' style='width: 100%; height: 100%; display: block; border: 1px solid #ddd; border-radius: 8px;'></canvas>";
-            htmlContent += "`;";
-            htmlContent += "}";
-            htmlContent += "});";
-            htmlContent += "</script>";
-            htmlContent += viewGraph::generateBasicJavaScript();
-            htmlContent += viewGraph::generateDrawFunctionJS();
-            htmlContent += viewGraph::generateUpdateFunctionJS("getTestValues", "channel");
-            htmlContent += viewGraph::generateInitializationJS();
-            htmlContent += viewGeneric::defaultFooter();
+            html += "<div class='controls'>";
+            html += "<button class='btn' onclick='startRec()'>▶️ Start Recording</button>";
+            html += "<button class='btn stop' onclick='stopRec()'>⏹️ Stop Recording</button>";
+            html += "<div id='status' class='status stopped'>Recording Stopped</div>";
+            html += "</div>";
             
-            request->send(200, "text/html", htmlContent);
+            html += "<a href='/multiplex_config' style='padding:10px 20px;background:#FF9800;color:white;text-decoration:none;border-radius:5px;'>← Back</a>";
+            html += "</div>";
+            
+            // JavaScript per grafico leggero
+            html += "<script>";
+            html += "let data=[],isRec=false;";
+            html += "const canvas=document.getElementById('chart'),ctx=canvas.getContext('2d');";
+            html += "function drawGraph(){";
+            html += "ctx.clearRect(0,0,canvas.width,canvas.height);";
+            html += "if(data.length<2)return;";
+            html += "const maxVal=Math.max(...data),minVal=Math.min(...data),range=maxVal-minVal||1;";
+            html += "const stepX=canvas.width/(data.length-1);";
+            html += "ctx.strokeStyle='#4CAF50';ctx.lineWidth=2;ctx.beginPath();";
+            html += "data.forEach((val,i)=>{";
+            html += "const x=i*stepX,y=canvas.height-((val-minVal)/range)*canvas.height*0.8-canvas.height*0.1;";
+            html += "i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});";
+            html += "ctx.stroke();";
+            html += "ctx.fillStyle='#666';ctx.font='12px Arial';";
+            html += "ctx.fillText('Min: '+minVal.toFixed(1),10,canvas.height-10);";
+            html += "ctx.fillText('Max: '+maxVal.toFixed(1),10,20);}";
+            html += "function updateValue(){";
+            html += "fetch('/getMultiplexValue?signalType=TEST').then(r=>r.json()).then(d=>{";
+            html += "document.getElementById('currentValue').innerHTML='<strong>'+d.value.toFixed(2)+' 🧪</strong>';";
+            html += "if(isRec){data.push(d.value);if(data.length>50)data.shift();drawGraph();}";
+            html += "}).catch(e=>console.log('Error:',e));}";
+            html += "function startRec(){fetch('/multiplex_graph?signalType=TEST&action=start_recording&milliseconds=1000').then(()=>{";
+            html += "isRec=true;data=[];document.getElementById('status').className='status recording';";
+            html += "document.getElementById('status').textContent='Recording Active ✅';});}";
+            html += "function stopRec(){fetch('/multiplex_graph?signalType=TEST&action=stop_recording').then(()=>{";
+            html += "isRec=false;document.getElementById('status').className='status stopped';";
+            html += "document.getElementById('status').textContent='Recording Stopped ⏹️';});}";
+            html += "setInterval(updateValue,2000);updateValue();drawGraph();";
+            html += "</script></body></html>";
+            
+            request->send(200, "text/html", html);
             return;
         }
 
-        // Only access ADS controller for NON-TEST modes
+        // Per segnali reali, controlla ADS
         ADS1115_controller* adsCtrl = ADS1115_controller::getInstance();
         
-        // Set recording interval only for real ADS operations
+        if (adsCtrl->isInitializationFailed()) {
+            String html = "<!DOCTYPE html><html><head><title>ADS Error</title></head><body style='text-align:center;margin:50px;'>";
+            html += "<h1>❌ ADS1115 Error</h1>";
+            html += "<p>L'ADS1115 non è inizializzato correttamente.</p>";
+            html += "<a href='/reinitialize_ads' style='padding:10px 20px;background:#f44336;color:white;text-decoration:none;border-radius:5px;'>Reinitializza ADS</a><br><br>";
+            html += "<a href='/multiplex_config'>← Torna alla configurazione</a>";
+            html += "</body></html>";
+            request->send(500, "text/html", html);
+            return;
+        }
+
+        // Gestisci azioni per segnali reali
         if (request->hasParam("milliseconds")) {
             adsCtrl->recordingInterval = milliseconds.toInt();
         }
         
-        // Check ADS initialization before proceeding (only for real signals)
-        if (adsCtrl->isInitializationFailed()) {
-            ErrorMessage = "<h1>Error: ADS1115 Initialization Failed.</h1>";
-            ErrorMessage += "<p>Impossibile procedere senza ADS1115 funzionante.</p>";
-            ErrorMessage += "<form action='/reinitialize_ads' method='get'><button type='submit'>Riprova inizializzazione</button></form>";
-            ErrorMessage += "<br><a href='/multiplex_config'>Torna alla configurazione</a>";
-            Serial.println("Initialization failed: " + ErrorMessage);
-            request->send(500, "text/html", ErrorMessage);
-            return;
-        }
-        
-        // Imposta il canale del multiplexer in base al signalType (only if ADS is working)
-        adsCtrl->setChannel(signalType);
-
-        //gestione pin che monitora un altro pin! posso fare monitor di 1 solo pi di out per volta! e solo o monitor o solo alert!!
-        if (action == "start_monitor") {
-            int outputPinNumber = request->getParam("out_pin_number")->value().toInt();
-            adsCtrl->startMonitorTask(outputPinNumber);
-        } else if (action == "stop_monitor") {
-            adsCtrl->stopMonitorTask();
-        }
-        if (action == "start_monitor_alert") {
-            int outputPinNumber = request->getParam("out_pin_number")->value().toInt();
-            float alertValue = request->getParam("alert_value")->value().toFloat();
-            adsCtrl->startAlertMonitorTask(outputPinNumber, alertValue);
-        } else if (action == "stop_monitor_alert") {
-            adsCtrl->stopMonitorTask();
-        }
-
         if (action == "start_recording") {
             adsCtrl->startRecording(signalType, milliseconds.toInt());
         } else if (action == "stop_recording") {
             adsCtrl->stopRecording();
         }
         
-        Serial.println("Action completed, preparing response...");
+        // Pagina segnali reali con grafico leggero
+        String html = "<!DOCTYPE html><html><head>";
+        html += "<meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'>";
+        html += "<title>Multiplex - " + signalType + "</title>";
+        html += "<style>";
+        html += "body{font-family:Arial;margin:10px;text-align:center;background:#f5f5f5;}";
+        html += ".container{max-width:900px;margin:0 auto;background:white;padding:20px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1);}";
+        html += ".value{font-size:26px;margin:15px 0;padding:20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border-radius:10px;}";
+        html += ".graph{width:100%;height:350px;border:2px solid #ddd;border-radius:8px;margin:20px 0;background:white;}";
+        html += ".controls{margin:15px 0;padding:15px;background:#f9f9f9;border-radius:8px;}";
+        html += ".btn{padding:12px 24px;margin:8px;background:#4CAF50;color:white;border:none;border-radius:6px;cursor:pointer;font-size:14px;}";
+        html += ".btn:hover{background:#45a049;}.btn.stop{background:#f44336;}.btn.stop:hover{background:#da190b;}";
+        html += ".status{margin:10px;padding:8px;border-radius:5px;font-weight:bold;}";
+        html += ".recording{background:#d4edda;color:#155724;}.stopped{background:#f8d7da;color:#721c24;}";
+        html += ".links{margin-top:20px;}";
+        html += ".links a{padding:10px 20px;background:#2196F3;color:white;text-decoration:none;border-radius:5px;margin:5px;display:inline-block;}";
+        html += "</style></head><body>";
+        html += "<div class='container'>";
+        html += "<h1>📊 " + signalType + "</h1>";
+        html += "<div class='value' id='currentValue'>Loading...</div>";
         
-        // Prepara un vettore contenente il canale selezionato (un singolo elemento)
-        std::vector<int> channelVector = { adsCtrl->getCurrentChannel() };
+        html += "<canvas class='graph' id='chart' width='850' height='350'></canvas>";
         
-        String htmlContent = viewGeneric::defaultCssHeader("Graph View");
-        htmlContent += viewMultiplex::pinStartAndStopForm(adsCtrl->getCurrentChannel(), signalType);
-        htmlContent += viewGraph::generateGraph(channelVector, "getADSValues", "channel");
-        htmlContent += viewGeneric::defaultFooter();
+        html += "<div class='controls'>";
+        html += "<h3>Recording Controls</h3>";
+        html += "<button class='btn' onclick='startRecording()'>▶️ Start Recording</button>";
+        html += "<button class='btn stop' onclick='stopRecording()'>⏹️ Stop Recording</button>";
+        html += "<div id='status' class='status stopped'>Recording Stopped</div>";
+        html += "</div>";
         
-        request->send(200, "text/html", htmlContent);
+        html += "<div class='links'>";
+        html += "<a href='/ADS_history'>📈 View History</a>";
+        html += "<a href='/multiplex_config'>⚙️ Config</a>";
+        html += "</div>";
+        html += "</div>";
+        
+        // JavaScript ottimizzato per grafico leggero
+        html += "<script>";
+        html += "let graphData=[],isRecording=false;";
+        html += "const canvas=document.getElementById('chart'),ctx=canvas.getContext('2d');";
+        html += "function drawChart(){";
+        html += "ctx.clearRect(0,0,canvas.width,canvas.height);";
+        html += "if(graphData.length<2){ctx.fillStyle='#999';ctx.font='16px Arial';ctx.textAlign='center';";
+        html += "ctx.fillText('Waiting for data...',canvas.width/2,canvas.height/2);return;}";
+        html += "const maxVal=Math.max(...graphData),minVal=Math.min(...graphData),range=maxVal-minVal||1;";
+        html += "const stepX=canvas.width/(graphData.length-1),padding=30;";
+        html += "ctx.strokeStyle='#4CAF50';ctx.lineWidth=3;ctx.beginPath();";
+        html += "graphData.forEach((val,i)=>{";
+        html += "const x=i*stepX,y=canvas.height-padding-((val-minVal)/range)*(canvas.height-2*padding);";
+        html += "i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});";
+        html += "ctx.stroke();";
+        html += "ctx.fillStyle='#333';ctx.font='14px Arial';ctx.textAlign='left';";
+        html += "ctx.fillText('Max: '+maxVal.toFixed(2),10,20);";
+        html += "ctx.fillText('Min: '+minVal.toFixed(2),10,canvas.height-10);";
+        html += "ctx.textAlign='right';";
+        html += "ctx.fillText('Points: '+graphData.length,canvas.width-10,20);}";
+        html += "function updateValue(){";
+        html += "fetch('/getMultiplexValue?signalType=" + signalType + "')";
+        html += ".then(r=>r.ok?r.json():Promise.reject('Error'))";
+        html += ".then(d=>{";
+        html += "document.getElementById('currentValue').innerHTML='<strong>'+d.value.toFixed(3)+'</strong><br><small>" + signalType + "</small>';";
+        html += "if(isRecording){graphData.push(d.value);if(graphData.length>100)graphData.shift();drawChart();}";
+        html += "}).catch(e=>{document.getElementById('currentValue').innerHTML='<span style=\"color:#ff6b6b;\">Error reading</span>';});}";
+        html += "function startRecording(){";
+        html += "fetch('/multiplex_graph?signalType=" + signalType + "&action=start_recording&milliseconds=1000')";
+        html += ".then(()=>{isRecording=true;graphData=[];document.getElementById('status').className='status recording';";
+        html += "document.getElementById('status').textContent='Recording Active ✅';});}";
+        html += "function stopRecording(){";
+        html += "fetch('/multiplex_graph?signalType=" + signalType + "&action=stop_recording')";
+        html += ".then(()=>{isRecording=false;document.getElementById('status').className='status stopped';";
+        html += "document.getElementById('status').textContent='Recording Stopped ⏹️';});}";
+        html += "setInterval(updateValue,2000);updateValue();drawChart();";
+        html += "</script></body></html>";
+        
+        request->send(200, "text/html", html);
     });
 
     server.on("/ADS_history", HTTP_GET, [](AsyncWebServerRequest *request) {

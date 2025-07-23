@@ -31,8 +31,9 @@ String viewGraph::generateGraph(std::vector<int> addresses, String apiFetch, Str
 {
     String var_html = "";
     
-    // Riserva memoria per evitare continue riallocazioni
-    var_html.reserve(2048);
+    // Pre-calculate total size needed to avoid multiple reallocations
+    size_t estimated_size = 2048 + (addresses.size() * 50); // Base size + selector options
+    var_html.reserve(estimated_size);
 
     // Creo il contenitore del grafico con dimensioni responsive
     var_html += "<div id='graphWrapper' style='width: 100%; height: 100%; min-height: 400px; position: relative; padding: 20px; box-sizing: border-box;'>";
@@ -52,7 +53,7 @@ String viewGraph::generateGraph(std::vector<int> addresses, String apiFetch, Str
 
     var_html += "</div>";
 
-    // JavaScript diviso in parti più piccole
+    // JavaScript diviso in parti più piccole per ridurre l'uso di memoria
     var_html += generateBasicJavaScript();
     var_html += generateDrawFunctionJS();
     var_html += generateUpdateFunctionJS(apiFetch, apiFetchParam);
@@ -348,22 +349,25 @@ String viewGraph::endCirularProgressBarGraph()
 
 String viewGraph::generateCirularProgressBarGraph(String circle_progressbar_label, float circle_progressbar_used_value, float circle_progressbar_total_value, String apiFetchData, int timeToUpdate)
 {
+    // Pre-calculate to avoid multiple operations
+    float percentage = (circle_progressbar_total_value > 0) ? (circle_progressbar_used_value / circle_progressbar_total_value) * 100 : 0;
+    
+    // Use more efficient string building with reserve
     String var_circle_progressbar_html = "";
-    float percentage = (circle_progressbar_used_value / circle_progressbar_total_value) * 100;
+    var_circle_progressbar_html.reserve(1024); // Pre-allocate memory
     
     var_circle_progressbar_html += "<div class='circle_progressbar_chart-wrapper' style='display: flex; flex-direction: column; align-items: center; width: 45%; max-width: 300px; min-width: 150px; position: relative;'>";
     var_circle_progressbar_html += "  <div class='circle_progressbar_label' style='font-size: 1.2rem; margin-bottom: 10px;'>" + circle_progressbar_label + "</div>";
     var_circle_progressbar_html += "  <canvas id='circle_progressbar_chart_" + circle_progressbar_label + "' class='circle_progressbar_chart' style='width: 200px; height: 200px;' width='200' height='200'></canvas>";
     var_circle_progressbar_html += "  <div class='circle_progressbar_center-label' id='label" + circle_progressbar_label + "' style='position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2rem; font-weight: bold; color: #000; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);'>" + String((int)percentage) + "%</div>";
-    var_circle_progressbar_html += "  <div class='circle_progressbar_percentage' style='font-size: 1rem; margin-top: 10px;'>Utilizzato: " + String(circle_progressbar_used_value) + " / Totale: " + String(circle_progressbar_total_value) + "</div>";
+    var_circle_progressbar_html += "  <div class='circle_progressbar_percentage' style='font-size: 1rem; margin-top: 10px;'>Utilizzato: " + String(circle_progressbar_used_value, 1) + " / Totale: " + String(circle_progressbar_total_value, 1) + "</div>";
     var_circle_progressbar_html += "</div>";
     
     var_circle_progressbar_html += "<script>";
     var_circle_progressbar_html += "document.addEventListener('DOMContentLoaded', function() {";
     var_circle_progressbar_html += "  const canvas = document.getElementById('circle_progressbar_chart_" + circle_progressbar_label + "');";
     var_circle_progressbar_html += "  if (canvas && typeof drawCircularProgress === 'function') {";
-    var_circle_progressbar_html += "    const percentage = " + String(percentage) + ";";
-    var_circle_progressbar_html += "    drawCircularProgress(canvas, percentage);";
+    var_circle_progressbar_html += "    drawCircularProgress(canvas, " + String(percentage, 1) + ");";
     var_circle_progressbar_html += "  }";
     var_circle_progressbar_html += "  ";
     var_circle_progressbar_html += "  if (" + String(timeToUpdate) + " > 0) {";
@@ -381,22 +385,25 @@ String viewGraph::generateCirularProgressBarGraph(String circle_progressbar_labe
 
 String viewGraph::generateCirularProgressBarGraph(String circle_progressbar_label, float circle_progressbar_used_value, float circle_progressbar_total_value)
 {
+    // Pre-calculate to avoid multiple operations  
+    float percentage = (circle_progressbar_total_value > 0) ? (circle_progressbar_used_value / circle_progressbar_total_value) * 100 : 0;
+    
+    // Use more efficient string building with reserve
     String var_circle_progressbar_html = "";
-    float percentage = (circle_progressbar_used_value / circle_progressbar_total_value) * 100;
+    var_circle_progressbar_html.reserve(768); // Pre-allocate memory
     
     var_circle_progressbar_html += "<div class='circle_progressbar_chart-wrapper' style='display: flex; flex-direction: column; align-items: center; width: 45%; max-width: 300px; min-width: 150px; position: relative;'>";
     var_circle_progressbar_html += "  <div class='circle_progressbar_label' style='font-size: 1.2rem; margin-bottom: 10px;'>" + circle_progressbar_label + "</div>";
     var_circle_progressbar_html += "  <canvas id='circle_progressbar_chart_" + circle_progressbar_label + "' class='circle_progressbar_chart' style='width: 200px; height: 200px;' width='200' height='200'></canvas>";
     var_circle_progressbar_html += "  <div class='circle_progressbar_center-label' id='label" + circle_progressbar_label + "' style='position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2rem; font-weight: bold; color: #000; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);'>" + String((int)percentage) + "%</div>";
-    var_circle_progressbar_html += "  <div class='circle_progressbar_percentage' style='font-size: 1rem; margin-top: 10px;'>Utilizzato: " + String(circle_progressbar_used_value) + " / Totale: " + String(circle_progressbar_total_value) + "</div>";
+    var_circle_progressbar_html += "  <div class='circle_progressbar_percentage' style='font-size: 1rem; margin-top: 10px;'>Utilizzato: " + String(circle_progressbar_used_value, 1) + " / Totale: " + String(circle_progressbar_total_value, 1) + "</div>";
     var_circle_progressbar_html += "</div>";
     
     var_circle_progressbar_html += "<script>";
     var_circle_progressbar_html += "document.addEventListener('DOMContentLoaded', function() {";
     var_circle_progressbar_html += "  const canvas = document.getElementById('circle_progressbar_chart_" + circle_progressbar_label + "');";
     var_circle_progressbar_html += "  if (canvas && typeof drawCircularProgress === 'function') {";
-    var_circle_progressbar_html += "    const percentage = " + String(percentage) + ";";
-    var_circle_progressbar_html += "    drawCircularProgress(canvas, percentage);";
+    var_circle_progressbar_html += "    drawCircularProgress(canvas, " + String(percentage, 1) + ");";
     var_circle_progressbar_html += "  }";
     var_circle_progressbar_html += "});";
     var_circle_progressbar_html += "</script>";

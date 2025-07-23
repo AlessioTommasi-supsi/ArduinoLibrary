@@ -5,64 +5,78 @@ String Pinout::html = "";
 
 String Pinout::generateHTML()
 {
-    html = "";
-    html = viewGeneric::defaultCssHeader("Pinout");
-    pageContent();
-    html += viewGeneric::defaultFooter();
-
+    // Header ultra-minimalista
+    html = "<!DOCTYPE html><html><head>";
+    html += "<meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1.0'>";
+    html += "<title>Pinout</title>";
+    html += "<style>body{margin:0;padding:60px 10px 120px;background:#f4f4f4}</style>";
+    html += "</head><body>";
+    
+    // Tutto caricato dinamicamente per ridurre heap
+    html += viewGeneric::dynamicUpdateContentScript();
+    html += viewGeneric::dynamicUpdateContent("navbar_area", "/navbarStyle", -1);
+    html += viewGeneric::dynamicUpdateContent("pinout_content", "/pinoutPageContent", -1);
+    
+    html += "<div id='navbar_area'></div>";
+    html += viewGeneric::addNavbar();
+    html += "<div id='pinout_content'><div style='text-align:center;padding:20px'>Loading pins...</div></div>";
+    
+    html += "</body></html>";
     return html;
 }
 
 String Pinout::pageContent()
 {
-    //html += pageContentCss(); //Gia fatto in defaultCssHeader
-    html += "<h1>Pinout</h1>";
+    // CSS minimalista inline
+    html = "<style>";
+    html += ".pin-container{background:rgba(255,255,255,0.9);border-radius:8px;padding:15px;margin:10px auto;width:90%;max-width:500px}";
+    html += ".pin-info{margin-bottom:8px;font-weight:bold;font-size:14px}";
+    html += ".pin-actions{margin-top:10px}.pin-actions button{padding:6px 10px;border:none;border-radius:4px;margin-right:6px;font-size:12px;cursor:pointer}";
+    html += ".start{background:#f44336;color:white}.stop{background:#999;color:white}.edit{background:#2196F3;color:white}";
+    html += "</style>";
 
-    // Inserisco un'immagine presa da internet:
-    //html += "<img src='https://raw.githubusercontent.com/AlessioTommasi-supsi/iotProject/refs/heads/main/image/ESP-38Pin-pinout.jpg' alt='ESP32 Pinout' style='width: 100%; max-width: 800px;'>";
-    html += "<br><br>";
-    // Aggiungo una sezione per i dati dei pin
-    html += "<div id='pinData'></div>";
+    html += "<h1 style='text-align:center;margin:20px 0'>🔌 Pinout Configuration</h1>";
 
-    // Aggiungi lo script per gestire l'aggiornamento e gli eventi di input
-    html += "<script>";
-    html += "document.addEventListener('DOMContentLoaded', () => {";
-    html += "  let intervalId;";
-    html += "  const startInterval = () => {";
-    html += "    intervalId = setInterval(() => {";
-    html += "      fetch('/pinoutContent')";
-    html += "        .then(response => response.text())";
-    html += "        .then(data => {";
-    html += "          document.getElementById('pinData').innerHTML = data;";
-    html += "        });";
-    html += "    }, 15000);"; // Aggiorna ogni 5 secondi (puoi cambiare il valore a k*1000 per k secondi)
-    html += "  };";
-    html += "  const stopInterval = () => {";
-    html += "    clearInterval(intervalId);";
-    html += "  };";
-    html += "  startInterval();";
-    html += "  document.addEventListener('focusin', (event) => {";
-    html += "    if (event.target.tagName === 'INPUT' && event.target.type === 'text') {";
-    html += "      stopInterval();";
-    html += "    }";
-    html += "  });";
-    html += "  document.addEventListener('focusout', (event) => {";
-    html += "    if (event.target.tagName === 'INPUT' && event.target.type === 'text') {";
-    html += "      startInterval();";
-    html += "    }";
-    html += "  });";
-    html += "});";
-    html += "</script>";
+    // Genera pin dinamicamente per evitare heap overflow
+    std::vector<int> pinNumbers = SystemState::getInstance()->pinoutData->getPinNumbers();
+    
+    for (int pinNumber : pinNumbers) 
+    {
+        Pin currentPin = SystemState::getInstance()->pinoutData->getPin(pinNumber);
+        
+        html += "<div class='pin-container'>";
+        html += "<div class='pin-info'>Pin " + String(pinNumber) + " - ";
+        html += currentPin.getIsInput() ? "INPUT" : "OUTPUT";
+        if (!currentPin.getIsInput()) {
+            // Usa getVoltage() invece di getOutputValue() e converti da mV a V
+            float voltageValue = currentPin.getVoltage() / 1000.0;
+            html += " (Value: " + String(voltageValue, 1) + "V)";
+        }
+        html += "</div>";
 
-    html += "<br><br><br><br><br><br><br><br><br><br>";
+        html += "<div class='pin-actions'>";
+        
+        // Form compatti
+        if (currentPin.getIsInput()) {
+            html += "<form method='POST' action='/startPin' style='display:inline-block;margin-right:5px'>";
+            html += "<input type='hidden' name='pinNumber' value='" + String(pinNumber) + "'>";
+            html += "<button type='submit' class='start'>▶ Start</button></form>";
+            
+            html += "<form method='POST' action='/stopPin' style='display:inline-block;margin-right:5px'>";
+            html += "<input type='hidden' name='pinNumber' value='" + String(pinNumber) + "'>";
+            html += "<button type='submit' class='stop'>⏹ Stop</button></form>";
+        }
+        
+        html += "<form method='GET' action='/editPin' style='display:inline-block'>";
+        html += "<input type='hidden' name='pinNumber' value='" + String(pinNumber) + "'>";
+        html += "<button type='submit' class='edit'>✏ Edit</button></form>";
+        
+        html += "</div></div>";
+    }
 
-    //html += viewGraph::generateGraph(SystemState::getInstance()->pinoutData->getPinNumbers(), "getPinValues", "pin");
-    //aggiungo grafico da ViewGraph
-    /*in realta al prof non interessa grafico quindi forse e meglio cosi!!
-     html += viewGraph::generateGraph(SystemState::getInstance()->pinoutData->getPinNumbers(), "getPinValues", "pin");
-    html += "<br><br><br><br><br><br><br><br><br><br>";
-    */
-   
+    // JavaScript minimalista per refresh periodico
+    html += "<script>setTimeout(()=>{if(typeof loadPageContent==='function')loadPageContent('/pinoutPageContent','pinout_content',-1)},30000)</script>";
+    
     return html;
 }
 

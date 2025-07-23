@@ -60,131 +60,97 @@ String viewCurrentRegister::generateHTML(String registerAddress, float registerV
 
 String viewCurrentRegister::generateHTML(String registerAddress, float registerValue, String popupScript = "")
 {
-    // Creazione dell'header HTML con il foglio di stile CSS usando solo risorse locali
-    String css = viewGeneric::basicHeader("Current Register"); 
-    css += viewGeneric::dynamicUpdateContentScript();
-    css += viewGeneric::dynamicUpdateContent("", "/navbarStyle", -1);
-
-    String page_content = "";
-    page_content += viewGeneric::addNavbar();
-    page_content += viewGeneric::dynamicUpdateContent(
-        "", 
-        "/modbusMasterPageContent?registerAddress=" + registerAddress 
-          + "&registerValue=" + String(registerValue), 
-        -1
-    );
-
-    // 1) Definizione della funzione showPopup
-    page_content += "<script>"
-                    "function showPopup(message) {"
-                    "  document.getElementById('popupMessage').innerText = message;"
-                    "  document.getElementById('popup').style.display = 'block';"
-                    "}"
-                    "</script>";
-
-    // 2) Inserisco **qui** il <div> del popup, **fuori** dal contenuto dinamico
-    page_content += "<div id=\"popup\" "
-                    "style=\"display:none;position:fixed;top:50%;left:50%;"
-                    "transform:translate(-50%,-50%);padding:20px;"
-                    "background-color:white;border:1px solid black;z-index:1000;\">"
-                    "<p id=\"popupMessage\"></p>"
-                    "<button onclick=\"window.location.href='/currentregister';\">Close</button>"
-                    "</div>";
-
-    // 3) Se c'è uno script di popup, lo wrappo in DOMContentLoaded
-    if (popupScript != "") {
-        page_content += "<script>"
-                        "window.addEventListener('DOMContentLoaded', function() {"
-                        + popupScript +
-                        "});"
-                        "</script>";
+    // Header ultra-minimalista con caricamento dinamico totale
+    html = "<!DOCTYPE html><html><head>";
+    html += "<meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1.0'>";
+    html += "<title>Current Register</title>";
+    html += "<style>body{margin:0;padding:60px 10px 120px;background:#f4f4f4}</style>";
+    html += "</head><body>";
+    
+    // Tutto frammentato dinamicamente
+    html += viewGeneric::dynamicUpdateContentScript();
+    html += viewGeneric::dynamicUpdateContent("navbar_area", "/navbarStyle", -1);
+    html += viewGeneric::dynamicUpdateContent("register_content", "/currentRegisterPageContent?registerAddress=" + registerAddress + "&registerValue=" + String(registerValue), -1);
+    
+    html += "<div id='navbar_area'></div>";
+    html += viewGeneric::addNavbar();
+    html += "<div id='register_content'><div style='text-align:center;padding:20px'>Loading register...</div></div>";
+    
+    // Popup minimale
+    html += "<div id='popup' style='display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);padding:15px;background:white;border:1px solid #ccc;border-radius:8px;z-index:1000;box-shadow:0 4px 8px rgba(0,0,0,0.2)'>";
+    html += "<p id='popupMessage'></p>";
+    html += "<button onclick=\"document.getElementById('popup').style.display='none'\" style='background:#4CAF50;color:white;border:none;padding:8px 12px;border-radius:4px;cursor:pointer'>Close</button>";
+    html += "</div>";
+    
+    // Script popup compresso
+    html += "<script>function showPopup(m){document.getElementById('popupMessage').innerText=m;document.getElementById('popup').style.display='block'}</script>";
+    
+    // Script personalizzato se fornito
+    if (popupScript.length() > 0) {
+        html += "<script>" + popupScript + "</script>";
     }
-
-    // Footer e restituzione
-    page_content += viewGeneric::defaultFooter();
-    return css + page_content;
+    
+    html += "</body></html>";
+    return html;
 }
-
 
 String viewCurrentRegister::pageContent(String registerAddress, float registerValue)
 {
-    String page_content = "";
-    // Aggiunta del contenitore principale per form e valore del registro
-   
-    page_content += "<div class=\"container\">";
-
-    // Creazione del primo form per monitorare il registro
+    html = "";
     
-    page_content += "<div class=\"form-container\">";
+    // CSS inline super compresso
+    html += "<style>";
+    html += ".form-container{background:rgba(255,255,255,0.95);border-radius:10px;padding:20px;margin:20px auto;max-width:500px}";
+    html += "form{display:flex;flex-direction:column}label{font-weight:bold;margin-bottom:5px;font-size:14px}";
+    html += "input,select{margin-bottom:10px;padding:8px;border:1px solid #ccc;border-radius:4px;font-size:14px}";
+    html += "button{padding:10px;background:#4CAF50;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;margin:5px 0}";
+    html += "button:hover{background:#45a049}.action-btn{display:inline-block;margin:5px;padding:8px 12px;text-decoration:none;border-radius:4px;font-size:12px}";
+    html += ".start{background:#4CAF50;color:white}.stop{background:#f44336;color:white}.master{background:#2196F3;color:white}";
+    html += "</style>";
     
-    page_content += "    <form action=\"modbusMaster\" method=\"get\">";
-    page_content += "        <label for=\"registerAddress\">Register Address:</label>";
-    page_content += "        <input type=\"text\" id=\"registerAddress\" name=\"registerAddress\" value=\"" + registerAddress + "\" required>";
-    page_content += "        <label for=\"registerType\">Register Type:</label>";
-    page_content += "        <select id=\"registerType\" name=\"registerType\" required>";
-    page_content += "            <option value=\"int\">int</option>";
-    page_content += "            <option value=\"float\">float</option>";
-    page_content += "        </select>";\
-    page_content += "        <button type=\"submit\">Monitor</button>";
-    page_content += "    </form>";
-
-    page_content += "    <form action=\"modbusSlave\" method=\"get\">";
-    page_content += "        <label for=\"registerAddress\">Register Address:</label>";
-    page_content += "        <input type=\"text\" id=\"registerAddress\" name=\"registerAddress\" value=\"" + registerAddress + "\" required>";
-    page_content += "        <label for=\"registerAddress\">Register Value:</label>";
-    page_content += "        <input type=\"text\" id=\"registerAddress\" name=\"registerValue\" value=\"" + String(registerValue) + "\" required>";
-    page_content += "        <label for=\"registerType\">Register Type:</label>";
-    page_content += "        <select id=\"registerType\" name=\"registerType\" required>";
-    page_content += "            <option value=\"int\">int</option>";
-    page_content += "            <option value=\"float\">float</option>";
-    page_content += "        </select>";\
-    page_content += "        <button type=\"submit\">Write As Slave</button>";
-    page_content += "    </form>";
+    html += "<h1 style='text-align:center;margin:20px 0'>📋 Current Register</h1>";
     
-    page_content += "</div>";
+    // Form principale compatto
+    html += "<div class='form-container'>";
+    html += "<form action='/modbusMaster' method='get'>";
+    html += "<label>Register Address:</label>";
+    html += "<input type='number' name='registerAddress' value='" + registerAddress + "' required>";
+    html += "<label>Register Type:</label>";
+    html += "<select name='registerType' required>";
+    html += "<option value='int'>Integer</option>";
+    html += "<option value='float'>Float</option>";
+    html += "</select>";
+    html += "<button type='submit'>🔍 Read Master</button>";
+    html += "</form></div>";
     
-
-    page_content += "</div>";
+    // Mostra valore attuale se presente
+    if (registerAddress.length() > 0) {
+        html += "<div class='form-container'>";
+        html += "<h3>Current Value: " + String(registerValue) + "</h3>";
+        html += "<p>Address: " + registerAddress + "</p>";
+        
+        // Azioni rapide
+        html += "<div style='text-align:center;margin:15px 0'>";
+        html += "<a href='/storevalue?registerAddress=" + registerAddress + "&registerValue=" + String(registerValue) + "' class='action-btn start'>💾 Store</a>";
+        html += "<a href='/startRecording?registerAddress=" + registerAddress + "&milliseconds=1000' class='action-btn master'>▶ Record</a>";
+        html += "<a href='/stopRecording?registerAddress=" + registerAddress + "' class='action-btn stop'>⏹ Stop</a>";
+        html += "</div>";
+        
+        // Form slave compatto
+        html += "<form action='/modbusSlave' method='get' style='margin-top:15px'>";
+        html += "<input type='hidden' name='registerAddress' value='" + registerAddress + "'>";
+        html += "<label>Write Value:</label>";
+        html += "<input type='number' name='registerValue' step='0.01' required>";
+        html += "<select name='registerType' required>";
+        html += "<option value='int'>Integer</option>";
+        html += "<option value='float'>Float</option>";
+        html += "</select>";
+        html += "<button type='submit'>✍ Write Slave</button>";
+        html += "</form>";
+        html += "</div>";
+    }
     
-    // Aggiunta del valore del registro sotto il primo form
-    page_content += "<div style=\"text-align: center; margin-top: 20px;\">";
-    page_content += "    <h2>Register Value: " + String(registerValue) + "</h2>";
-    page_content += "</div>";
-
-    // Creazione del secondo form per memorizzare il valore del registro
-    page_content += "<div class=\"form-container\" style=\"margin-top: 20px; text-align: center;\">";
-    page_content += "    <form action=\"/storevalue\" method=\"get\">";
-    page_content += "        <input type=\"hidden\" name=\"registerValue\" value=\"" + String(registerValue) + "\">"; // Campo nascosto per il valore del registro
-    page_content += "        <input type=\"hidden\" name=\"registerAddress\" value=\"" + registerAddress + "\">";     // Campo nascosto per l'indirizzo del registro
-    page_content += "        <button type=\"submit\" style=\"padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;\">Store Register Value</button>";
-    page_content += "    </form>";
-    page_content += "</div>";
-
-    // Aggiunta della casella di testo per i millisecondi e dei pulsanti Start/Stop Recording
-    page_content += "<div class=\"form-container\" style=\"margin-top: 20px; text-align: center;\">";
-    page_content += "    <label for=\"milliseconds\">Milliseconds:</label>";
-    page_content += "    <input type=\"text\" id=\"milliseconds\" name=\"milliseconds\" required>";
-    page_content += "    <form action=\"/startRecording\" method=\"get\" style=\"display: inline;\" onsubmit=\"document.getElementById('startMilliseconds').value = document.getElementById('milliseconds').value;\">";
-    page_content += "        <input type=\"hidden\" name=\"milliseconds\" id=\"startMilliseconds\">";
-    page_content += "        <input type=\"hidden\" name=\"registerAddress\" value=\"" + registerAddress + "\">";     // Campo nascosto per l'indirizzo del registro
-    page_content += "        <button type=\"submit\" style=\"padding: 10px; background-color: red; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;\">Start Recording</button>";
-    page_content += "    </form>";
-    page_content += "    <form action=\"/stopRecording\" method=\"get\" style=\"display: inline;\">";
-    page_content += "        <input type=\"hidden\" name=\"registerAddress\" value=\"" + registerAddress + "\">";     // Campo nascosto per l'indirizzo del registro
-    page_content += "        <button type=\"submit\" style=\"padding: 10px; background-color: grey; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;\">Stop Recording</button>";
-    page_content += "    </form>";
-    page_content += "</div>";
-
-    // Aggiunta del popup
-    page_content += "<div id=\"popup\" style=\"display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); padding:20px; background-color:white; border:1px solid black; z-index:1000;\">";
-    page_content += "    <p id=\"popupMessage\"></p>";
-    page_content += "    <button onclick=\"window.location.href='/currentregister';\">Close</button>";
-    page_content += "</div>";
-
-    // Chiusura del contenitore principale
-    page_content += "</div>";
-    
-    return page_content;
+    return html;
 }
 String viewCurrentRegister::generateHTMLConfirm(String registerAddress, float registerValue)
 {

@@ -100,187 +100,34 @@ String viewGraph::generateSelectorHTML(std::vector<int> addresses)
 
 String viewGraph::generateBasicJavaScript()
 {
-    return "<script>let chartData = [];</script>";
+    return "<script>let chartData=[];</script>";
 }
 
 String viewGraph::generateDrawFunctionJS()
 {
-    String js = "";
-    js.reserve(1024);
-    
-    js += "<script>";
-    js += "function resizeCanvas() {";
-    js += "const canvas = document.getElementById('myChart');";
-    js += "if (canvas && canvas.parentElement) {";
-    js += "const container = canvas.parentElement;";
-    js += "const rect = container.getBoundingClientRect();";
-    js += "canvas.width = rect.width - 40;";  // Sottrae il padding
-    js += "canvas.height = rect.height - 40;";
-    js += "if (chartData.length > 0) { drawChart(canvas, chartData); }";
-    js += "}}";
-    
-    js += "function drawChart(canvas, data) {";
-    js += "const ctx = canvas.getContext('2d');";
-    js += "const width = canvas.width;";
-    js += "const height = canvas.height;";
-    js += "const padding = 40;";
-    js += "const chartWidth = width - 2 * padding;";
-    js += "const chartHeight = height - 2 * padding;";
-    js += "ctx.clearRect(0, 0, width, height);";
-    js += "if (data.length === 0) {";
-    js += "ctx.fillStyle = '#666';";
-    js += "ctx.font = '14px Arial';";
-    js += "ctx.textAlign = 'center';";
-    js += "ctx.fillText('Nessun dato disponibile', width / 2, height / 2);";
-    js += "return;";
-    js += "}";
-    js += "const minValue = Math.min(...data);";
-    js += "const maxValue = Math.max(...data);";
-    js += "const valueRange = maxValue - minValue || 1;";
-    js += "ctx.strokeStyle = '#f0f0f0';";
-    js += "ctx.lineWidth = 1;";
-    js += "for (let i = 0; i <= 5; i++) {";
-    js += "const y = padding + (chartHeight * i / 5);";
-    js += "ctx.beginPath();";
-    js += "ctx.moveTo(padding, y);";
-    js += "ctx.lineTo(width - padding, y);";
-    js += "ctx.stroke();";
-    js += "}";
-    js += "ctx.strokeStyle = '#333';";
-    js += "ctx.lineWidth = 2;";
-    js += "ctx.beginPath();";
-    js += "ctx.moveTo(padding, padding);";
-    js += "ctx.lineTo(padding, height - padding);";
-    js += "ctx.lineTo(width - padding, height - padding);";
-    js += "ctx.stroke();";
-    js += "ctx.fillStyle = '#333';";
-    js += "ctx.font = '11px Arial';";
-    js += "ctx.textAlign = 'right';";
-    js += "for (let i = 0; i <= 5; i++) {";
-    js += "const value = minValue + (valueRange * i / 5);";
-    js += "const y = height - padding - (chartHeight * i / 5);";
-    js += "ctx.fillText(value.toFixed(1), padding - 5, y + 3);";
-    js += "}";
-    js += "ctx.strokeStyle = '#4CAF50';";
-    js += "ctx.lineWidth = 2;";
-    js += "ctx.beginPath();";
-    js += "const stepX = chartWidth / Math.max(data.length - 1, 1);";
-    js += "for (let i = 0; i < data.length; i++) {";
-    js += "const x = padding + (stepX * i);";
-    js += "const normalizedValue = (data[i] - minValue) / valueRange;";
-    js += "const y = height - padding - (chartHeight * normalizedValue);";
-    js += "if (i === 0) { ctx.moveTo(x, y); } else { ctx.lineTo(x, y); }";
-    js += "}";
-    js += "ctx.stroke();";
-    js += "if (data.length <= 30) {";
-    js += "ctx.fillStyle = '#2196F3';";
-    js += "for (let i = 0; i < data.length; i++) {";
-    js += "const x = padding + (stepX * i);";
-    js += "const normalizedValue = (data[i] - minValue) / valueRange;";
-    js += "const y = height - padding - (chartHeight * normalizedValue);";
-    js += "ctx.beginPath();";
-    js += "ctx.arc(x, y, 2, 0, 2 * Math.PI);";
-    js += "ctx.fill();";
-    js += "}}";
-    js += "if (data.length > 0) {";
-    js += "const lastValue = data[data.length - 1];";
-    js += "ctx.fillStyle = '#2196F3';";
-    js += "ctx.font = 'bold 12px Arial';";
-    js += "ctx.textAlign = 'left';";
-    js += "ctx.fillText('Ultimo: ' + lastValue.toFixed(2), padding, 20);";
-    js += "}}";
-    js += "</script>";
-    
+    // JavaScript super compresso per il grafico
+    String js = R"(<script>function resizeCanvas(){const c=document.getElementById('myChart');if(c&&c.parentElement){const r=c.parentElement.getBoundingClientRect();c.width=r.width-40;c.height=r.height-40;if(chartData.length>0)drawChart(c,chartData)}}function drawChart(c,d){const ctx=c.getContext('2d'),w=c.width,h=c.height,p=40,cw=w-2*p,ch=h-2*p;ctx.clearRect(0,0,w,h);if(d.length===0){ctx.fillStyle='#666';ctx.font='14px Arial';ctx.textAlign='center';ctx.fillText('No data',w/2,h/2);return}const min=Math.min(...d),max=Math.max(...d),range=max-min||1;ctx.strokeStyle='#f0f0f0';ctx.lineWidth=1;for(let i=0;i<=5;i++){const y=p+(ch*i/5);ctx.beginPath();ctx.moveTo(p,y);ctx.lineTo(w-p,y);ctx.stroke()}ctx.strokeStyle='#333';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(p,p);ctx.lineTo(p,h-p);ctx.lineTo(w-p,h-p);ctx.stroke();ctx.fillStyle='#333';ctx.font='11px Arial';ctx.textAlign='right';for(let i=0;i<=5;i++){const v=min+(range*i/5),y=h-p-(ch*i/5);ctx.fillText(v.toFixed(1),p-5,y+3)}ctx.strokeStyle='#4CAF50';ctx.lineWidth=2;ctx.beginPath();const sx=cw/Math.max(d.length-1,1);for(let i=0;i<d.length;i++){const x=p+(sx*i),nv=(d[i]-min)/range,y=h-p-(ch*nv);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)}ctx.stroke();if(d.length<=30){ctx.fillStyle='#2196F3';for(let i=0;i<d.length;i++){const x=p+(sx*i),nv=(d[i]-min)/range,y=h-p-(ch*nv);ctx.beginPath();ctx.arc(x,y,2,0,2*Math.PI);ctx.fill()}}if(d.length>0){const lv=d[d.length-1];ctx.fillStyle='#2196F3';ctx.font='bold 12px Arial';ctx.textAlign='left';ctx.fillText('Last: '+lv.toFixed(2),p,20)}}</script>)";
     return js;
 }
 
 String viewGraph::generateUpdateFunctionJS(String apiFetch, String apiFetchParam)
 {
-    String js = "";
-    js.reserve(512);
-    
-    js += "<script>";
-    js += "function updateGraph() {";
-    js += "const selectElement = document.getElementById('register-select');";
-    js += "const address = selectElement ? selectElement.value : 0;";
-    js += "fetch('" + apiFetch + "?" + apiFetchParam + "=' + address)";
-    js += ".then(response => response.json())";
-    js += ".then(data => {";
-    js += "chartData = data;";
-    js += "const canvas = document.getElementById('myChart');";
-    js += "if (canvas) { drawChart(canvas, data); }";
-    js += "})";
-    js += ".catch(error => {";
-    js += "console.error('Error:', error);";
-    js += "const canvas = document.getElementById('myChart');";
-    js += "if (canvas) {";
-    js += "const ctx = canvas.getContext('2d');";
-    js += "ctx.clearRect(0, 0, canvas.width, canvas.height);";
-    js += "ctx.fillStyle = '#f44336';";
-    js += "ctx.font = '14px Arial';";
-    js += "ctx.textAlign = 'center';";
-    js += "ctx.fillText('Errore nel caricamento dei dati', canvas.width / 2, canvas.height / 2);";
-    js += "}});";
-    js += "}";
-    js += "</script>";
-    
+    // JavaScript update minimalista
+    String js = R"(<script>function updateGraph(){const s=document.getElementById('register-select'),a=s?s.value:0;fetch(')" + apiFetch + "?" + apiFetchParam + R"(='+a).then(r=>r.json()).then(d=>{chartData=d;const c=document.getElementById('myChart');if(c)drawChart(c,d)}).catch(e=>{console.error(e);const c=document.getElementById('myChart');if(c){const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);ctx.fillStyle='#f44336';ctx.font='14px Arial';ctx.textAlign='center';ctx.fillText('Load Error',c.width/2,c.height/2)}})}</script>)";
     return js;
 }
 
 String viewGraph::generateGraphExportJS(String apiFetch, String apiFetchParam)
 {
-    String js = "";
-    js.reserve(512);
-    
-    js += "<script>";
-    js += "function exportCurrentGraphData() {";
-    js += "const selectElement = document.getElementById('register-select');";
-    js += "const address = selectElement ? selectElement.value : 0;";
-    js += "fetch('" + apiFetch + "?" + apiFetchParam + "=' + address)";
-    js += ".then(response => response.json())";
-    js += ".then(data => {";
-    js += "if (data.length === 0) {";
-    js += "alert('Nessun dato disponibile per l\\'esportazione.');";
-    js += "return;";
-    js += "}";
-    js += "let csv = 'Index,Value\\n';";
-    js += "data.forEach((value, index) => {";
-    js += "csv += index + ',' + value + '\\n';";
-    js += "});";
-    js += "const csvFile = new Blob([csv], { type: 'text/csv' });";
-    js += "const downloadLink = document.createElement('a');";
-    js += "downloadLink.download = 'graph_data_' + address + '.csv';";
-    js += "downloadLink.href = window.URL.createObjectURL(csvFile);";
-    js += "downloadLink.style.display = 'none';";
-    js += "document.body.appendChild(downloadLink);";
-    js += "downloadLink.click();";
-    js += "document.body.removeChild(downloadLink);";
-    js += "})";
-    js += ".catch(error => console.error('Error exporting data:', error));";
-    js += "}";
-    js += "</script>";
-    
+    // Export minimalista
+    String js = R"(<script>function exportCurrentGraphData(){const s=document.getElementById('register-select'),a=s?s.value:0;fetch(')" + apiFetch + "?" + apiFetchParam + R"(='+a).then(r=>r.json()).then(d=>{if(d.length===0){alert('No data');return}let csv='Index,Value\n';d.forEach((v,i)=>{csv+=i+','+v+'\n'});const cf=new Blob([csv],{type:'text/csv'}),dl=document.createElement('a');dl.download='graph_data_'+a+'.csv';dl.href=window.URL.createObjectURL(cf);dl.style.display='none';document.body.appendChild(dl);dl.click();document.body.removeChild(dl)}).catch(e=>console.error(e))}</script>)";
     return js;
 }
 
 String viewGraph::generateInitializationJS()
 {
-    String js = "";
-    js.reserve(512);
-    
-    js += "<script>";
-    js += "document.addEventListener('DOMContentLoaded', function() {";
-    js += "requestAnimationFrame(() => {";
-    js += "resizeCanvas();";
-    js += "updateGraph();";
-    js += "setInterval(updateGraph, 10000);";
-    js += "window.addEventListener('resize', () => {";
-    js += "setTimeout(resizeCanvas, 100);";
-    js += "});";
-    js += "});";
-    js += "});";
-    js += "</script>";
-    
+    // Inizializzazione minimalista
+    String js = R"(<script>document.addEventListener('DOMContentLoaded',function(){requestAnimationFrame(()=>{resizeCanvas();updateGraph();setInterval(updateGraph,10000);window.addEventListener('resize',()=>{setTimeout(resizeCanvas,100)})})});</script>)";
     return js;
 }
 

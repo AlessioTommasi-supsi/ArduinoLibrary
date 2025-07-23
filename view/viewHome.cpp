@@ -5,128 +5,55 @@ String viewHome::html = "";
 
 String viewHome::generateHTML()
 {
-    html = "";
-    html = "<!DOCTYPE html>";
-    html += "<html>";
-    html += "<head>";
-    html += viewGeneric::defaultPorfolioCss();
-    html += "<style>";
-    html += viewGeneric::addCss();
-    html += "</style>";
-    html += "</head>";
-    html += "<body>";
-    pageContent();
-    html += viewGeneric::defaultFooter();
-
+    // Header minimalista senza CSS esterni
+    html = "<!DOCTYPE html><html><head>";
+    html += "<meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1.0'>";
+    html += "<title>ALPHA</title>";
+    html += "<style>body{margin:0;padding:0;background:#f4f4f4}</style>";
+    html += "</head><body>";
+    
+    // Carica tutto dinamicamente per ridurre heap iniziale
+    html += viewGeneric::dynamicUpdateContentScript();
+    html += viewGeneric::dynamicUpdateContent("main_content", "/homePageContent", -1);
+    html += "<div id='main_content'><div style='text-align:center;padding:50px'>Loading...</div></div>";
+    
+    html += "</body></html>";
     return html;
 }
 
 String viewHome::pageContent()
 {
-    html += viewGeneric::dynamicUpdateContentScript();
-    html += viewGeneric::dynamicUpdateContent("id_navbarStyle", "/navbarStyle", -1);
+    html = "";
+    
+    // CSS inline minimalista solo per questa pagina
+    html += "<style>";
+    html += ".main_container_absolute{position:relative;width:100%;min-height:100vh}";
+    html += ".glass_container{background:rgba(255,255,255,0.9);border-radius:15px;padding:20px;margin:20px;max-width:600px}";
+    html += "@media(min-width:1500px){.glass_container{margin-left:120px!important}}";
+    html += "</style>";
+    
+    // Navbar dinamica
+    html += viewGeneric::dynamicUpdateContent("navbar_area", "/navbarStyle", -1);
+    html += "<div id='navbar_area'></div>";
     html += viewGeneric::addNavbar();
     
-    html+= R"(
-    <div class="main_container_absolute">
-        <div class="main_container_relative">
-            <div id="particles-js"></div>
-            
-            <!-- Stile inline per i margini dei glass containers -->
-            <style>
-                /* Margini per glass_container per evitare overlap con navbar */
-                .glass_container {
-                    /* Mobile: margine inferiore per navbar in basso */
-                    margin-bottom: 120px !important;
-                    margin-top: 20px !important;
-                }
-
-                /* Desktop: margine laterale ridotto per navbar a sinistra */
-                @media (min-width: 1500px) {
-                    .glass_container {
-                        margin-left: 120px !important; /* Ridotto da 180px a 120px */
-                        margin-right: 20px !important;
-                        margin-bottom: 20px !important;
-                    }
-                }
-            </style>
-
-            <div id="textTypingContainer">
-                <div id="textTypingAnimation" class="glassEffect"></div>
-            </div>
-
-            <div>
-                <div class="no_overflow">
-                    <div class="logo_container">
-                        <div class="gear_logo_container">
-                            <img class="gear" src="https://alessiotommasi.com/view/images/gearNobg.png" alt="Immagine senza sfondo">
-                        </div>
-                        <div class="logo">
-                            <img class="logo_image" src="https://alessiotommasi.com/view/images/logo.png" alt="Immagine senza sfondo">
-                        </div>
-                    </div>
-
-                    <div class="gear_container_left">
-                        <img class="gear" src="https://alessiotommasi.com/view/images/gearNobg.png" alt="Immagine senza sfondo">
-                    </div>
-
-                    <div class="gear_container_bottom">
-                        <img class="gear" src="https://alessiotommasi.com/view/images/gearNobg.png" alt="Immagine senza sfondo">
-                    </div>
-                </div>
-
-                <div class="next_page" id="aboutMeTitle">
-                    <div class="glass_container">
-                        <div class="glass_content">
-                            <div class="glass_container">
-                                <div class="image-with-text responsive_div">
-                                    <img class="project_maxwidth responsive_img"
-                                        src="https://alessiotommasi.com/view/images/c.png" alt="Description of the image">
-                                    <div class="project_maxwidth responsive_text">
-                                        <h3>ALPHA </h3>
-                                        <p>
-                                            <button class="knowledge-button">C++</button>
-                                            <button class="knowledge-button">ESP32</button>
-                                            <button class="knowledge-button">MODBUS</button>
-                                            <button class="knowledge-button">CSS</button>
-                                        </p>
-                                        <p>
-                                            Acquisizione Locale di Parametri con Hardware Avanzato
-                                        </p>
-                                        <p>
-                                            Il progetto ALPHA `e stato sviluppato nel corso di IoT del Master in Informatica presso SUPSI. Il focus principale `e sull'ESP32 e il protocollo Modbus
-                                        </p>
-                                        <a href="https://github.com/AlessioTommasi-supsi/iotProject/blob/main/docs/tesi.pdf"> <button
-                                                class="download-button">official</button> </a>
-                                        <a href="https://github.com/AlessioTommasi-supsi/iotProject/tree/main/docs"> <button
-                                            class="download-button">ghithub docs</button> </a>
-                                        <a href="https://github.com/AlessioTommasi-supsi/iotProject/tree/main"> <button
-                                            class="download-button">official repo</button> </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <br><br><br><br>
-
-                <a href="mailto:alessio.tommasi.lavoro@gmail.com"><button id="GetInTouchBtn">📲</button></a>
-                <a href="http://alessiotommasi.com/model/docs/curriculum.pdf"><button id="ResumeBtn">📖</button></a>
-
-                <!--  JavaScript files -->
-                <script src="http://alessiotommasi.com/view/js/rotation_on_scroll.js"></script>
-                <script src="http://alessiotommasi.com/view/js/autoType.js"></script>
-                <script src="http://alessiotommasi.com/view/js/scrollUp.js"></script>
-                <script src="http://alessiotommasi.com/view/js/class_switcher.js"></script>
-
-                <script src="http://alessiotommasi.com/view/js/particleLib/particles.js"></script>
-                <script src="http://alessiotommasi.com/view/js/particleLib/app.js"></script>
-
-            </div>
-        </div>
-    </div>
-    )";
-
+    html += "<div class='main_container_absolute'>";
+    html += "<div class='main_container_relative'>";
+    
+    // Contenuto principale frammentato
+    html += "<div class='glass_container'>";
+    html += "<h1>🏠 Sistema IoT</h1>";
+    html += "<p>Benvenuto nel sistema di monitoraggio IoT</p>";
+    
+    // Links di navigazione semplificati
+    html += "<div style='display:flex;flex-wrap:wrap;gap:10px;margin:20px 0'>";
+    html += "<a href='/monitor' style='background:#4CAF50;color:white;padding:10px 15px;text-decoration:none;border-radius:5px;font-size:14px'>🖥️ Monitor</a>";
+    html += "<a href='/pinout' style='background:#2196F3;color:white;padding:10px 15px;text-decoration:none;border-radius:5px;font-size:14px'>🔌 Pinout</a>";
+    html += "<a href='/currentregister' style='background:#FF9800;color:white;padding:10px 15px;text-decoration:none;border-radius:5px;font-size:14px'>📋 Register</a>";
+    html += "<a href='/graph' style='background:#9C27B0;color:white;padding:10px 15px;text-decoration:none;border-radius:5px;font-size:14px'>📈 Graph</a>";
+    html += "</div>";
+    html += "</div>";
+    
+    html += "</div></div>";
     return html;
 }

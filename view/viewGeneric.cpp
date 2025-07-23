@@ -3,21 +3,8 @@
 String viewGeneric::html = "";
 
 String viewGeneric::addCss(){
-    String css = R"(
-    body {
-        font-family: Arial, sans-serif;
-        line-height: 1.6;
-        background-color: #f4f4f4;
-        margin: 0;
-        padding: 20px;
-        padding-top: 60px; /* Evita la sovrapposizione della navbar */
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding-bottom: 200px; /* Spazio extra per evitare la navbar mobile */
-    }
-    )";
-    //return css+ viewGeneric::addNavbarCss();
+    // CSS super minimale - solo l'essenziale
+    String css = R"(body{font-family:Arial;margin:0;padding:60px 10px 120px;display:flex;flex-direction:column;align-items:center;background:#f4f4f4})";
     return css;
 }
 
@@ -28,164 +15,15 @@ String viewGeneric::addNavbarStyleCss(){
 };
 
 String viewGeneric::addNavbarCss(){
-    String addNavbarCss = R"(
-        /* Versione Mobile (default): navbar in basso, più piccola */
-    .navbar {
-      display: flex;
-      justify-content: space-evenly;
-      align-items: center;
-      background: rgba(48, 48, 48, 0.6); /* Grigio traslucido */
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-      border-radius: 15px;
-      padding: 8px 16px; /* padding ridotto */
-      z-index: 2000;
-      
-      /* Posizionata in basso e centrata */
-      position: fixed;
-      bottom: 15px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 80vw; /* ridotta dal 90vw all'80vw */
-      
-      flex-direction: row;
-      overflow-x: auto; /* scroll orizzontale */
-      scroll-behavior: smooth;
-      gap: 8px; /* gap ridotto */
-    }
-
-    /* Rimuove la scrollbar per estetica */
-    .navbar::-webkit-scrollbar {
-      display: none;
-    }
-
-    /* Link della navbar */
-    .navbar a {
-      text-decoration: none;
-      color: white;
-      text-align: center;
-      display: inline-flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 8px; /* padding interno leggermente ridotto */
-      transition: transform 0.2s ease-in-out, color 0.3s ease;
-    }
-
-    /* Icone della navbar, dimensioni ridotte */
-    .navbar .icon {
-      width: 50px;   /* diminuito rispetto ai 60px */
-      height: 50px;  /* diminuito rispetto ai 60px */
-      background-color: rgba(255, 255, 255, 0.752);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;  /* ridotto rispetto ai 30px */
-      color: #333;
-      transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
-      box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.2), 0 4px 8px rgba(0, 0, 0, 0.4);
-    }
-
-    /* Testo sotto le icone, dimensione ridotta */
-    .navbar span {
-      font-size: 12px;  /* ridotto rispetto ai 14px */
-      margin-top: 8px;
-      color: white;
-      transition: transform 0.3s ease, color 0.3s ease;
-    }
-
-    /* Effetto hover */
-    .navbar a:hover .icon {
-      transform: scale(1.3);
-      background-color: rgba(161, 255, 167, 0.7);
-      color: white;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
-    }
-    .navbar a:hover span {
-      color: #4CAF50;
-    }
-
-    /* Responsive per smartphone */
-    @media (max-width: 480px) {
-      .navbar .icon {
-        width: 45px;
-        height: 45px;
-        font-size: 20px;
-      }
-      .navbar span {
-        font-size: 10px;
-      }
-    }
-
-    /* Versione desktop/tablet: layout verticale (min-width >= 1500px) */
-    @media (min-width: 1500px) {
-      .navbar {
-        flex-direction: column;
-        top: 50%;
-        left: 15px;
-        transform: translateY(-50%);
-        bottom: auto;
-        right: auto;
-        
-        /* Limita l'altezza e la larghezza per non occupare troppo spazio */
-        max-height: 80vh;  /* ridotto dal 90vh all'80vh */
-        width: auto;
-        
-        overflow-y: auto;  /* scroll verticale */
-        overflow-x: hidden;
-        padding: 10px;     /* padding leggermente ridotto */
-      }
-    }
-    )"; 
-    return addNavbarCss;
+    // CSS navbar minimalista
+    String css = R"(.navbar{display:flex;justify-content:space-evenly;background:rgba(48,48,48,0.9);position:fixed;bottom:15px;left:50%;transform:translateX(-50%);width:80vw;padding:8px;border-radius:10px;z-index:2000}.navbar a{color:white;text-decoration:none;text-align:center;padding:8px}.navbar .icon{width:40px;height:40px;background:rgba(255,255,255,0.8);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#333}.navbar span{font-size:10px;margin-top:4px}@media(min-width:1500px){.navbar{flex-direction:column;top:50%;left:15px;transform:translateY(-50%);bottom:auto;width:auto;max-height:80vh}})";
+    return css;
 }
 
 String viewGeneric::addPinCss(){
-    String pinCss = R"(
-
-        .pin-container {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-bacfieldsetkdrop-filter: blur(10px);
-            padding: 20px;
-            margin-bottom: 20px;
-            width: 80%;
-            max-width: 600px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        .pin-info {
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-        .pin-actions form {
-            display: inline-block;
-            margin-right: 10px;
-        }
-        .pin-actions button {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .pin-actions button.start {
-            background-color: rgba(255, 0, 0, 0.7);
-            color: white;
-        }
-        .pin-actions button.stop {
-            background-color: rgba(128, 128, 128, 0.7);
-            color: white;
-        }
-        .pin-actions button.edit {
-            background-color: rgba(0, 0, 255, 0.7);
-            color: white;
-        }
-    )";
-    return pinCss;
+    // CSS pin super minimo
+    String css = R"(.pin-container{background:rgba(255,255,255,0.9);border-radius:10px;padding:15px;margin:10px;width:80%;max-width:500px}.pin-info{margin-bottom:10px;font-weight:bold}.pin-actions button{padding:8px 12px;border:none;border-radius:4px;margin-right:8px;cursor:pointer}.pin-actions .start{background:#f44336;color:white}.pin-actions .stop{background:#999;color:white}.pin-actions .edit{background:#2196F3;color:white})";
+    return css;
 }
 
 String viewGeneric::addPinStyleCss(){
@@ -203,131 +41,10 @@ String viewGeneric::addFormStyleCss(){
 }
 
 String viewGeneric::addFormCss(){
-    String formCss = R"(
-        .form-container {
-            width: 80%; /* Adatta larghezza */
-            background: rgba(255, 255, 255, 0.85); /* Sfondo semi-trasparente */
-            padding: 20px;
-            border-radius: 15px; /* Angoli arrotondati */
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Ombra leggera */
-            margin-top: 20px;
-            backdrop-filter: blur(10px); /* Effetto glass */
-            -webkit-backdrop-filter: blur(10px); /* Compatibilità Safari */
-            border: 1px solid rgba(255, 255, 255, 0.2); /* Bordo traslucido */
-            max-width: 600px; /* Imposta una larghezza massima */
-        }
-
-        form {
-            display: flex;
-            flex-direction: column; /* Allineamento verticale */
-        }
-
-        label {
-            font-weight: bold;
-            margin-bottom: 8px; /* Spaziatura inferiore */
-            color: #333; /* Colore del testo */
-        }
-
-        input, select {
-            margin-bottom: 15px; 
-            padding: 10px; 
-            border: 1px solid #ccc; 
-            border-radius: 8px; /* Angoli arrotondati */
-            font-size: 16px; /* Dimensione del testo */
-            width: 100%; /* Larghezza piena */
-            box-sizing: border-box; /* Include padding nei calcoli di larghezza */
-        }
-
-        button {
-            padding: 12px;
-            font-size: 16px; /* Testo leggibile */
-            background-color: #4CAF50; /* Colore verde */
-            color: white; /* Testo bianco */
-            border: none;
-            border-radius: 5px; /* Angoli arrotondati */
-            cursor: pointer;
-            transition: background-color 0.3s ease; /* Transizione per hover */
-        }
-
-        button:hover {
-            background-color: #45a049; /* Verde più scuro per hover */
-        }
-
-        /* Tabelle per visualizzare dati */
-        .scrollable-container {
-            justify-content: center; /* centra il contenuto */
-            width: 90%;
-            overflow-y: auto;
-            max-height: 80vh;
-        }
-        .history-table {
-            width: 100%;
-            border-collapse: collapse; /* Rimuove spazi tra celle */
-            margin: 20px 0;
-            font-size: 18px;
-            text-align: left;
-        }
-
-        .history-table th, .history-table td {
-            padding: 12px 15px; /* Spaziatura interna */
-            border: 1px solid #ddd; /* Bordo sottile */
-        }
-
-        .history-table th {
-            background-color: #f2f2f2; /* Sfondo per intestazioni */
-        }
-
-        .history-table tr:nth-child(even) {
-            background-color: #f9f9f9; /* Riga pari */
-        }
-
-        .history-table tr:nth-child(odd) {
-            background-color: #fff; /* Riga dispari */
-        }
-
-        canvas {
-            max-width: 100%; /* Adattabile */
-            height: auto;
-        }
-
-        /* Responsive Form Container */
-        @media (max-width: 768px) {
-            .form-container {
-                width: 90%; /* Riduce larghezza per schermi medi */
-                padding: 15px; /* Riduce padding */
-            }
-
-            input, select, button {
-                font-size: 14px; /* Riduce font */
-                padding: 8px; /* Adatta padding */
-            }
-
-            button {
-                font-size: 14px; /* Testo più piccolo */
-            }
-        }
-        @media (max-width: 480px) {
-            .form-container {
-                width: 100%; /* Adatta completamente */
-                padding: 10px;
-            }
-
-            label {
-                font-size: 14px; /* Riduce dimensione dei label */
-            }
-
-            input, select, button {
-                font-size: 12px; /* Testo più piccolo */
-            }
-
-            button {
-                padding: 8px; /* Spaziatura interna ridotta */
-            }
-        }
-    )";
-    return formCss;
+    // CSS form essenziale
+    String css = R"(.form-container{width:90%;max-width:500px;background:rgba(255,255,255,0.95);padding:20px;border-radius:10px;margin:20px 0}form{display:flex;flex-direction:column}label{font-weight:bold;margin-bottom:5px}input,select{margin-bottom:10px;padding:8px;border:1px solid #ccc;border-radius:4px;font-size:14px}button{padding:10px;background:#4CAF50;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px}button:hover{background:#45a049}.history-table{width:100%;border-collapse:collapse;margin:10px 0}.history-table th,.history-table td{padding:8px;border:1px solid #ddd;font-size:14px}.history-table th{background:#f2f2f2})";
+    return css;
 }
-
 
 String viewGeneric::addFieldFormStyleCss(){
     String formStyleCss = "<style>";
@@ -337,89 +54,9 @@ String viewGeneric::addFieldFormStyleCss(){
 }
 
 String viewGeneric::addFieldFormCss(){
-    String formCss = R"(
-        /* Stili di base e layout */
-        body {
-        font-family: Arial, sans-serif;
-        background: linear-gradient(135deg, #ece9e6, #ffffff);
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 20px;
-        }
-        
-        /* Contenitore con effetto glass */
-        .form-container {
-        background: rgba(255, 255, 255, 0.75);
-        backdrop-filter: blur(5px);
-        -webkit-backdrop-filter: blur(5px);
-        border-radius: 16px;
-        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-        padding: 30px;
-        margin-top: 100px;
-        width: 90%;
-        max-width: 700px;
-        }
-        
-        h2 {
-        text-align: center;
-        margin-bottom: 30px;
-        }
-        
-        fieldset {
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        margin-bottom: 25px;
-        padding: 15px;
-        }
-        
-        legend {
-        font-size: 1.2em;
-        font-weight: bold;
-        padding: 0 10px;
-        }
-        
-        h3 {
-        margin: 15px 0 5px;
-        font-size: 1.1em;
-        }
-        
-        label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: bold;
-        }
-        
-        input[type="number"],
-        input[type="text"],
-        select {
-        width: 100%;
-        padding: 10px;
-        margin-bottom: 15px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        font-size: 16px;
-        }
-        
-        /* Bottone di invio */
-        button {
-        width: 100%;
-        padding: 15px;
-        font-size: 18px;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-        }
-        
-        button:hover {
-        background-color: #45a049;
-        }
-        )";
-    return formCss;
+    // CSS form campi minimalista
+    String css = R"(.form-container{background:rgba(255,255,255,0.9);border-radius:10px;padding:20px;margin:20px;width:90%;max-width:600px}fieldset{border:1px solid #ccc;border-radius:6px;margin:15px 0;padding:10px}legend{font-size:1.1em;font-weight:bold}input[type="number"],input[type="text"],select{width:100%;padding:8px;margin-bottom:10px;border:1px solid #ccc;border-radius:4px;font-size:14px}button{width:100%;padding:12px;background:#4CAF50;color:white;border:none;border-radius:4px;cursor:pointer;font-size:16px})";
+    return css;
 }
 
 
@@ -622,168 +259,23 @@ String viewGeneric::dynamicUpdateContent(String divId/*una stringa univoca nella
 
 String viewGeneric::fetchContentScript()
 {
-    String script = R"(
-        <script>
-             // Funzione per caricare dinamicamente i dati dal backend
-            async function fetchContent(api) {
-                try {
-                    // Mostra il messaggio di caricamento (se esiste)
-                    const loadingDiv = document.getElementById('loading');
-                    if (loadingDiv) loadingDiv.style.display = 'block';
-
-                    // Effettua la richiesta GET
-                    const response = await fetch(api);
-                    if (!response.ok) {
-                        throw new Error('Errore durante il caricamento dei dati: ' + response.status);
-                    }
-                    return await response.text(); // Restituisce il contenuto della risposta
-                } catch (error) {
-                    console.error(error);
-                    const loadingDiv = document.getElementById('loading');
-                    if (loadingDiv) {
-                        loadingDiv.innerText = 'Errore durante il caricamento dei dati';
-                    }
-                    return null; // In caso di errore, restituisce null
-                }
-            }
-        </script>
-    )";
-
+    // JavaScript super minimale
+    String script = R"(<script>async function fetchContent(a){try{const r=await fetch(a);return r.ok?await r.text():null}catch(e){console.error(e);return null}}</script>)";
     return script;
 }
 
 String viewGeneric::addExportCSVScript()
 {
-    String script = R"(
-    <script>
-    function exportToCSV(filename, tableId) {
-        const table = document.getElementById(tableId);
-        if (!table) {
-            alert('Tabella non trovata!');
-            return;
-        }
-        
-        let csv = [];
-        const rows = table.querySelectorAll('tr');
-        
-        for (let i = 0; i < rows.length; i++) {
-            const row = [], cols = rows[i].querySelectorAll('td, th');
-            
-            for (let j = 0; j < cols.length; j++) {
-                // Gestisce celle con input per estrarre il valore
-                const input = cols[j].querySelector('input[type="text"]');
-                let cellText = input ? input.value : cols[j].innerText;
-                
-                // Pulisce il testo e gestisce le virgolette
-                cellText = cellText.replace(/"/g, '""');
-                if (cellText.search(/("|,|\n)/g) >= 0) {
-                    cellText = '"' + cellText + '"';
-                }
-                row.push(cellText);
-            }
-            csv.push(row.join(','));
-        }
-        
-        // Crea e scarica il file
-        const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
-        const downloadLink = document.createElement('a');
-        downloadLink.download = filename;
-        downloadLink.href = window.URL.createObjectURL(csvFile);
-        downloadLink.style.display = 'none';
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-    }
-    
-    function exportGraphDataToCSV(filename, apiEndpoint, paramName, paramValue) {
-        fetch(apiEndpoint + '?' + paramName + '=' + paramValue)
-            .then(response => response.json())
-            .then(data => {
-                let csv = 'Index,Value\n';
-                data.forEach((value, index) => {
-                    csv += index + ',' + value + '\n';
-                });
-                
-                const csvFile = new Blob([csv], { type: 'text/csv' });
-                const downloadLink = document.createElement('a');
-                downloadLink.download = filename;
-                downloadLink.href = window.URL.createObjectURL(csvFile);
-                downloadLink.style.display = 'none';
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-            })
-            .catch(error => {
-                console.error('Errore durante l\'esportazione:', error);
-                alert('Errore durante l\'esportazione dei dati del grafico');
-            });
-    }
-    </script>
-    )";
+    // Script CSV minimalista
+    String script = R"(<script>function exportToCSV(f,t){const tb=document.getElementById(t);if(!tb)return;let c=[],rs=tb.querySelectorAll('tr');for(let i=0;i<rs.length;i++){const r=[],cs=rs[i].querySelectorAll('td,th');for(let j=0;j<cs.length;j++){const inp=cs[j].querySelector('input[type="text"]');let txt=inp?inp.value:cs[j].innerText;txt=txt.replace(/"/g,'""');if(txt.search(/("|,|\n)/g)>=0)txt='"'+txt+'"';r.push(txt)}c.push(r.join(','))}const cf=new Blob([c.join('\n')],{type:'text/csv'}),dl=document.createElement('a');dl.download=f;dl.href=window.URL.createObjectURL(cf);dl.style.display='none';document.body.appendChild(dl);dl.click();document.body.removeChild(dl)}</script>)";
     return script;
 }
 
-/*
-    MetteContenutoNuovo Sotto al Contenuto vecchio
-    timeToUpdate > 0 il contenuto nuovo deve essere messo AL posto di quello vecchio alrimenti sotto 
-*/
 String viewGeneric::dynamicUpdateContentScript()
 {
-    String script = "";
-    
-    script += fetchContentScript();
-
-    script += R"(
-        <script>
-            // Variabile globale per tenere traccia dell'indice dei contenuti aggiunti
-            let contentIndex = 0;
-            // Funzione per gestire l'aggiunta o la sostituzione del contenuto
-            function updateContent(divId, content, replace) {
-                if (replace) {
-                    // Sostituisci il contenuto del div esistente
-                    const existingDiv = document.getElementById(divId);
-                    if (existingDiv) {
-                        existingDiv.innerHTML = content;
-                    } else {
-                        console.error('Div con ID ' + divId + ' non trovato per la sostituzione.');
-                    }
-                } else {
-                    // Aggiungi un nuovo div con contenuto sotto
-                    const newContentDiv = document.createElement('div');
-                    newContentDiv.id = `contentAdd_${contentIndex}`;
-                    newContentDiv.className = 'content';
-                    newContentDiv.innerHTML = content;
-                    contentIndex++;
-
-                    const loadButton = document.getElementById('loadButton');
-                    if (loadButton) {
-                        document.body.insertBefore(newContentDiv, loadButton);
-                    } else {
-                        document.body.appendChild(newContentDiv);
-                    }
-                }
-            }
-
-            // Funzione per inizializzare il caricamento
-            async function loadPageContent(api, divId, timeToUpdate) {
-                const content = await fetchContent(api);
-                if (content) {
-                    updateContent(divId, content, timeToUpdate > 0);
-                }
-
-                // Se il refresh è attivo, imposta un intervallo
-                if (timeToUpdate > 0) {
-                    setInterval(async () => {
-                        const refreshedContent = await fetchContent(api);
-                        if (refreshedContent) {
-                            updateContent(divId, refreshedContent, true); // Sostituisce il contenuto
-                        }
-                    }, timeToUpdate);
-                }
-            }
-        </script>
-    )";
-
+    // JavaScript essenziale per dynamic update
+    String script = fetchContentScript();
+    script += R"(<script>let ci=0;function updateContent(d,c,r){if(r){const ed=document.getElementById(d);if(ed)ed.innerHTML=c}else{const nd=document.createElement('div');nd.id='contentAdd_'+(ci++);nd.innerHTML=c;document.body.appendChild(nd)}}async function loadPageContent(a,d,t){const c=await fetchContent(a);if(c)updateContent(d,c,t>0);if(t>0)setInterval(async()=>{const rc=await fetchContent(a);if(rc)updateContent(d,rc,true)},t)}</script>)";
     return script;
 }
 

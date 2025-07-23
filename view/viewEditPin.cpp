@@ -92,29 +92,28 @@ String viewEditPin::generateHTML(int pinNumber)
 
 String viewEditPin::generateHTML(int pinNumber, String script)
 {
-    // Creazione dell'header HTML con il foglio di stile CSS
-    String html = viewGeneric::defaultCssHeader("Edit Pin");
-
-    String css ="";
-
-    css += viewGeneric::dynamicUpdateContentScript(); //aggiungo script per aggiornamento dinamico
-
-    /**
-     * Aggiungo Css effettivo
-     */
-
-    css += viewGeneric::dynamicUpdateContent("", "/formStyle", -1); //aggiungo script per aggiornamento dinamico
-    css += viewGeneric::dynamicUpdateContent("", "/pinStyle", -1); //aggiungo script per aggiornamento dinamico
-    css += viewGeneric::dynamicUpdateContent("", "/navbarStyle", -1); //aggiungo script per aggiornamento dinamico
-
-    html += css;
-
-    // Aggiunta del contenitore principale per form e valore del registro
-    html+= viewEditPin::generateForm(pinNumber);
-    html+= viewEditPin::addCustomScript(script);
-
-    // Aggiunta del footer
-    html += viewGeneric::defaultFooter();
+    // Header ultra-minimalista con caricamento dinamico
+    html = "<!DOCTYPE html><html><head>";
+    html += "<meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1.0'>";
+    html += "<title>Edit Pin</title>";
+    html += "<style>body{margin:0;padding:60px 10px 120px;background:#f4f4f4}</style>";
+    html += "</head><body>";
+    
+    // Tutto caricato dinamicamente
+    html += viewGeneric::dynamicUpdateContentScript();
+    html += viewGeneric::dynamicUpdateContent("navbar_area", "/navbarStyle", -1);
+    html += viewGeneric::dynamicUpdateContent("editpin_content", "/editPinPageContent?pinNumber=" + String(pinNumber), -1);
+    
+    html += "<div id='navbar_area'></div>";
+    html += viewGeneric::addNavbar();
+    html += "<div id='editpin_content'><div style='text-align:center;padding:20px'>Loading pin editor...</div></div>";
+    
+    // Script aggiuntivo se fornito
+    if (script.length() > 0) {
+        html += "<script>" + script + "</script>";
+    }
+    
+    html += "</body></html>";
     return html;
 }
 
@@ -124,29 +123,6 @@ String viewEditPin::addCustomScript(String script)
 }
 
 String viewEditPin::addDefaultScript(){
-    String defaultScript = R"(
-        <script>
-            function showOutputValue() {
-                var isInput = document.getElementById("isInput").value;
-                var outputValueContainer = document.getElementById("outputValueContainer");
-                if (isInput === "false") {
-                    outputValueContainer.style.display = "block";
-                } else {
-                    outputValueContainer.style.display = "none";
-                }
-            }
-
-            function applyConfig() {
-                document.getElementById("configurePinForm").action = "editPin";
-                document.getElementById("configurePinForm").submit();
-            }
-
-            function saveConfig() {
-                document.getElementById("configurePinForm").action = "pinout";
-                document.getElementById("configurePinForm").submit();
-            }
-        </script>
-
-    )";
-    return defaultScript;
+    // Script super compresso
+    return "<script>function showOutputValue(){const i=document.getElementById('isInput').value,o=document.getElementById('outputValueContainer');o.style.display=i==='false'?'block':'none'}function applyConfig(){document.getElementById('configurePinForm').action='editPin';document.getElementById('configurePinForm').submit()}function saveConfig(){document.getElementById('configurePinForm').action='pinout';document.getElementById('configurePinForm').submit()}</script>";
 }

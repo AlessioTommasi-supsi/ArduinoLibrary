@@ -31,6 +31,7 @@ public:
     std::vector<Pin>::const_iterator end() const override;
 
     std::string toString() const override;
+    void savePinsToMemory() override;
 };
 
 #endif // ESP32_38PIN_H

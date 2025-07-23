@@ -18,6 +18,7 @@ String viewModbusHistory::generateHTML()
     html += viewGeneric::addNavbar();
     
     html += viewGeneric::addExportCSVScript(); // Aggiungo script per esportazione CSV
+    html += viewGeneric::addAutoRefreshControlScript(); // 🔧 FIX: Script controllo auto-refresh
     html += "<h1>Modbus History</h1>";
     
     // Aggiungo bottone export CSV
@@ -41,16 +42,20 @@ String viewModbusHistory::generateHTML()
     html += "</table>";
     html += "</div>";
 
-    // Script per aggiornamento automatico
+    // 🔧 FIX: Script aggiornamento automatico con controllo focus/blur integrato
     html += "<script>";
     html += "document.addEventListener('DOMContentLoaded', () => {";
-    html += "  setInterval(() => {";
-    html += "    fetch('/getModbusValuesHistory')";
-    html += "      .then(response => response.text())";
-    html += "      .then(data => {";
-    html += "        document.getElementById('modbus-history-content').innerHTML = data;";
-    html += "      });";
-    html += "  }, 3000);";
+    html += "  const refreshModbusHistory = () => {";
+    html += "    if (!window.AutoRefreshManager.isPaused) {";
+    html += "      fetch('/getModbusValuesHistory')";
+    html += "        .then(response => response.text())";
+    html += "        .then(data => {";
+    html += "          document.getElementById('modbus-history-content').innerHTML = data;";
+    html += "        });";
+    html += "    }";
+    html += "  };";
+    html += "  const interval = setInterval(refreshModbusHistory, 3000);";
+    html += "  window.AutoRefreshManager.addInterval(interval);";
     html += "});";
     html += "</script>";
 

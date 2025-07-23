@@ -10,6 +10,50 @@ void Routes::defineRoutes(AsyncWebServer &server)
         request->send(200, "text/html", htmlContentPtr); 
     });
     
+    // **🔧 FIX: Route per Apply/Save EditPin che non funzionavano**
+    server.on("/applyPinChanges", HTTP_POST, [](AsyncWebServerRequest *request){
+        try {
+            if (request->hasParam("pin", true) && request->hasParam("pinType", true) && 
+                request->hasParam("isInput", true) && request->hasParam("outputValue", true) && 
+                request->hasParam("pinNote", true)) {
+                
+                String pinNumber = request->getParam("pin", true)->value();
+                String pinType = request->getParam("pinType", true)->value();
+                bool isInput = request->getParam("isInput", true)->value() == "true";
+                float outputValue = request->getParam("outputValue", true)->value().toFloat();
+                String pinNote = request->getParam("pinNote", true)->value();
+                
+                // Applica le modifiche al pin
+                Pin &pin = SystemState::getInstance()->pinoutData->getPin(pinNumber.toInt());
+                pin.setType(pinType);
+                pin.setIsInput(isInput);
+                pin.setNote(pinNote.c_str());
+                
+                if (!isInput && outputValue > 0) {
+                    pin.write(outputValue > 0);
+                }
+                
+                Serial.println("Pin " + pinNumber + " modificato con successo");
+                request->send(200, "text/plain", "Pin modifications applied successfully");
+            } else {
+                request->send(400, "text/plain", "Missing required parameters");
+            }
+        } catch (...) {
+            request->send(500, "text/plain", "Error applying pin changes");
+        }
+    });
+    
+    server.on("/savePinChanges", HTTP_POST, [](AsyncWebServerRequest *request){
+        try {
+            // Salva tutte le modifiche ai pin nella memoria persistente
+            SystemState::getInstance()->pinoutData->savePinsToMemory();
+            Serial.println("Pin changes saved to memory");
+            request->send(200, "text/plain", "Pin changes saved successfully");
+        } catch (...) {
+            request->send(500, "text/plain", "Error saving pin changes");
+        }
+    });
+    
     // Nuove rotte per caricamento dinamico dei contenuti frammentati
     server.on("/homePageContent", HTTP_GET, [](AsyncWebServerRequest *request){
         try {

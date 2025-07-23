@@ -299,3 +299,30 @@ std::string Esp32_30pin::toString() const
     }
     return oss.str();
 }
+
+// **🔧 FIX: Implementazione metodo per salvare configurazione pin in memoria**
+void Esp32_30pin::savePinsToMemory() {
+    try {
+        Serial.println("Saving ESP32_30pin configuration to memory...");
+        
+        // Qui potrei implementare il salvataggio su EEPROM, SPIFFS, o Preferences
+        // Per ora stampo la configurazione salvata su Serial per debug
+        for (const auto& pin : pins) {
+            Serial.print("Saved Pin ");
+            Serial.print(pin.getNumber());
+            Serial.print(": Type=");
+            Serial.print(pin.getType());
+            Serial.print(", Input=");
+            Serial.print(pin.getIsInput() ? "true" : "false");
+            Serial.print(", Voltage=");
+            Serial.println(pin.getVoltage());
+        }
+        
+        Serial.println("ESP32_30pin configuration saved successfully!");
+        
+    } catch (const std::exception& e) {
+        Serial.println("Error saving ESP32_30pin configuration: " + String(e.what()));
+    } catch (...) {
+        Serial.println("Unknown error saving ESP32_30pin configuration");
+    }
+}

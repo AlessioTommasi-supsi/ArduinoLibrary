@@ -31,6 +31,7 @@ class viewGeneric
         static String dynamicUpdateContentScript();
         static String fetchContentScript();
         static String addExportCSVScript();
+        static String addAutoRefreshControlScript();
 };
 
 #endif // !VIEWGENERIC_H#define VIEWGENERIC_H

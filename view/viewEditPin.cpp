@@ -123,6 +123,43 @@ String viewEditPin::addCustomScript(String script)
 }
 
 String viewEditPin::addDefaultScript(){
-    // Script super compresso
-    return "<script>function showOutputValue(){const i=document.getElementById('isInput').value,o=document.getElementById('outputValueContainer');o.style.display=i==='false'?'block':'none'}function applyConfig(){document.getElementById('configurePinForm').action='editPin';document.getElementById('configurePinForm').submit()}function saveConfig(){document.getElementById('configurePinForm').action='pinout';document.getElementById('configurePinForm').submit()}</script>";
+    // Script corretto per Apply e Save con funzionamento completo
+    return "<script>"
+           "function showOutputValue(){"
+           "const i=document.getElementById('isInput').value,"
+           "o=document.getElementById('outputValueContainer');"
+           "o.style.display=i==='false'?'block':'none'"
+           "}"
+           "function applyConfig(){"
+           "const form=document.getElementById('configurePinForm');"
+           "if(!form){alert('Form not found');return;}"
+           // Apply: invia dati e rimane su editPin
+           "const formData=new FormData(form);"
+           "const params=new URLSearchParams();"
+           "for(let[key,value] of formData.entries())params.append(key,value);"
+           "fetch('/editPin?'+params.toString())"
+           ".then(response=>response.text())"
+           ".then(html=>{"
+           "document.documentElement.innerHTML=html;"
+           "showPopup('Pin configuration applied!');"
+           "})"
+           ".catch(e=>alert('Error applying config: '+e.message))"
+           "}"
+           "function saveConfig(){"
+           "const form=document.getElementById('configurePinForm');"
+           "if(!form){alert('Form not found');return;}"
+           // Save: invia dati e vai a pinout
+           "const formData=new FormData(form);"
+           "const params=new URLSearchParams();"
+           "for(let[key,value] of formData.entries())params.append(key,value);"
+           "window.location.href='/pinout?'+params.toString();"
+           "}"
+           "function showPopup(msg){"
+           "const popup=document.createElement('div');"
+           "popup.style.cssText='position:fixed;top:20px;right:20px;background:#4CAF50;color:white;padding:15px;border-radius:5px;z-index:1000';"
+           "popup.textContent=msg;"
+           "document.body.appendChild(popup);"
+           "setTimeout(()=>popup.remove(),3000)"
+           "}"
+           "</script>";
 }

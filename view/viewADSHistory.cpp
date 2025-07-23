@@ -19,6 +19,7 @@ String viewADSHistory::generateHTML()
     html += viewGeneric::addNavbar();
     
     html += viewGeneric::addExportCSVScript(); // Aggiungo script per esportazione CSV
+    html += viewGeneric::addAutoRefreshControlScript(); // 🔧 FIX: Script controllo auto-refresh
     html += "<h1>ADS History</h1>";
     
     // Aggiungo bottone export CSV
@@ -30,7 +31,7 @@ String viewADSHistory::generateHTML()
     html += "<table class='history-table' id='ads-history-table' border='1'>";
     html += "<thead>";
     html += "<tr>";
-    html += "<th>#</th>";
+    html += "<th>Channel</th>";
     html += "<th>Value</th>";
     html += "<th>Actions</th>";
     html += "</tr>";
@@ -42,16 +43,20 @@ String viewADSHistory::generateHTML()
     html += "</table>";
     html += "</div>";
 
-    // Add script to update content every few seconds
+    // 🔧 FIX: Script aggiornamento automatico con controllo focus/blur integrato
     html += "<script>";
     html += "document.addEventListener('DOMContentLoaded', () => {";
-    html += "  setInterval(() => {";
-    html += "    fetch('/getADSValuesHistory')";
-    html += "      .then(response => response.text())";
-    html += "      .then(data => {";
-    html += "        document.getElementById('ads-history-content').innerHTML = data;";
-    html += "      });";
-    html += "  }, 3000);"; 
+    html += "  const refreshADSHistory = () => {";
+    html += "    if (!window.AutoRefreshManager.isPaused) {";
+    html += "      fetch('/getADSValuesHistory')";
+    html += "        .then(response => response.text())";
+    html += "        .then(data => {";
+    html += "          document.getElementById('ads-history-content').innerHTML = data;";
+    html += "        });";
+    html += "    }";
+    html += "  };";
+    html += "  const interval = setInterval(refreshADSHistory, 3000);";
+    html += "  window.AutoRefreshManager.addInterval(interval);";
     html += "});";
     html += "</script>";
 

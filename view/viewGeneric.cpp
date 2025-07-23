@@ -279,5 +279,52 @@ String viewGeneric::dynamicUpdateContentScript()
     return script;
 }
 
+String viewGeneric::addAutoRefreshControlScript()
+{
+    // 🔧 Script ottimizzato per controllo auto-refresh con focus/blur
+    String script = R"(<script>
+window.AutoRefreshManager = {
+    intervals: [],
+    isPaused: false,
+    init: function() {
+        // Event listeners globali per tutti gli input fields
+        document.addEventListener('focusin', (e) => {
+            if (e.target.matches('input[type="text"], input[type="number"], textarea, select')) {
+                this.pauseAll();
+            }
+        });
+        document.addEventListener('focusout', (e) => {
+            if (e.target.matches('input[type="text"], input[type="number"], textarea, select')) {
+                this.resumeAll();
+            }
+        });
+    },
+    addInterval: function(intervalId) {
+        this.intervals.push(intervalId);
+    },
+    pauseAll: function() {
+        if (!this.isPaused) {
+            this.isPaused = true;
+            this.intervals.forEach(id => clearInterval(id));
+            console.log('🔴 Auto-refresh paused (input focus)');
+        }
+    },
+    resumeAll: function() {
+        if (this.isPaused) {
+            this.isPaused = false;
+            // Riavvia tutti gli interval registrati
+            window.location.reload(); // Soluzione semplice e robusta
+            console.log('🟢 Auto-refresh resumed (input blur)');
+        }
+    }
+};
+// Inizializza quando il DOM è pronto
+document.addEventListener('DOMContentLoaded', () => {
+    window.AutoRefreshManager.init();
+});
+</script>)";
+    return script;
+}
+
 
 

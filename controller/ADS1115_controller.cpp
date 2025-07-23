@@ -224,14 +224,36 @@ void ADS1115_controller::startRecording(const String &signalType, int interval) 
 }
 
 void ADS1115_controller::stopRecording() {
-    if (xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE) {
+    if (xSemaphoreTake(mutex, pdMS_TO_TICKS(2000)) == pdTRUE) { // Timeout più lungo
         recordingActive = false;
+        
+        if (recordingTask != NULL) {
+            Serial.println("Stopping ADS1115 recording task...");
+            
+            // Termina il task in modo sicuro
+            vTaskDelete(recordingTask);
+            recordingTask = NULL;
+            
+            // Aspetta che il task sia completamente terminato
+            vTaskDelay(pdMS_TO_TICKS(200));
+            
+            Serial.println("ADS1115 recording task stopped successfully");
+        }
+        
+        // Pulizia sicura dei valori per liberare memoria
+        if (recordedValues.size() > 50) {
+            recordedValues.erase(recordedValues.begin(), recordedValues.end() - 25);
+        }
+        
+        xSemaphoreGive(mutex);
+    } else {
+        Serial.println("ERROR: Cannot acquire mutex to stop ADS1115 recording");
+        // Forza la terminazione se necessario
         if (recordingTask != NULL) {
             vTaskDelete(recordingTask);
             recordingTask = NULL;
-            Serial.println("Recording task terminato.");
         }
-        xSemaphoreGive(mutex);
+        recordingActive = false;
     }
 }
 

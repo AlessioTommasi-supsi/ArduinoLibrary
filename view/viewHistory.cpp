@@ -18,6 +18,7 @@ String viewHistory::generateHTML()
     html += viewGeneric::addNavbar();
     
     html += viewGeneric::addExportCSVScript(); // Aggiungo script per esportazione CSV
+    html += viewGeneric::addAutoRefreshControlScript(); // 🔧 FIX: Script controllo auto-refresh
     html += "<h1>History</h1>";
     
     // Aggiungo bottone export CSV
@@ -49,33 +50,33 @@ String viewHistory::generateHTML()
     html += "</table>";
     html += "</div>";
 
-    // Aggiungi lo script per aggiornare il div ogni k secondi
+    // 🔧 FIX: Script aggiornamento automatico con controllo focus/blur integrato
     html += "<script>";
     html += "document.addEventListener('DOMContentLoaded', () => {";
-    html += "  setInterval(() => {";
-    html += "    fetch('/getHistoryContent')";
-    html += "      .then(response => response.text())";
-    html += "      .then(data => {";
-    html += "        document.getElementById('history-content').innerHTML = data;";
-    html += "      });";
-    html += "  }, 3000);"; // Aggiorna ogni 10 secondi (puoi cambiare il valore a k*1000 per k secondi)
+    html += "  const refreshHistory = () => {";
+    html += "    if (!window.AutoRefreshManager.isPaused) {";
+    html += "      fetch('/getHistoryContent')";
+    html += "        .then(response => response.text())";
+    html += "        .then(data => {";
+    html += "          document.getElementById('history-content').innerHTML = data;";
+    html += "        });";
+    html += "    }";
+    html += "  };";
+    html += "  const refreshPins = () => {";
+    html += "    if (!window.AutoRefreshManager.isPaused) {";
+    html += "      fetch('/getPinValuesHistory')";
+    html += "        .then(response => response.text())";
+    html += "        .then(data => {";
+    html += "          document.getElementById('history-pin-content').innerHTML = data;";
+    html += "        });";
+    html += "    }";
+    html += "  };";
+    html += "  const interval1 = setInterval(refreshHistory, 3000);";
+    html += "  const interval2 = setInterval(refreshPins, 3000);";
+    html += "  window.AutoRefreshManager.addInterval(interval1);";
+    html += "  window.AutoRefreshManager.addInterval(interval2);";
     html += "});";
     html += "</script>";
-
-    html += "<script>";
-    html += "document.addEventListener('DOMContentLoaded', () => {";
-    html += "  setInterval(() => {";
-    html += "    fetch('/getPinValuesHistory')";
-    html += "      .then(response => response.text())";
-    html += "      .then(data => {";
-    html += "        document.getElementById('history-pin-content').innerHTML = data;";
-    html += "      });";
-    html += "  }, 3000);"; // Aggiorna ogni 10 secondi (puoi cambiare il valore a k*1000 per k secondi)
-    html += "});";
-    html += "</script>";
-
-    //TODO vedi pinout! script che quando faccio focus su un input mi ferma l'aggiornamento e quando lo tolgo lo riavvia
-    
 
     html += viewGeneric::defaultFooter();
 

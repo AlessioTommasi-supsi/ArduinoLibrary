@@ -171,7 +171,7 @@ void MultiplexRoutes::defineRoutes(AsyncWebServer &server) {
             html += "</style></head><body>";
             html += "<div class='container'>";
             html += "<h1>🧪 TEST Mode</h1>";
-            html += "<div class='value' id='currentValue'>Loading...</div>";
+            html += "<div class='value' id='currentValue'> </div>";
             
             html += "<canvas class='graph' id='chart' width='800' height='300'></canvas>";
             
@@ -263,7 +263,7 @@ void MultiplexRoutes::defineRoutes(AsyncWebServer &server) {
         html += "</style></head><body>";
         html += "<div class='container'>";
         html += "<h1>📊 " + signalType + "</h1>";
-        html += "<div class='value' id='currentValue'>Loading...</div>";
+        html += "<div class='value' id='currentValue'> </div>";
         
         html += "<canvas class='graph' id='chart' width='850' height='350'></canvas>";
         

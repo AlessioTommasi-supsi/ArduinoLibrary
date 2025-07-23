@@ -70,7 +70,7 @@ public:
     bool write(bool goHigh);
     uint16_t read();
     void setType(String type);
-    String getType();
+    String getType() const;  // **🔧 FIX: Aggiungo const per permettere chiamate su oggetti const**
 
     // Metodi per la registrazione
     void startRecording(int milliseconds);

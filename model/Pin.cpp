@@ -242,7 +242,7 @@ void Pin::setType(String type)
     }
 }
 
-String Pin::getType()
+String Pin::getType() const
 {
     if (xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE) {
         String result = pinTypeToString(this->type);
@@ -340,62 +340,131 @@ uint16_t Pin::read()
 // Funzione per registrare valori dal pin
 void Pin::recordingFunction()
 {
-    try
-    {
-        while (true)
-        {
-            uint16_t value = read();
-            Serial.println("Recording value: " + String(value) + " at pin " + String(getNumber()));
-            
-            if (xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE) {
-                valuesVoltage.push_back(value);
-                delay(timeToRecord);
-                xSemaphoreGive(mutex);
+    const size_t MAX_VALUES = 100; // Limite massimo valori per evitare overflow
+    unsigned long lastCleanup = millis();
+    const unsigned long CLEANUP_INTERVAL = 30000; // Pulizia ogni 30 secondi
+    
+    try {
+        while (true) {
+            // Verifica heap ogni ciclo
+            size_t freeHeap = ESP.getFreeHeap();
+            if (freeHeap < 4096) { // Se heap < 4KB, ferma recording
+                Serial.println("WARNING: Low memory, stopping recording for pin " + String(number));
+                break;
             }
+            
+            uint16_t value = read();
+            
+            if (xSemaphoreTake(mutex, pdMS_TO_TICKS(100)) == pdTRUE) {
+                // Limita il numero di valori per evitare overflow
+                if (valuesVoltage.size() >= MAX_VALUES) {
+                    valuesVoltage.erase(valuesVoltage.begin(), valuesVoltage.begin() + 10); // Rimuovi i primi 10
+                }
+                
+                valuesVoltage.push_back(value);
+                xSemaphoreGive(mutex);
+                
+                // Pulizia periodica per liberare memoria
+                unsigned long currentTime = millis();
+                if (currentTime - lastCleanup > CLEANUP_INTERVAL) {
+                    if (valuesVoltage.size() > 50) {
+                        valuesVoltage.erase(valuesVoltage.begin(), valuesVoltage.begin() + 25);
+                    }
+                    lastCleanup = currentTime;
+                }
+            }
+            
+            // Usa vTaskDelay invece di delay per task FreeRTOS
+            vTaskDelay(pdMS_TO_TICKS(timeToRecord));
         }
+    } catch (...) {
+        Serial.println("Exception in recording function for pin " + String(number));
     }
-    catch (...)
-    {
-        Serial.println("Errore nella registrazione del pin " + String(getNumber()));
-        stopRecording();
+    
+    // Auto-cleanup del task
+    if (xSemaphoreTake(mutex, pdMS_TO_TICKS(100)) == pdTRUE) {
+        recordingTask = NULL;
+        xSemaphoreGive(mutex);
     }
+    
+    vTaskDelete(NULL); // Termina se stesso
 }
 
-// Inizia la registrazione
+// Inizia la registrazione con protezioni anti-crash
 void Pin::startRecording(int milliseconds)
 {
-    if (xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE) {
-        timeToRecord = milliseconds;
-        if (recordingTask == NULL)
-        {
-            xTaskCreatePinnedToCore(
-                [](void *parameter)
-                {
-                    Pin *pin = static_cast<Pin *>(parameter);
-                    pin->recordingFunction();
-                },
-                "recordingTask",
-                stackSize,
-                this,
-                1,
-                &recordingTask,
-                0);
+    // Controlli preliminari per prevenire crash
+    if (milliseconds < 500) {
+        milliseconds = 500; // Minimo 500ms per evitare sovraccarico
+    }
+    
+    // Verifica heap disponibile
+    size_t freeHeap = ESP.getFreeHeap();
+    if (freeHeap < 8192) { // Minimo 8KB liberi
+        Serial.println("ERROR: Heap insufficiente per recording pin " + String(number) + ". Free: " + String(freeHeap));
+        return;
+    }
+    
+    if (xSemaphoreTake(mutex, pdMS_TO_TICKS(1000)) == pdTRUE) {
+        // Se c'è già un task attivo, fermalo prima
+        if (recordingTask != NULL) {
+            Serial.println("Stopping existing recording task for pin " + String(number));
+            vTaskDelete(recordingTask);
+            recordingTask = NULL;
+            vTaskDelay(pdMS_TO_TICKS(100)); // Aspetta che il task sia completamente terminato
         }
+        
+        timeToRecord = milliseconds;
+        
+        // Riduce lo stack size per ESP32 Core 3.0.7
+        size_t taskStackSize = 2048; // Ridotto da 4096 per risparmiare memoria
+        
+        // Crea il task con priorità bassa e core specifico
+        BaseType_t result = xTaskCreatePinnedToCore(
+            [](void *parameter) {
+                Pin *pin = static_cast<Pin *>(parameter);
+                pin->recordingFunction();
+            },
+            ("PinRec" + String(number)).c_str(), // Nome task più corto
+            taskStackSize,
+            this,
+            1, // Priorità bassa
+            &recordingTask,
+            0  // Core 0 per bilanciare il carico
+        );
+        
+        if (result != pdPASS) {
+            Serial.println("ERROR: Failed to create recording task for pin " + String(number));
+            recordingTask = NULL;
+        } else {
+            Serial.println("Recording started for pin " + String(number) + " (interval: " + String(milliseconds) + "ms)");
+        }
+        
         xSemaphoreGive(mutex);
+    } else {
+        Serial.println("ERROR: Cannot acquire mutex for pin " + String(number));
     }
 }
 
-// Ferma la registrazione
+// Ferma la registrazione con pulizia sicura
 void Pin::stopRecording()
 {
-    if (xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE) {
-        if (recordingTask != NULL)
-        {
+    if (xSemaphoreTake(mutex, pdMS_TO_TICKS(1000)) == pdTRUE) {
+        if (recordingTask != NULL) {
+            Serial.println("Stopping recording for pin " + String(number));
+            
+            // Termina il task in modo sicuro
             vTaskDelete(recordingTask);
             recordingTask = NULL;
-            Serial.println("Recording stopped!");
+            
+            // Aspetta che il task sia completamente terminato
+            vTaskDelay(pdMS_TO_TICKS(100));
+            
+            Serial.println("Recording stopped for pin " + String(number));
         }
         xSemaphoreGive(mutex);
+    } else {
+        Serial.println("ERROR: Cannot acquire mutex to stop recording for pin " + String(number));
     }
 }
 

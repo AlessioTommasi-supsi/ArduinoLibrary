@@ -18,6 +18,7 @@ String viewPinHistory::generateHTML()
     html += viewGeneric::addNavbar();
     
     html += viewGeneric::addExportCSVScript(); // Aggiungo script per esportazione CSV
+    html += viewGeneric::addAutoRefreshControlScript(); // 🔧 FIX: Script controllo auto-refresh
     html += "<h1>Pin History</h1>";
     
     // Aggiungo bottone export CSV
@@ -41,16 +42,20 @@ String viewPinHistory::generateHTML()
     html += "</table>";
     html += "</div>";
 
-    // Script per aggiornamento automatico
+    // 🔧 FIX: Script aggiornamento automatico con controllo focus/blur integrato
     html += "<script>";
     html += "document.addEventListener('DOMContentLoaded', () => {";
-    html += "  setInterval(() => {";
-    html += "    fetch('/getPinValuesHistory')";
-    html += "      .then(response => response.text())";
-    html += "      .then(data => {";
-    html += "        document.getElementById('pin-history-content').innerHTML = data;";
-    html += "      });";
-    html += "  }, 3000);";
+    html += "  const refreshPinHistory = () => {";
+    html += "    if (!window.AutoRefreshManager.isPaused) {";
+    html += "      fetch('/getPinValuesHistory')";
+    html += "        .then(response => response.text())";
+    html += "        .then(data => {";
+    html += "          document.getElementById('pin-history-content').innerHTML = data;";
+    html += "        });";
+    html += "    }";
+    html += "  };";
+    html += "  const interval = setInterval(refreshPinHistory, 3000);";
+    html += "  window.AutoRefreshManager.addInterval(interval);";
     html += "});";
     html += "</script>";
 

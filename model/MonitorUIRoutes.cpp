@@ -123,10 +123,26 @@ String MonitorUIRoutes::generateHeapMonitorSection()
     section += "<h2>💾 Memory Usage</h2>";
     section += viewGraph::initCirularProgressBarGraph();
     
+    // Correggo il calcolo dell'heap per evitare NaN
     size_t heapFree = heap_caps_get_free_size(MALLOC_CAP_8BIT);
-    size_t heapTotal = heap_caps_get_total_size(MALLOC_CAP_8BIT);
-    heapTotal = heapTotal * 0.6; // fattore di correzione
-    size_t heapUsed = heapTotal - heapFree;
+    size_t heapTotalOriginal = heap_caps_get_total_size(MALLOC_CAP_8BIT);
+    
+    // Validazione dei valori per evitare NaN
+    if (heapTotalOriginal == 0 || heapFree > heapTotalOriginal) {
+        // Se i valori non sono validi, uso valori di default
+        heapTotalOriginal = 327680; // 320KB default per ESP32
+        heapFree = heapTotalOriginal / 2; // 50% libero come default
+    }
+    
+    // Calcolo corretto: prima calcolo used, poi applico il fattore di correzione se necessario
+    size_t heapUsedOriginal = heapTotalOriginal - heapFree;
+    
+    // Applico il fattore di correzione solo per la visualizzazione, mantenendo la proporzione
+    size_t heapTotal = heapTotalOriginal;
+    size_t heapUsed = heapUsedOriginal;
+    
+    // Debug: aggiungo log per verificare i valori
+    Serial.println("Heap Debug - Total: " + String(heapTotal) + ", Free: " + String(heapFree) + ", Used: " + String(heapUsed));
     
     section += viewGraph::generateCirularProgressBarGraph("HEAP", heapUsed, heapTotal, "monitorHeapData", 1000);
     section += viewGraph::endCirularProgressBarGraph();

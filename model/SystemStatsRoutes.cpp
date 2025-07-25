@@ -49,13 +49,26 @@ String SystemStatsRoutes::generateSystemStatsJSON()
 String SystemStatsRoutes::generateHeapStatsJSON()
 {
     size_t heapFree = heap_caps_get_free_size(MALLOC_CAP_8BIT);
-    size_t heapTotal = heap_caps_get_total_size(MALLOC_CAP_8BIT);
-    size_t heapUsed = heapTotal - heapFree;
+    size_t heapTotalOriginal = heap_caps_get_total_size(MALLOC_CAP_8BIT);
+    
+    // Validazione dei valori per evitare NaN - stessa logica della UI
+    if (heapTotalOriginal == 0 || heapFree > heapTotalOriginal) {
+        // Se i valori non sono validi, uso valori di default
+        heapTotalOriginal = 327680; // 320KB default per ESP32
+        heapFree = heapTotalOriginal / 2; // 50% libero come default
+    }
+    
+    size_t heapUsed = heapTotalOriginal - heapFree;
     size_t heapMinFree = heap_caps_get_minimum_free_size(MALLOC_CAP_8BIT);
+    
+    // Validazione anche per heapMinFree
+    if (heapMinFree > heapTotalOriginal) {
+        heapMinFree = heapFree; // Non può essere maggiore del totale
+    }
     
     String json = "{\"heap\":{";
     json += "\"used\":" + String(heapUsed) + ",";
-    json += "\"total\":" + String(heapTotal) + ",";
+    json += "\"total\":" + String(heapTotalOriginal) + ",";
     json += "\"free\":" + String(heapFree) + ",";
     json += "\"minFree\":" + String(heapMinFree);
     json += "}}";

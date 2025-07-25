@@ -248,17 +248,14 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
                     pin->write(goHigh);
                 }
 
-                //aggiungo popup script con scritto salvataggio avvenuto!
-                String script = "Pin " + pinNumber + " saved!";
-                script += viewEditPin::addDefaultScript();
-                htmlContent = viewEditPin::generateHTML(pinNumber.toInt(), script);
+                // 🔥 FIX: Pagina completamente statica - niente più caricamento dinamico
+                htmlContent = viewEditPin::generateHTML(pinNumber.toInt(), "");
             }else{
-                htmlContent = viewEditPin::generateHTML(pinNumber.toInt());
+                // 🔥 FIX: Pagina completamente statica - niente più caricamento dinamico
+                htmlContent = viewEditPin::generateHTML(pinNumber.toInt(), "");
             }
-
             
             const char *htmlContentPtr = htmlContent.c_str();
-
             request->send(200, "text/html", htmlContentPtr);
         }
     });
@@ -420,7 +417,45 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
                 
                 content += "<h1 style='text-align:center;margin:20px 0'>✏ Edit Pin " + String(pinNumber) + "</h1>";
                 content += viewEditPin::generateForm(pinNumber);
-                content += viewEditPin::addDefaultScript();
+                
+                // 🔥 FIX: JavaScript con definizione globale delle funzioni
+                content += "<script>";
+                // Definisci le funzioni nell'oggetto window per renderle globali
+                content += "window.showOutputValue = function(){";
+                content += "const i=document.getElementById('isInput').value,";
+                content += "o=document.getElementById('outputValueContainer');";
+                content += "o.style.display=i==='false'?'block':'none'";
+                content += "};";
+                content += "window.applyConfig = function(){";
+                content += "const form=document.getElementById('configurePinForm');";
+                content += "if(!form){alert('Form not found');return;}";
+                content += "const formData=new FormData(form);";
+                content += "const params=new URLSearchParams();";
+                content += "for(let[key,value] of formData.entries())params.append(key,value);";
+                content += "window.location.href='/applyPin?'+params.toString();";
+                content += "};";
+                content += "window.saveConfig = function(){";
+                content += "const form=document.getElementById('configurePinForm');";
+                content += "if(!form){alert('Form not found');return;}";
+                content += "const formData=new FormData(form);";
+                content += "const params=new URLSearchParams();";
+                content += "for(let[key,value] of formData.entries())params.append(key,value);";
+                content += "window.location.href='/savePin?'+params.toString();";
+                content += "};";
+                content += "window.showPopup = function(msg){";
+                content += "const popup=document.createElement('div');";
+                content += "popup.style.cssText='position:fixed;top:20px;right:20px;background:#4CAF50;color:white;padding:15px;border-radius:5px;z-index:1000';";
+                content += "popup.textContent=msg;";
+                content += "document.body.appendChild(popup);";
+                content += "setTimeout(()=>popup.remove(),3000)";
+                content += "};";
+                
+                // 🔥 FIX: Controlla se c'è il parametro "applied" per mostrare popup
+                if (request->hasParam("applied") && request->getParam("applied")->value() == "true") {
+                    content += "setTimeout(function(){window.showPopup('✅ Pin " + String(pinNumber) + " applicato con successo!')},500);";
+                }
+                
+                content += "</script>";
             } else {
                 content = "<h1>Error: Pin number required</h1>";
             }
@@ -435,17 +470,66 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
     });
 
     // **🔧 FIX: Route per Apply/Save EditPin che non funzionavano**
-    server.on("/applyPinChanges", HTTP_POST, [](AsyncWebServerRequest *request){
+    server.on("/applyPin", HTTP_GET, [](AsyncWebServerRequest *request){
         try {
-            if (request->hasParam("pin", true) && request->hasParam("pinType", true) && 
-                request->hasParam("isInput", true) && request->hasParam("outputValue", true) && 
-                request->hasParam("pinNote", true)) {
+            if (request->hasParam("pin") && request->hasParam("pinType") && 
+                request->hasParam("isInput") && request->hasParam("outputValue") && 
+                request->hasParam("pinNote")) {
                 
-                String pinNumber = request->getParam("pin", true)->value();
-                String pinType = request->getParam("pinType", true)->value();
-                bool isInput = request->getParam("isInput", true)->value() == "true";
-                float outputValue = request->getParam("outputValue", true)->value().toFloat();
-                String pinNote = request->getParam("pinNote", true)->value();
+                String pinNumber = request->getParam("pin")->value();
+                String pinType = request->getParam("pinType")->value();
+                bool isInput = request->getParam("isInput")->value() == "true";
+                float outputValue = request->getParam("outputValue")->value().toFloat();
+                String pinNote = request->getParam("pinNote")->value();
+                
+                // Applica le modifiche al pin (STESSO codice di savePin)
+                Pin &pin = SystemState::getInstance()->pinoutData->getPin(pinNumber.toInt());
+                pin.setType(pinType);
+                pin.setIsInput(isInput);
+                pin.setNote(pinNote.c_str());
+                
+                if (!isInput) {
+                    pin.setMode(OUTPUT);
+                    if (outputValue > 0) {
+                        pin.write(true);
+                    } else {
+                        pin.write(false);
+                    }
+                } else {
+                    pin.setMode(INPUT);
+                }
+                
+                // 🔥 AGGIUNTO: Salva anche in memoria persistente (come savePin)
+                SystemState::getInstance()->pinoutData->savePinsToMemory();
+                
+                // 🔥 FIX: Resta nella pagina editPin ma con parametro applied per mostrare popup
+                // La pagina editPin usa loadPageContent per caricare /editPinPageContent che controllerà il parametro applied
+                String redirectUrl = "/editPin?pin=" + pinNumber + "&applied=true";
+                AsyncWebServerResponse *response = request->beginResponse(302);
+                response->addHeader("Location", redirectUrl);
+                request->send(response);
+                
+                Serial.println("Pin " + pinNumber + " applied successfully with persistent save (staying on edit page)");
+            } else {
+                request->send(400, "text/plain", "Missing required parameters for apply");
+            }
+        } catch (...) {
+            request->send(500, "text/plain", "Error applying pin changes");
+        }
+    });
+
+    // Route per SAVE - salva e torna a /pinout  
+    server.on("/savePin", HTTP_GET, [](AsyncWebServerRequest *request){
+        try {
+            if (request->hasParam("pin") && request->hasParam("pinType") && 
+                request->hasParam("isInput") && request->hasParam("outputValue") && 
+                request->hasParam("pinNote")) {
+                
+                String pinNumber = request->getParam("pin")->value();
+                String pinType = request->getParam("pinType")->value();
+                bool isInput = request->getParam("isInput")->value() == "true";
+                float outputValue = request->getParam("outputValue")->value().toFloat();
+                String pinNote = request->getParam("pinNote")->value();
                 
                 // Applica le modifiche al pin
                 Pin &pin = SystemState::getInstance()->pinoutData->getPin(pinNumber.toInt());
@@ -453,29 +537,33 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
                 pin.setIsInput(isInput);
                 pin.setNote(pinNote.c_str());
                 
-                if (!isInput && outputValue > 0) {
-                    pin.write(outputValue > 0);
+                if (!isInput) {
+                    pin.setMode(OUTPUT);
+                    if (outputValue > 0) {
+                        pin.write(true);
+                    } else {
+                        pin.write(false);
+                    }
+                } else {
+                    pin.setMode(INPUT);
                 }
                 
-                Serial.println("Pin " + pinNumber + " modificato con successo");
-                request->send(200, "text/plain", "Pin modifications applied successfully");
+                // Salva in memoria persistente
+                SystemState::getInstance()->pinoutData->savePinsToMemory();
+                
+                // Torna alla pagina pinout con messaggio di successo
+                String redirectUrl = "/pinout?popup=success&message=🟢%20Pin%20" + pinNumber + "%20salvato%20con%20successo!";
+                AsyncWebServerResponse *response = request->beginResponse(302);
+                response->addHeader("Location", redirectUrl);
+                request->send(response);
+                
+                Serial.println("Pin " + pinNumber + " saved successfully (returning to pinout)");
             } else {
-                request->send(400, "text/plain", "Missing required parameters");
+                request->send(400, "text/plain", "Missing required parameters for save");
             }
-        } catch (...) {
-            request->send(500, "text/plain", "Error applying pin changes");
-        }
-    });
-    
-    server.on("/savePinChanges", HTTP_POST, [](AsyncWebServerRequest *request){
-        try {
-            // Salva tutte le modifiche ai pin nella memoria persistente
-            SystemState::getInstance()->pinoutData->savePinsToMemory();
-            Serial.println("Pin changes saved to memory");
-            request->send(200, "text/plain", "Pin changes saved successfully");
         } catch (...) {
             request->send(500, "text/plain", "Error saving pin changes");
         }
     });
-
+    
 }

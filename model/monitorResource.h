@@ -4,27 +4,30 @@
 #include "RoutesInterface.h"
 #include <ESPAsyncWebSrv.h>
 
-#include <Arduino.h>
+// Include delle nuove classi modulari
+#include "MonitorUIRoutes.h"
+#include "SystemStatsRoutes.h"
+#include "TaskInfoRoutes.h"
+#include "HeapOptimizationRoutes.h"
+#include "SystemMonitorRoutes.h"
 
-
-#include "viewGraph.h"
-#include "viewGeneric.h"
-
-#include <freertos/FreeRTOS.h>
-#include <freertos/semphr.h>
-
-//per monitor metriche
-#include <esp_heap_caps.h>
-
-
-#include "SystemState.h"
-#include "PinoutData.h"
-
+/**
+ * @brief Classe principale che coordina tutte le route di monitoring
+ * Implementa il pattern Composite per gestire le sottoclassi specializzate
+ * Responsabilità: coordinamento e delega alle classi specifiche
+ */
 class MonitorResource : public RoutesInterface
 {
+private:
+    // Istanze delle classi specializzate
+    MonitorUIRoutes uiRoutes;
+    SystemStatsRoutes statsRoutes;
+    TaskInfoRoutes taskRoutes;
+    HeapOptimizationRoutes heapRoutes;
+    SystemMonitorRoutes systemRoutes;
 
 public:
-    void defineRoutes(AsyncWebServer &server);
+    void defineRoutes(AsyncWebServer &server) override;
 };
 
 #endif // MONITORRESOURCE_H

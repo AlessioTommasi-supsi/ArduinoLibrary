@@ -13,6 +13,7 @@ public:
     static String html;
     static String generateHTML();
     static String generateHTML(String popupScript); 
+    static String generateHTMLWithPopup(String popupType, String popupMessage);
     static String pageContent();
     static String pageContentCss();
 };

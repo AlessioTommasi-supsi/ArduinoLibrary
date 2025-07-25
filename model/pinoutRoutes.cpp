@@ -10,6 +10,20 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
         
         try
         {
+            // Gestione parametri popup
+            String popupType = "";
+            String popupMessage = "";
+            if (request->hasParam("popup")) {
+                popupType = request->getParam("popup")->value();
+            }
+            if (request->hasParam("message")) {
+                popupMessage = request->getParam("message")->value();
+                // URL decode del messaggio
+                popupMessage.replace("%20", " ");
+                popupMessage.replace("%C2%A0", " ");
+                popupMessage.replace(":", ": ");
+            }
+            
             if (request->hasParam("pin"))
             {
                 String pinNumber = request->getParam("pin")->value();
@@ -41,7 +55,14 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
                     Serial.println("Error: missing parameters");
                 }
             }
-            htmlContent = Pinout::generateHTML();
+            
+            // Genera HTML con popup se necessario
+            if (popupType != "" && popupMessage != "") {
+                htmlContent = Pinout::generateHTMLWithPopup(popupType, popupMessage);
+            } else {
+                htmlContent = Pinout::generateHTML();
+            }
+            
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(200, "text/html", htmlContentPtr);
              
@@ -143,27 +164,26 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
             Serial.println("Start recording Pin " + registerAddress + " every " + milliseconds + " milliseconds");
             
             SystemState::getInstance()->pinoutData->getPin(registerAddress.toInt()).startRecording(milliseconds.toInt());
-
-            // Risposta JSON per gestire popup lato client
-            String jsonResponse = "{";
-            jsonResponse += "\"success\": true,";
-            jsonResponse += "\"message\": \"🟢 Registrazione avviata per Pin " + registerAddress + " ogni " + milliseconds + "ms\",";
-            jsonResponse += "\"pin\": " + registerAddress + ",";
-            jsonResponse += "\"interval\": " + milliseconds;
-            jsonResponse += "}";
             
-            AsyncWebServerResponse *response = request->beginResponse(200, "application/json", jsonResponse);
-            response->addHeader("Access-Control-Allow-Origin", "*");
+            // REDIRECT con popup invece di JSON
+            String redirectUrl = "/pinout?popup=success&message=🟢%20Registrazione%20avviata%20per%20Pin%20" + registerAddress + "%20ogni%20" + milliseconds + "ms";
+            
+            AsyncWebServerResponse *response = request->beginResponse(302);
+            response->addHeader("Location", redirectUrl);
             request->send(response);
              
         } catch (const std::exception &e) {
             Serial.println("Error in /startRecordingPin route: " + String(e.what()));
-            String errorResponse = "{\"success\": false, \"message\": \"Errore: " + String(e.what()) + "\"}";
-            request->send(500, "application/json", errorResponse);
+            String redirectUrl = "/pinout?popup=error&message=Errore:%20" + String(e.what());
+            AsyncWebServerResponse *response = request->beginResponse(302);
+            response->addHeader("Location", redirectUrl);
+            request->send(response);
         } catch (...) {
             Serial.println("Unknown error in /startRecordingPin route");
-            String errorResponse = "{\"success\": false, \"message\": \"Errore sconosciuto durante l'avvio della registrazione\"}";
-            request->send(500, "application/json", errorResponse);
+            String redirectUrl = "/pinout?popup=error&message=Errore%20sconosciuto%20durante%20avvio%20registrazione";
+            AsyncWebServerResponse *response = request->beginResponse(302);
+            response->addHeader("Location", redirectUrl);
+            request->send(response);
         }
     });
 
@@ -173,25 +193,25 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
             String registerAddress = request->getParam("pin")->value();
             SystemState::getInstance()->pinoutData->getPin(registerAddress.toInt()).stopRecording();
 
-            // Risposta JSON per gestire popup lato client
-            String jsonResponse = "{";
-            jsonResponse += "\"success\": true,";
-            jsonResponse += "\"message\": \"🔴 Registrazione fermata per Pin " + registerAddress + "\",";
-            jsonResponse += "\"pin\": " + registerAddress;
-            jsonResponse += "}";
+            // REDIRECT con popup invece di JSON  
+            String redirectUrl = "/pinout?popup=success&message=🔴%20Registrazione%20fermata%20per%20Pin%20" + registerAddress;
             
-            AsyncWebServerResponse *response = request->beginResponse(200, "application/json", jsonResponse);
-            response->addHeader("Access-Control-Allow-Origin", "*");
+            AsyncWebServerResponse *response = request->beginResponse(302);
+            response->addHeader("Location", redirectUrl);
             request->send(response);
             
         } catch (const std::exception &e) {
             Serial.println("Error in /stopRecordingPin route: " + String(e.what()));
-            String errorResponse = "{\"success\": false, \"message\": \"Errore: " + String(e.what()) + "\"}";
-            request->send(500, "application/json", errorResponse);
+            String redirectUrl = "/pinout?popup=error&message=Errore:%20" + String(e.what());
+            AsyncWebServerResponse *response = request->beginResponse(302);
+            response->addHeader("Location", redirectUrl);
+            request->send(response);
         } catch (...) {
             Serial.println("Unknown error in /stopRecordingPin route");
-            String errorResponse = "{\"success\": false, \"message\": \"Errore sconosciuto durante l'arresto della registrazione\"}";
-            request->send(500, "application/json", errorResponse);
+            String redirectUrl = "/pinout?popup=error&message=Errore%20sconosciuto%20durante%20arresto%20registrazione";
+            AsyncWebServerResponse *response = request->beginResponse(302);
+            response->addHeader("Location", redirectUrl);
+            request->send(response);
         }
     });
 

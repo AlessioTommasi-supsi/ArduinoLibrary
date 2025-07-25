@@ -9,10 +9,15 @@ String Pinout::generateHTML()
     html = "<!DOCTYPE html><html><head>";
     html += "<meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1.0'>";
     html += "<title>Pinout</title>";
-    html += "<style>body{margin:0;padding:60px 10px 120px;background:#f4f4f4}</style>";
+    html += "<style>";
+    html += "body{margin:0;padding:60px 10px 120px;background:#f4f4f4}";
+    // CSS per popup
+    html += ".popup{position:fixed;top:20px;right:20px;background:#4CAF50;color:white;padding:15px;border-radius:5px;z-index:1000;box-shadow:0 4px 8px rgba(0,0,0,0.2)}";
+    html += ".popup.error{background:#f44336}";
+    html += "</style>";
     html += "</head><body>";
     
-    // Tutto caricato dinamicamente per ridurre heap
+    // Prima carico tutto il sistema dinamico originale
     html += viewGeneric::dynamicUpdateContentScript();
     html += viewGeneric::dynamicUpdateContent("navbar_area", "/navbarStyle", -1);
     html += viewGeneric::dynamicUpdateContent("pinout_content", "/pinoutPageContent", -1);
@@ -196,5 +201,49 @@ String Pinout::generateHTML(String popupScript)
 
     html += viewGeneric::defaultFooter();
 
+    return html;
+}
+
+String Pinout::generateHTMLWithPopup(String popupType, String popupMessage)
+{
+    // Header ultra-minimalista
+    html = "<!DOCTYPE html><html><head>";
+    html += "<meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1.0'>";
+    html += "<title>Pinout</title>";
+    html += "<style>";
+    html += "body{margin:0;padding:60px 10px 120px;background:#f4f4f4}";
+    // CSS per popup
+    html += ".popup{position:fixed;top:20px;right:20px;background:#4CAF50;color:white;padding:15px;border-radius:5px;z-index:1000;box-shadow:0 4px 8px rgba(0,0,0,0.2);display:none}";
+    html += ".popup.error{background:#f44336}";
+    html += ".popup.success{background:#4CAF50}";
+    html += "</style>";
+    html += "</head><body>";
+    
+    // Prima carico tutto il sistema dinamico originale
+    html += viewGeneric::dynamicUpdateContentScript();
+    html += viewGeneric::dynamicUpdateContent("navbar_area", "/navbarStyle", -1);
+    html += viewGeneric::dynamicUpdateContent("pinout_content", "/pinoutPageContent", -1);
+    
+    html += "<div id='navbar_area'></div>";
+    html += viewGeneric::addNavbar();
+    html += "<div id='pinout_content'><div style='text-align:center;padding:20px'>Loading pins...</div></div>";
+    
+    // Popup con messaggio
+    html += "<div id='popup' class='popup " + popupType + "'>" + popupMessage + "</div>";
+    
+    // JavaScript per mostrare il popup
+    html += "<script>";
+    html += "document.addEventListener('DOMContentLoaded', function() {";
+    html += "  const popup = document.getElementById('popup');";
+    html += "  if (popup) {";
+    html += "    popup.style.display = 'block';";
+    html += "    setTimeout(() => {";
+    html += "      popup.style.display = 'none';";
+    html += "    }, 4000);";
+    html += "  }";
+    html += "});";
+    html += "</script>";
+    
+    html += "</body></html>";
     return html;
 }

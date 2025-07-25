@@ -22,6 +22,7 @@ public:
     virtual std::vector<Pin>::const_iterator end() const = 0;
     virtual std::string toString() const = 0;
     virtual void savePinsToMemory() = 0;
+    virtual void savePinToMemory(int pinNumber) = 0;
 };
 
 #endif // PINOUTDATA_H

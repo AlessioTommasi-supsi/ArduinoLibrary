@@ -14,8 +14,9 @@
 class Esp32_30pin : public PinoutData
 {
 private:
-public:
     std::vector<Pin> pins;
+
+public:
     Esp32_30pin();
 
     void printPinsOnSerial() override;
@@ -32,6 +33,7 @@ public:
 
     std::string toString() const override;
     void savePinsToMemory() override;
+    void savePinToMemory(int pinNumber) override;
 };
 
 #endif // ESP32_38PIN_H

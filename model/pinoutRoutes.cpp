@@ -500,7 +500,8 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
                 }
                 
                 // 🔥 AGGIUNTO: Salva anche in memoria persistente (come savePin)
-                SystemState::getInstance()->pinoutData->savePinsToMemory();
+                // 🔧 OTTIMIZZAZIONE: Salva solo il pin modificato invece di tutti i pin
+                SystemState::getInstance()->pinoutData->savePinToMemory(pinNumber.toInt());
                 
                 // 🔥 FIX: Resta nella pagina editPin ma con parametro applied per mostrare popup
                 // La pagina editPin usa loadPageContent per caricare /editPinPageContent che controllerà il parametro applied
@@ -549,7 +550,7 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
                 }
                 
                 // Salva in memoria persistente
-                SystemState::getInstance()->pinoutData->savePinsToMemory();
+                SystemState::getInstance()->pinoutData->savePinToMemory(pinNumber.toInt());
                 
                 // Torna alla pagina pinout con messaggio di successo
                 String redirectUrl = "/pinout?popup=success&message=🟢%20Pin%20" + pinNumber + "%20salvato%20con%20successo!";

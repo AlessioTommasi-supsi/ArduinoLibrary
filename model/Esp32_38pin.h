@@ -25,6 +25,7 @@ public:
 
     std::string toString() const override;
     void savePinsToMemory() override;
+    void savePinToMemory(int pinNumber);
 };
 
 #endif // ESP32_38PIN_H

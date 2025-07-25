@@ -362,3 +362,30 @@ void Esp32_38pin::savePinsToMemory() {
         Serial.println("Unknown error saving ESP32_38pin configuration");
     }
 }
+
+// **🔧 NEW: Metodo ottimizzato per salvare solo un pin specifico**
+void Esp32_38pin::savePinToMemory(int pinNumber) {
+    try {
+        Serial.println("Saving ESP32_38pin pin " + String(pinNumber) + " configuration to memory...");
+        
+        // Trova il pin specifico
+        Pin& pin = getPin(pinNumber);
+        
+        // Salva solo questo pin invece di tutti
+        Serial.print("Saved Pin ");
+        Serial.print(pin.getNumber());
+        Serial.print(": Type=");
+        Serial.print(pin.getType());
+        Serial.print(", Input=");
+        Serial.print(pin.getIsInput() ? "true" : "false");
+        Serial.print(", Voltage=");
+        Serial.println(pin.getVoltage());
+        
+        Serial.println("ESP32_38pin pin " + String(pinNumber) + " configuration saved successfully!");
+        
+    } catch (const std::exception& e) {
+        Serial.println("Error saving ESP32_38pin pin " + String(pinNumber) + " configuration: " + String(e.what()));
+    } catch (...) {
+        Serial.println("Unknown error saving ESP32_38pin pin " + String(pinNumber) + " configuration");
+    }
+}

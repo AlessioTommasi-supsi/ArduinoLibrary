@@ -89,17 +89,22 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
                         content += "        Pin number: " + String(pin->getNumber()) + ", Type: " + pin->getType() + ", Voltage: " + String(pin->getVoltage() / 1000.0, 3) + " V, Input: " + (pin->getIsInput() ? "Yes" : "No") + ", Note: " + String(noteBuffer);
                         content += "    </div>";
                         content += "    <div class=\"pin-actions\">";
-                        content += "        <form action=\"/startRecordingPin\" method=\"get\">";
-                        content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->getNumber()) + "\">";
-                        content += "            <label for=\"milliseconds\">Milliseconds:</label>";
-                        content += "            <input type=\"text\" id=\"milliseconds\" name=\"milliseconds\" required value=\"1000\">";
-                        content += "            <button type=\"submit\" class=\"start\">Start Recording</button>";
-                        content += "        </form>";
-                        content += "        <form action=\"/stopRecordingPin\" method=\"get\">";
-                        content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->getNumber()) + "\">";
-                        content += "            <button type=\"submit\" class=\"stop\">Stop Recording</button>";
-                        content += "        </form>";
-                        content += "        <form action=\"/editPin\" method=\"get\">";
+                        
+                        // Solo per pin input, aggiungo form con JavaScript AJAX
+                        if (pin->getIsInput()) {
+                            content += "        <form action=\"/startRecordingPin\" method=\"get\" class=\"start-form\" data-pin=\"" + String(pin->getNumber()) + "\" style=\"display:inline-block;margin-right:5px\">";
+                            content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->getNumber()) + "\">";
+                            content += "            <label for=\"milliseconds\">ms:</label>";
+                            content += "            <input type=\"text\" name=\"milliseconds\" value=\"1000\" style=\"width:60px;margin-right:5px\">";
+                            content += "            <button type=\"submit\" class=\"start\">Start Recording</button>";
+                            content += "        </form>";
+                            content += "        <form action=\"/stopRecordingPin\" method=\"get\" class=\"stop-form\" data-pin=\"" + String(pin->getNumber()) + "\" style=\"display:inline-block;margin-right:5px\">";
+                            content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->getNumber()) + "\">";
+                            content += "            <button type=\"submit\" class=\"stop\">Stop Recording</button>";
+                            content += "        </form>";
+                        }
+                        
+                        content += "        <form action=\"/editPin\" method=\"get\" style=\"display:inline-block\">";
                         content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->getNumber()) + "\">";
                         content += "            <button type=\"submit\" class=\"edit\">Edit</button>";
                         content += "        </form>";
@@ -139,17 +144,26 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
             
             SystemState::getInstance()->pinoutData->getPin(registerAddress.toInt()).startRecording(milliseconds.toInt());
 
-            String popupScript = "showPopup('Recording started for pin " + registerAddress + "');";
-            String htmlContent = Pinout::generateHTML(popupScript);
-            const char *htmlContentPtr = htmlContent.c_str();
-            request->send(200, "text/html", htmlContentPtr);
+            // Risposta JSON per gestire popup lato client
+            String jsonResponse = "{";
+            jsonResponse += "\"success\": true,";
+            jsonResponse += "\"message\": \"🟢 Registrazione avviata per Pin " + registerAddress + " ogni " + milliseconds + "ms\",";
+            jsonResponse += "\"pin\": " + registerAddress + ",";
+            jsonResponse += "\"interval\": " + milliseconds;
+            jsonResponse += "}";
+            
+            AsyncWebServerResponse *response = request->beginResponse(200, "application/json", jsonResponse);
+            response->addHeader("Access-Control-Allow-Origin", "*");
+            request->send(response);
              
         } catch (const std::exception &e) {
             Serial.println("Error in /startRecordingPin route: " + String(e.what()));
-            request->send(500, "text/html", "Error: " + String(e.what()));
+            String errorResponse = "{\"success\": false, \"message\": \"Errore: " + String(e.what()) + "\"}";
+            request->send(500, "application/json", errorResponse);
         } catch (...) {
             Serial.println("Unknown error in /startRecordingPin route");
-            request->send(500, "text/html", "Unknown error occurred");
+            String errorResponse = "{\"success\": false, \"message\": \"Errore sconosciuto durante l'avvio della registrazione\"}";
+            request->send(500, "application/json", errorResponse);
         }
     });
 
@@ -159,17 +173,25 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
             String registerAddress = request->getParam("pin")->value();
             SystemState::getInstance()->pinoutData->getPin(registerAddress.toInt()).stopRecording();
 
-            String popupScript = "showPopup('Recording stopped for pin " + registerAddress + "');";
-            String htmlContent = Pinout::generateHTML(popupScript);
-            const char *htmlContentPtr = htmlContent.c_str();
-            request->send(200, "text/html", htmlContentPtr);
-             
+            // Risposta JSON per gestire popup lato client
+            String jsonResponse = "{";
+            jsonResponse += "\"success\": true,";
+            jsonResponse += "\"message\": \"🔴 Registrazione fermata per Pin " + registerAddress + "\",";
+            jsonResponse += "\"pin\": " + registerAddress;
+            jsonResponse += "}";
+            
+            AsyncWebServerResponse *response = request->beginResponse(200, "application/json", jsonResponse);
+            response->addHeader("Access-Control-Allow-Origin", "*");
+            request->send(response);
+            
         } catch (const std::exception &e) {
             Serial.println("Error in /stopRecordingPin route: " + String(e.what()));
-            request->send(500, "text/html", "Error: " + String(e.what()));
+            String errorResponse = "{\"success\": false, \"message\": \"Errore: " + String(e.what()) + "\"}";
+            request->send(500, "application/json", errorResponse);
         } catch (...) {
             Serial.println("Unknown error in /stopRecordingPin route");
-            request->send(500, "text/html", "Unknown error occurred");
+            String errorResponse = "{\"success\": false, \"message\": \"Errore sconosciuto durante l'arresto della registrazione\"}";
+            request->send(500, "application/json", errorResponse);
         }
     });
 

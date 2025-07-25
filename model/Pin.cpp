@@ -354,6 +354,7 @@ void Pin::recordingFunction()
             }
             
             uint16_t value = read();
+            Serial.println("Recording value for pin " + String(number) + ": " + String(value));
             
             if (xSemaphoreTake(mutex, pdMS_TO_TICKS(100)) == pdTRUE) {
                 // Limita il numero di valori per evitare overflow

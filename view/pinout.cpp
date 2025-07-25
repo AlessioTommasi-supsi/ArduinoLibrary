@@ -33,6 +33,8 @@ String Pinout::pageContent()
     html += ".pin-info{margin-bottom:8px;font-weight:bold;font-size:14px}";
     html += ".pin-actions{margin-top:10px}.pin-actions button{padding:6px 10px;border:none;border-radius:4px;margin-right:6px;font-size:12px;cursor:pointer}";
     html += ".start{background:#4CAF50;color:white}.stop{background:#f44336;color:white}.edit{background:#2196F3;color:white}";
+    html += ".popup{position:fixed;top:20px;right:20px;background:#4CAF50;color:white;padding:15px;border-radius:5px;z-index:1000;box-shadow:0 4px 8px rgba(0,0,0,0.2)}";
+    html += ".popup.error{background:#f44336}";
     html += "</style>";
 
     html += "<h1 style='text-align:center;margin:20px 0'>🔌 Pinout Configuration</h1>";
@@ -53,16 +55,16 @@ String Pinout::pageContent()
         
         html += "<div class='pin-actions'>";
         
-        // Form per start recording (solo per pin input)
+        // Form per start recording (solo per pin input) - RIPRISTINATO con action originale
         if (currentPin.getIsInput()) {
-            html += "<form action='/startRecordingPin' method='get' style='display:inline-block;margin-right:5px'>";
+            html += "<form action='/startRecordingPin' method='get' class='start-form' data-pin='" + String(pinNumber) + "' style='display:inline-block;margin-right:5px'>";
             html += "<input type='hidden' name='pin' value='" + String(pinNumber) + "'>";
             html += "<label for='milliseconds'>ms:</label>";
             html += "<input type='text' name='milliseconds' value='1000' style='width:60px;margin-right:5px'>";
             html += "<button type='submit' class='start'>Start Recording</button>";
             html += "</form>";
             
-            html += "<form action='/stopRecordingPin' method='get' style='display:inline-block;margin-right:5px'>";
+            html += "<form action='/stopRecordingPin' method='get' class='stop-form' data-pin='" + String(pinNumber) + "' style='display:inline-block;margin-right:5px'>";
             html += "<input type='hidden' name='pin' value='" + String(pinNumber) + "'>";
             html += "<button type='submit' class='stop'>Stop Recording</button>";
             html += "</form>";
@@ -76,6 +78,57 @@ String Pinout::pageContent()
         
         html += "</div></div>";
     }
+
+    // JavaScript per gestire i form AJAX e i popup
+    html += "<script>";
+    html += "function showPopup(message, isError = false) {";
+    html += "  const popup = document.createElement('div');";
+    html += "  popup.className = 'popup' + (isError ? ' error' : '');";
+    html += "  popup.textContent = message;";
+    html += "  document.body.appendChild(popup);";
+    html += "  setTimeout(() => popup.remove(), 4000);";
+    html += "}";
+    
+    html += "document.addEventListener('DOMContentLoaded', function() {";
+    html += "  // Gestione form start recording";
+    html += "  document.querySelectorAll('.start-form').forEach(form => {";
+    html += "    form.addEventListener('submit', function(e) {";
+    html += "      e.preventDefault();";
+    html += "      const formData = new FormData(this);";
+    html += "      const params = new URLSearchParams(formData);";
+    html += "      fetch('/startRecordingPin?' + params.toString())";
+    html += "        .then(response => response.json())";
+    html += "        .then(data => {";
+    html += "          if (data.success) {";
+    html += "            showPopup(data.message);";
+    html += "          } else {";
+    html += "            showPopup(data.message, true);";
+    html += "          }";
+    html += "        })";
+    html += "        .catch(error => showPopup('Errore di rete durante avvio registrazione', true));";
+    html += "    });";
+    html += "  });";
+    
+    html += "  // Gestione form stop recording";
+    html += "  document.querySelectorAll('.stop-form').forEach(form => {";
+    html += "    form.addEventListener('submit', function(e) {";
+    html += "      e.preventDefault();";
+    html += "      const formData = new FormData(this);";
+    html += "      const params = new URLSearchParams(formData);";
+    html += "      fetch('/stopRecordingPin?' + params.toString())";
+    html += "        .then(response => response.json())";
+    html += "        .then(data => {";
+    html += "          if (data.success) {";
+    html += "            showPopup(data.message);";
+    html += "          } else {";
+    html += "            showPopup(data.message, true);";
+    html += "          }";
+    html += "        })";
+    html += "        .catch(error => showPopup('Errore di rete durante stop registrazione', true));";
+    html += "    });";
+    html += "  });";
+    html += "});";
+    html += "</script>";
 
     // JavaScript minimalista per refresh periodico
     html += "<script>setTimeout(()=>{if(typeof loadPageContent==='function')loadPageContent('/pinoutPageContent','pinout_content',-1)},30000)</script>";

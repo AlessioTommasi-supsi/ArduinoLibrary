@@ -262,7 +262,7 @@ String MonitorUIRoutes::generateMonitorJavaScript()
     script += "    document.body.appendChild(downloadLink);";
     script += "    downloadLink.click();";
     script += "    document.body.removeChild(downloadLink);";
-    script += "  });";
+    script += "  }).catch(error => console.error('Export error:', error));";
     script += "}";
     
     // Cleanup function
@@ -274,7 +274,7 @@ String MonitorUIRoutes::generateMonitorJavaScript()
     script += "    } else {";
     script += "      alert('Errore durante il cleanup del heap: ' + data.error);";
     script += "    }";
-    script += "  }).catch(error => console.error('Error:', error));";
+    script += "  }).catch(error => console.error('Cleanup error:', error));";
     script += "}";
     
     // Auto-refresh

@@ -328,4 +328,21 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
     } 
     });
 
+    server.on("/currentRegisterPageContent", HTTP_GET, [](AsyncWebServerRequest *request){
+        try {
+            String content = "";
+            String registerAddress = request->hasParam("registerAddress") ? request->getParam("registerAddress")->value() : "";
+            float registerValue = request->hasParam("registerValue") ? request->getParam("registerValue")->value().toFloat() : 0.0;
+            
+            content = viewCurrentRegister::pageContent(registerAddress, registerValue);
+            
+            AsyncWebServerResponse *response = request->beginResponse(200, "text/html", content);
+            response->addHeader("Access-Control-Allow-Origin", "*");
+            response->addHeader("Cache-Control", "no-cache");
+            request->send(response);
+        } catch (...) {
+            request->send(500, "text/html", "Error loading register content");
+        }
+    });
+
 }

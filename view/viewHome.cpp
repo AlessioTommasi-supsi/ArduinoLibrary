@@ -1,5 +1,6 @@
 #include "viewHome.h"
 #include "viewGraph.h"
+#include "Config.h"
 
 String viewHome::html = "";
 
@@ -24,8 +25,8 @@ String viewHome::generateHTML()
 String viewHome::pageContent()
 {
     html += viewGeneric::dynamicUpdateContentScript(); //aggiungo script per aggiornamento dinamico
-    html += viewGeneric::dynamicUpdateContent("id_navbarStyle", "/navbarStyle", -1); //aggiungo script per aggiornamento dinamico
-    html += viewGeneric::dynamicUpdateContent("", "/emoji_buttonStyle", -1); //aggiungo script per aggiornamento dinamico
+    html += viewGeneric::dynamicUpdateContent("id_navbarStyle", "/navbarStyle", UI_AUTO_UPDATE_DISABLED); //aggiungo script per aggiornamento dinamico
+    html += viewGeneric::dynamicUpdateContent("", "/emoji_buttonStyle", UI_AUTO_UPDATE_DISABLED); //aggiungo script per aggiornamento dinamico
     html += viewGeneric::addNavbar();
     html+= R"(
     <div class="main_container_absolute">

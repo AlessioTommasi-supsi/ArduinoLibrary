@@ -32,12 +32,10 @@ SystemState *SystemState::getInstance()
     {
         instance = new SystemState();
         error_message = "";
-        sd_pin = 5;
+        sd_pin = DEFAULT_SD_PIN;
         
         // Inizializza il Logger e la scheda SD
         //Logger::getInstance().begin(sd_pin);
-
-        
     }
     return instance;
 }

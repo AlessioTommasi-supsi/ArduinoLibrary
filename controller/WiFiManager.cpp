@@ -23,7 +23,7 @@ void WiFiManager::setupAP()
         clear_var();
        
         WiFi.mode(WIFI_AP);
-        delay(100);
+        delay(WIFI_MODE_DELAY);
         WiFi.softAP(ssid, password);
         IPAddress IP = WiFi.softAPIP();
         Serial.print("ESP32 AP IP address: ");
@@ -80,7 +80,7 @@ void WiFiManager::connect()
         clear_var();
         WiFi.mode(WIFI_STA);
         
-        delay(100);
+        delay(WIFI_MODE_DELAY);
 
         Serial.println("Connessione alla rete Wi-Fi...");
 
@@ -125,7 +125,7 @@ void WiFiManager::smoothConnect()
 {
     try
     {
-        delay(100);
+        delay(WIFI_MODE_DELAY);
 
         Serial.println("Connessione alla rete Wi-Fi...");
 
@@ -192,7 +192,7 @@ bool WiFiManager::autoReconnect()
     int attempts = 0;
     while (WiFi.status() != WL_CONNECTED && attempts < WIFI_AUTO_RECONNECT_ATTEMPTS)
     {
-        delay(500);
+        delay(WIFI_RECONNECT_DELAY);
         Serial.print(".");
         attempts++;
     }

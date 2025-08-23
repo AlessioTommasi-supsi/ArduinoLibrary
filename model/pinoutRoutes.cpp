@@ -76,7 +76,7 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
                     content += "        <form action=\"/startRecordingPin\" method=\"get\">";
                     content += "            <input type=\"hidden\" name=\"pin\" value=\"" + String(pin->number) + "\">";
                     content += "            <label for=\"milliseconds\">Milliseconds:</label>";
-                    content += "            <input type=\"text\" id=\"milliseconds\" name=\"milliseconds\" required value=\"1000\">";
+                    content += "            <input type=\"text\" id=\"milliseconds\" name=\"milliseconds\" required value=\"" + String(DEFAULT_RECORDING_INTERVAL) + "\">";
                     content += "            <button type=\"submit\" class=\"start\">Start Recording</button>";
                     content += "        </form>";
                     content += "        <form action=\"/stopRecordingPin\" method=\"get\">";
@@ -216,7 +216,7 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
 
     server.on("/pulsePin", HTTP_GET, [](AsyncWebServerRequest *request){   
         int PinNumber = -1;
-        int pin_delay = 1000;
+        int pin_delay = DEFAULT_PIN_DELAY;
         bool rise_direction = false;  //di default se non specificato parametri tiro a pin a gnd per 1 secondo!   
         if (!request->hasParam("pin")) {
             request->send(500, "text/html", "Error: Pin parameter missing");

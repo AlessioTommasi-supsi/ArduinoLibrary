@@ -1,4 +1,5 @@
 #include "viewGeneric.h"
+#include "Config.h"
 
 String viewGeneric::html = "";
 
@@ -41,7 +42,7 @@ String viewGeneric::addNavbarCss(){
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
       border-radius: 15px;
       padding: 8px 16px; /* padding ridotto */
-      z-index: 2000;
+      z-index: )" + String(CSS_NAVBAR_Z_INDEX) + R"(;
       
       /* Posizionata in basso e centrata */
       position: fixed;
@@ -649,9 +650,9 @@ String viewGeneric::defaultCssHeader(String title)
     String css ="";
 
     css += viewGeneric::dynamicUpdateContentScript(); //aggiungo script per aggiornamento dinamico
-    css += viewGeneric::dynamicUpdateContent("", "/formStyle", -1); //aggiungo script per aggiornamento dinamico
-    css += viewGeneric::dynamicUpdateContent("", "/pinStyle", -1); //aggiungo script per aggiornamento dinamico
-    css += viewGeneric::dynamicUpdateContent("", "/navbarStyle", -1); //aggiungo script per aggiornamento dinamico
+    css += viewGeneric::dynamicUpdateContent("", "/formStyle", UI_AUTO_UPDATE_DISABLED); //aggiungo script per aggiornamento dinamico
+    css += viewGeneric::dynamicUpdateContent("", "/pinStyle", UI_AUTO_UPDATE_DISABLED); //aggiungo script per aggiornamento dinamico
+    css += viewGeneric::dynamicUpdateContent("", "/navbarStyle", UI_AUTO_UPDATE_DISABLED); //aggiungo script per aggiornamento dinamico
 
     html += css;
 

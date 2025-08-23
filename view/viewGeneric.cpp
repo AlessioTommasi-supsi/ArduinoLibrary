@@ -577,6 +577,11 @@ String viewGeneric::addNavbar()
     String navbar = R"(
         <!-- Navbar Responsive con Scorrimento Orizzontale -->
         <div class="navbar">
+            <a href="/">
+            <div class="icon">🏠</div>
+            <span>Home</span>
+            </a>
+            
             <a href="/monitor">
             <div class="icon">🖥️</div>
             <span>Monitor</span>
@@ -590,10 +595,7 @@ String viewGeneric::addNavbar()
             <div class="icon">⏳</div>
             <span>History</span>
             </a>
-            <a href="/">
-            <div class="icon">🏠</div>
-            <span>Home</span>
-            </a>
+            
             <a href="/services">
             <div class="icon">⚡</div>
             <span>Services</span>

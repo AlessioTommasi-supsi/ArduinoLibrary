@@ -27,133 +27,80 @@ String viewHome::pageContent()
     html += viewGeneric::dynamicUpdateContentScript(); //aggiungo script per aggiornamento dinamico
     html += viewGeneric::dynamicUpdateContent("id_navbarStyle", "/navbarStyle", UI_AUTO_UPDATE_DISABLED); //aggiungo script per aggiornamento dinamico
     html += viewGeneric::dynamicUpdateContent("", "/emoji_buttonStyle", UI_AUTO_UPDATE_DISABLED); //aggiungo script per aggiornamento dinamico
+    html += viewGeneric::dynamicUpdateContent("servicesContent", "/services", UI_AUTO_UPDATE_DISABLED); //carica contenuto servizi UNA SOLA VOLTA
     html += viewGeneric::addNavbar();
     html+= R"(
     <div class="main_container_absolute">
         <div class="main_container_relative">
             <div id="particles-js"></div>
-    )";
+        </div>
+        
+        <div id="textTypingContainer">
+            <div id="textTypingAnimation" class="glassEffect">I am: Developer|</div>
+        </div>
 
+        <div>
+            <div class="no_overflow">
+                <div class="logo_container">
+                    <div class="gear_logo_container">
+                        <img class="gear" src="https://alessiotommasi.com/view/images/gearNobg.png" alt="Immagine senza sfondo">
+                    </div>
+                    <div class="logo">
+                        <img class="logo_image" src="https://alessiotommasi.com/view/images/logo.png" alt="Immagine senza sfondo">
+                    </div>
+                </div>
 
-    html += R"rawliteral(
-    
-    <div id="textTypingContainer">
-        <div id="textTypingAnimation" class="glassEffect">I am: Developer|</div>
-    </div>
-
-    <div>
-        <div class="no_overflow">
-
-            <div class="logo_container">
-                <div class="gear_logo_container">
+                <div class="gear_container_left">
                     <img class="gear" src="https://alessiotommasi.com/view/images/gearNobg.png" alt="Immagine senza sfondo">
                 </div>
-                <div class="logo">
-                    <img class="logo_image" src="https://alessiotommasi.com/view/images/logo.png" alt="Immagine senza sfondo">
+
+                <div class="gear_container_bottom">
+                    <img class="gear" src="https://alessiotommasi.com/view/images/gearNobg.png" alt="Immagine senza sfondo">
                 </div>
             </div>
 
-            <div class="gear_container_left">
-                <img class="gear" src="https://alessiotommasi.com/view/images/gearNobg.png" alt="Immagine senza sfondo">
+            <!-- Contenitore per il contenuto dinamico dei servizi -->
+            <div id="servicesContent">
+                <!-- Il contenuto verrà caricato dinamicamente da /services -->
             </div>
+            
+            <a href="mailto:alessio.tommasi.lavoro@gmail.com"><button id="GetInTouchBtn">📲</button></a>
+            <a href="http://alessiotommasi.com/model/docs/curriculum.pdf"><button id="ResumeBtn">📖</button></a>
 
-            <div class="gear_container_bottom">
-                <img class="gear" src="https://alessiotommasi.com/view/images/gearNobg.png" alt="Immagine senza sfondo">
-            </div>
-        </div>
-
-        <div class="next_page" id="aboutMeTitle">
-            <div class="glass_container">
-                
-  
-                <div class="emoji-button-container">
-                    <!-- Esempio: Bottone "Porta" con emoji 🚪 -->
-                    <button class="emoji-button" onclick="fetchData(this, 'pulsePin?pin=32')">
-                        🚪 
-                      <label>Porta studio</label>
-                      <!-- Contenitore per l'icona di loading -->
-                      <div class="loading-icon">⏳</div>
-                    </button>
-                    
-                    <!-- Puoi aggiungere altri bottoni analoghi con emoji differenti -->
-                    <button class="emoji-button" onclick="fetchData(this, 'pulsePin?pin=33')">
-                      💡
-                      <label>Luce interna studio</label>
-                      <div class="loading-icon">⏳</div>
-                    </button>
-                    
-                    <button class="emoji-button" onclick="fetchData(this, 'pulsePin?pin=25')">
-                        💡
-                        <label>Luce esterna studio</label>
-                        <div class="loading-icon">⏳</div>
-                    </button> 
-                    <button class="emoji-button" onclick="fetchData(this, 'pulsePin?pin=26')">
-                        💡
-                        <label>Luce presepe</label>
-                        <div class="loading-icon">⏳</div>
-                    </button> 
-
-                    <button class="emoji-button" onclick="fetchData(this, 'pulsePin?pin=27')">
-                        💡
-                        <label>Luce cantina</label>
-                        <div class="loading-icon">⏳</div>
-                    </button>
-
-                    <button class="emoji-button" onclick="fetchData(this, 'pulsePin?pin=14')">
-                        💡
-                        <label>Luce camino</label>
-                        <div class="loading-icon">⏳</div>
-                    </button>
-                </div>
-                
-            </div>
-            <br><br><br><br>
+            <!-- JavaScript per gestire i click sui bottoni dei servizi -->
             <script>
-                // Funzione che viene chiamata al click del bottone.
-                // 'button' è l'elemento HTML che è stato cliccato, 'apiUrl' è l'endpoint da chiamare.
                 function fetchData(button, apiUrl) {
-                  // Aggiunge la classe loading-state, riducendo l'opacità
-                  button.classList.add("loading-state");
-                  
-                  // Esegue la chiamata fetch all'API
-                  fetch(apiUrl)
-                    .then(response => {
-                      if (!response.ok) {
-                        throw new Error("Network response was not ok");
-                      }
-                      return response.json(); // oppure response.text() se la risposta è testuale
-                    })
-                    .then(data => {
-                      console.log("Dati ricevuti:", data);
-                      // Qui puoi aggiornare il bottone o altre parti della pagina in base alla risposta.
-                    })
-                    .catch(err => {
-                      console.error("Fetch error:", err);
-                      // Puoi mostrare un messaggio di errore nell'interfaccia se desiderato.
-                    })
-                    .finally(() => {
-                      // Rimuove la classe loading-state così il bottone torna alla normalità
-                      button.classList.remove("loading-state");
-                    });
+                    button.classList.add('loading-state');
+                    
+                    fetch(apiUrl)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.text();
+                        })
+                        .then(data => {
+                            console.log('Dati ricevuti:', data);
+                        })
+                        .catch(err => {
+                            console.error('Fetch error:', err);
+                        })
+                        .finally(() => {
+                            button.classList.remove('loading-state');
+                        });
                 }
-              </script>
-        </div>
-        <a href="mailto:alessio.tommasi.lavoro@gmail.com"><button id="GetInTouchBtn">📲</button></a>
-        <a href="http://alessiotommasi.com/model/docs/curriculum.pdf"><button id="ResumeBtn">📖</button></a>
+            </script>
 
-        <!--  JavaScript files -->
-        <script src="http://alessiotommasi.com/view/js/rotation_on_scroll.js"></script>
-        <script src="http://alessiotommasi.com/view/js/autoType.js"></script>
-        <script src="http://alessiotommasi.com/view/js/class_switcher.js"></script>
+            <!--  JavaScript files -->
+            <script src="http://alessiotommasi.com/view/js/rotation_on_scroll.js"></script>
+            <script src="http://alessiotommasi.com/view/js/autoType.js"></script>
+            <script src="http://alessiotommasi.com/view/js/class_switcher.js"></script>
 
-        <script src="http://alessiotommasi.com/view/js/particleLib/particles.js"></script>
-        <script src="http://alessiotommasi.com/view/js/particleLib/app.js"></script>
-
-            </div>
+            <script src="http://alessiotommasi.com/view/js/particleLib/particles.js"></script>
+            <script src="http://alessiotommasi.com/view/js/particleLib/app.js"></script>
         </div>
     </div>
-    
-    )rawliteral";
+    )";
 
     return html;
 }

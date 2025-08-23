@@ -21,7 +21,7 @@ void WifiRoutes::defineRoutes(AsyncWebServer &server)
 
                 SystemState::getInstance()->switchNetwork(ssid_new.c_str(), password_new.c_str());
                 //delay(1000);
-                String htmlContent = viewWifiSuccessChange::generateHTML(SystemState::getInstance()->wifiManager->ip_address);
+                String htmlContent = viewWifiSuccessChange::generateHTML(SystemState::getInstance()->wifiManager->getIP());
                 const char *htmlContentPtr = htmlContent.c_str();
                 request->send(200, "text/html", htmlContentPtr);
                  
@@ -29,7 +29,7 @@ void WifiRoutes::defineRoutes(AsyncWebServer &server)
             }
             catch(...)
             {
-                String htmlContent = viewWifiSuccessChange::generateErrorPage(SystemState::getInstance()->wifiManager->ssid, SystemState::getInstance()->wifiManager->ip_address);
+                String htmlContent = viewWifiSuccessChange::generateErrorPage(SystemState::getInstance()->wifiManager->getSSID(), SystemState::getInstance()->wifiManager->getIP());
                 const char *htmlContentPtr = htmlContent.c_str();
                 request->send(500, "text/html", htmlContentPtr);
 

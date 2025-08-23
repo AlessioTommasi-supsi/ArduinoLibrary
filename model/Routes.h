@@ -6,7 +6,6 @@
 #include <vector>
 #include <string>
 
-
 #include "viewGraph.h"
 #include "viewConfig.h"
 #include "viewWifiSuccessChange.h"
@@ -21,6 +20,7 @@
 #include "wifiRoutes.h"
 #include "monitorResource.h"
 #include "cssRoutes.h"
+#include "servicesRoutes.h"
 
 class Routes : public RoutesInterface
 {

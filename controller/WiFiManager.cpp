@@ -3,17 +3,45 @@
 
 WebServer *my_webServer = nullptr;
 
+// Costanti per Preferences
+const char* WiFiManager::PREF_NAMESPACE = "wifi_creds";
+const char* WiFiManager::PREF_SSID_KEY = "ssid";
+const char* WiFiManager::PREF_PASSWORD_KEY = "password";
+const char* WiFiManager::PREF_SAVED_KEY = "saved";
+
 WiFiManager::WiFiManager()
 {
-    /*qui creo Esp32 funziona come AP!*/
     this->ssid = DEFAULT_AP_SSID;
     this->password = DEFAULT_AP_PASSWORD;
-    this->setupAP();
-    isAP = true;
-    isConnected = false;
     autoReconnectEnabled = true;
     lastConnectionCheck = 0;
     lastReconnectAttempt = 0;
+    
+    // Inizializza Preferences
+    preferences.begin(PREF_NAMESPACE, false);
+    
+    // Prova prima a connettersi con credenziali salvate
+    if (!tryConnectWithSavedCredentials()) {
+        // Se non ci sono credenziali salvate o connessione fallita, avvia AP
+        this->setupAP();
+        isAP = true;
+        isConnected = false;
+    }
+}
+
+WiFiManager::WiFiManager(const char *ssid, const char *password)
+{
+    this->ssid = ssid;
+    this->password = password;
+    this->isConnected = false;
+    this->autoReconnectEnabled = true;
+    this->lastConnectionCheck = 0;
+    this->lastReconnectAttempt = 0;
+    
+    // Inizializza Preferences
+    preferences.begin(PREF_NAMESPACE, false);
+    
+    this->connect();
 }
 
 void WiFiManager::setupAP()
@@ -60,17 +88,6 @@ void WiFiManager::clear_var()
     }
     WiFi.disconnect();
     isConnected = false;
-}
-
-WiFiManager::WiFiManager(const char *ssid, const char *password)
-{
-    this->ssid = ssid;
-    this->password = password;
-    this->isConnected = false;
-    this->autoReconnectEnabled = true;
-    this->lastConnectionCheck = 0;
-    this->lastReconnectAttempt = 0;
-    this->connect();
 }
 
 void WiFiManager::connect()
@@ -270,6 +287,11 @@ void WiFiManager::setNetwork(const char *ssid_new, const char *password_new)
     try
     {
         this->smoothConnect();
+        
+        // Se la connessione ha successo, salva le credenziali
+        saveCurrentCredentials();
+        Serial.println("✅ Credenziali WiFi salvate con successo!");
+        
         isFirstStart = false;
     }
     catch(...)
@@ -288,6 +310,74 @@ void WiFiManager::setNetwork(const char *ssid_new, const char *password_new)
         }
         throw std::runtime_error(std::string("Errore cambio rete Wi-Fi!, attivo la vecchia rete: ssid: ") + old_ssid + ", password: " + old_password);
     }
+}
+
+// ===== METODI PER PERSISTENZA CREDENZIALI =====
+
+void WiFiManager::saveCredentials(const char* ssid, const char* password)
+{
+    preferences.putString(PREF_SSID_KEY, ssid);
+    preferences.putString(PREF_PASSWORD_KEY, password);
+    preferences.putBool(PREF_SAVED_KEY, true);
+    Serial.println("💾 Credenziali salvate in memoria persistente");
+}
+
+bool WiFiManager::loadSavedCredentials()
+{
+    if (preferences.getBool(PREF_SAVED_KEY, false)) {
+        String saved_ssid = preferences.getString(PREF_SSID_KEY, "");
+        String saved_password = preferences.getString(PREF_PASSWORD_KEY, "");
+        
+        if (saved_ssid.length() > 0) {
+            // Alloca memoria statica per le stringhe
+            static String static_ssid;
+            static String static_password;
+            static_ssid = saved_ssid;
+            static_password = saved_password;
+            
+            this->ssid = static_ssid.c_str();
+            this->password = static_password.c_str();
+            
+            Serial.println("📱 Credenziali caricate: " + saved_ssid);
+            return true;
+        }
+    }
+    return false;
+}
+
+void WiFiManager::clearSavedCredentials()
+{
+    preferences.clear();
+    Serial.println("🗑️ Credenziali WiFi cancellate dalla memoria");
+}
+
+bool WiFiManager::tryConnectWithSavedCredentials()
+{
+    if (loadSavedCredentials()) {
+        Serial.println("🔄 Tentativo connessione con credenziali salvate...");
+        try {
+            this->connect();
+            if (isConnected) {
+                Serial.println("✅ Connesso con credenziali salvate!");
+                return true;
+            }
+        } catch (...) {
+            Serial.println("❌ Connessione fallita con credenziali salvate");
+        }
+    }
+    return false;
+}
+
+void WiFiManager::saveCurrentCredentials()
+{
+    if (!isAP && isConnected) {
+        saveCredentials(this->ssid, this->password);
+    }
+}
+
+bool WiFiManager::hasSavedCredentials()
+{
+    return preferences.getBool(PREF_SAVED_KEY, false);
 }
 
 WiFiManager::~WiFiManager()

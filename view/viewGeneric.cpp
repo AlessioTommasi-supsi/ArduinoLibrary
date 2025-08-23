@@ -591,12 +591,16 @@ String viewGeneric::addNavbar()
             <span>History</span>
             </a>
             <a href="/">
-            <div class="icon">🏠 </div>
+            <div class="icon">🏠</div>
             <span>Home</span>
+            </a>
+            <a href="/services">
+            <div class="icon">⚡</div>
+            <span>Services</span>
             </a>
             <a href="/config">
             <div class="icon">📶</div>
-            <span>WIfi Config</span>
+            <span>WiFi Config</span>
             </a>
             
         </div>

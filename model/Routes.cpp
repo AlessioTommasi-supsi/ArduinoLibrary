@@ -53,6 +53,9 @@ void Routes::defineRoutes(AsyncWebServer &server)
     MonitorResource monitor;
     monitor.defineRoutes(server);
 
+    servicesRoutes services;
+    services.defineRoutes(server);
+
     
 
 }

@@ -1,51 +1,69 @@
-#ifndef WiFiManager_h
-#define WiFiManager_h
+#ifndef WIFIMANAGER_H
+#define WIFIMANAGER_H
 
-#include <Arduino.h>
 #include <WiFi.h>
-#include "Config.h"
-#include <string>
 #include <vector>
+#include <string>
+#include <Preferences.h>
+#include "Config.h"
 
-// Forward declaration per evitare dipendenze circolari
 class WebServer;
 
 class WiFiManager
 {
-
-public:
+private:
     const char *ssid;
     const char *password;
-    std::string ip_address="none";
+    std::string ip_address;
+    bool isConnected;
+    bool isAP;
     bool isFirstStart = true;
-    bool isAP = true;
     
     // Variabili per riconnessione automatica
-    unsigned long lastConnectionCheck = 0;
-    unsigned long lastReconnectAttempt = 0;
-    bool isConnected = false;
-    bool autoReconnectEnabled = true;
+    bool autoReconnectEnabled;
+    unsigned long lastConnectionCheck;
+    unsigned long lastReconnectAttempt;
+    
+    // Gestione persistenza credenziali
+    Preferences preferences;
+    static const char* PREF_NAMESPACE;
+    static const char* PREF_SSID_KEY;
+    static const char* PREF_PASSWORD_KEY;
+    static const char* PREF_SAVED_KEY;
 
-    WebServer *my_webServer;
+    void saveCredentials(const char* ssid, const char* password);
+    bool loadSavedCredentials();
+    void clearSavedCredentials();
 
-    WiFiManager(const char *ssid, const char *password);
+public:
     WiFiManager();
-    ~WiFiManager(); // Distruttore
+    WiFiManager(const char *ssid, const char *password);
+    ~WiFiManager();
+    
+    void setupAP();
     void connect();
     void smoothConnect();
-    void setupAP();
     void clear_var();
+    void setNetwork(const char *ssid, const char *password);
     
-    // Nuove funzioni per riconnessione automatica
+    // Metodi per riconnessione automatica
     void checkConnection();
     bool autoReconnect();
-    void enableAutoReconnect(bool enable = true);
+    void enableAutoReconnect(bool enable);
     bool isWiFiConnected() const;
     void updateConnectionStatus();
     
-    void setNetwork(const char *ssid, const char *password);
-
+    // Metodi per persistenza
+    bool tryConnectWithSavedCredentials();
+    void saveCurrentCredentials();
+    bool hasSavedCredentials();
+    
     std::vector<std::string> scanNetworks();
+    
+    const char *getSSID() const { return ssid; }
+    std::string getIP() const { return ip_address; }
+    bool getIsConnected() const { return isConnected; }
+    bool getIsAP() const { return isAP; }
 };
 
-#endif
+#endif // WIFIMANAGER_H

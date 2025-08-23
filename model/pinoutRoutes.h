@@ -1,4 +1,3 @@
-
 #ifndef PINOUTROUTES_H
 #define PINOUTROUTES_H
 
@@ -12,14 +11,11 @@
 #include "viewGraph.h"
 #include "viewGeneric.h"
 #include "viewEditPin.h"
-#include "viewCurrentRegister.h"
 #include "viewHistory.h"
 
 #include "SystemState.h"
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
-
-
 
 class pinoutRoutes : public RoutesInterface
 {

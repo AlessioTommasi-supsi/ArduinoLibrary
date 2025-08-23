@@ -1,5 +1,4 @@
 #include "WiFiManager.h"
-
 #include "WebServer.h"
 
 WebServer *my_webServer = nullptr;
@@ -7,10 +6,14 @@ WebServer *my_webServer = nullptr;
 WiFiManager::WiFiManager()
 {
     /*qui creo Esp32 funziona come AP!*/
-    this->ssid = "ESP32-Access-Point";
-    this->password = "123456789";
+    this->ssid = DEFAULT_AP_SSID;
+    this->password = DEFAULT_AP_PASSWORD;
     this->setupAP();
     isAP = true;
+    isConnected = false;
+    autoReconnectEnabled = true;
+    lastConnectionCheck = 0;
+    lastReconnectAttempt = 0;
 }
 
 void WiFiManager::setupAP()
@@ -35,6 +38,7 @@ void WiFiManager::setupAP()
         Serial.println("Errore durante la creazione dell'access point!");
     }
     isAP = true;
+    isConnected = false;
 }
 
 void WiFiManager::clear_var()
@@ -45,9 +49,8 @@ void WiFiManager::clear_var()
         {
             if (!isFirstStart)
             {
-                delete my_webServer; // da errore di double free soprattutto all avvio non riesco a catturarlo con eccezzione.
+                delete my_webServer;
             }
-                       
         }
         catch (const std::exception &e)
         {
@@ -55,21 +58,23 @@ void WiFiManager::clear_var()
         }
         my_webServer = nullptr;
     }
-    WiFi.disconnect(); // Disconnetti eventuali connessioni pregresse
+    WiFi.disconnect();
+    isConnected = false;
 }
-
 
 WiFiManager::WiFiManager(const char *ssid, const char *password)
 {
     this->ssid = ssid;
     this->password = password;
+    this->isConnected = false;
+    this->autoReconnectEnabled = true;
+    this->lastConnectionCheck = 0;
+    this->lastReconnectAttempt = 0;
     this->connect();
 }
 
 void WiFiManager::connect()
 {
-   
-
     try
     {
         clear_var();
@@ -81,41 +86,45 @@ void WiFiManager::connect()
 
         WiFi.begin(ssid, password);
 
-        while (WiFi.status() != WL_CONNECTED)
+        int attempts = 0;
+        while (WiFi.status() != WL_CONNECTED && attempts < WIFI_CONNECT_TIMEOUT)
         {
-            delay(1000);
+            delay(CONNECTION_RETRY_DELAY);
             Serial.println("Connessione in corso...");
+            attempts++;
         }
 
-        my_webServer = new WebServer(ssid, password);
+        if (WiFi.status() == WL_CONNECTED)
+        {
+            my_webServer = new WebServer(ssid, password);
 
-        Serial.println("Connessione Wi-Fi stabilita!");
-        Serial.print("Indirizzo IP: ");
-        Serial.println(WiFi.localIP());
-        //this->ip_address = WiFi.localIP().toString();
-        this->ip_address = std::string(WiFi.localIP().toString().c_str());
-    
-
+            Serial.println("Connessione Wi-Fi stabilita!");
+            Serial.print("Indirizzo IP: ");
+            Serial.println(WiFi.localIP());
+            this->ip_address = std::string(WiFi.localIP().toString().c_str());
+            this->isConnected = true;
+            this->isAP = false;
+        }
+        else
+        {
+            throw std::runtime_error("Timeout connessione WiFi");
+        }
     }
     catch(...)
     {
         Serial.println("Errore durante la connessione alla rete Wi-Fi!");
-        //throw new std::runtime_error("Errore durante la connessione alla rete Wi-Fi!");
-        this->ssid = "ESP32-Access-Point";
-        this->password = "123456789";
+        this->ssid = DEFAULT_AP_SSID;
+        this->password = DEFAULT_AP_PASSWORD;
         this->setupAP();
         isAP = true;
+        isConnected = false;
     }
-    
-    
 }
 
-void WiFiManager::smoothConnect() //nota ce ancora errore quando sbaglio a inserire password!
+void WiFiManager::smoothConnect()
 {
     try
     {
-        //WiFi.mode(WIFI_STA);
-        
         delay(100);
 
         Serial.println("Connessione alla rete Wi-Fi...");
@@ -123,39 +132,120 @@ void WiFiManager::smoothConnect() //nota ce ancora errore quando sbaglio a inser
         WiFi.begin(ssid, password);
 
         int attempts = 0;
-        while (WiFi.status() != WL_CONNECTED && attempts < 10)
+        while (WiFi.status() != WL_CONNECTED && attempts < SMOOTH_CONNECT_ATTEMPTS)
         {
-            // Controlla lo stato WiFi
             Serial.println("Connessione in corso...");
-
-            // Aumenta il contatore dei tentativi
             attempts++;
-
-            delay(200);
+            delay(SMOOTH_CONNECT_DELAY);
         }
 
         if (WiFi.status() != WL_CONNECTED)
         {
-            throw std::runtime_error("Errore durante la connessione alla rete Wi-Fi dopo 10 tentativi!");
+            throw std::runtime_error("Errore durante la connessione alla rete Wi-Fi dopo tentativi!");
         }
 
         Serial.println("smooth Connessione Wi-Fi stabilita!");
         Serial.print("Indirizzo IP: ");
         Serial.println(WiFi.localIP());
         this->ip_address = std::string(WiFi.localIP().toString().c_str());
+        this->isConnected = true;
         Serial.println("ip_address: ");
         Serial.println(this->ip_address.c_str());
     }
     catch(const std::exception& e)
     {
         Serial.println("Errore non sono riuscito a connettermi, password probabilmente errata o potenza segnale troppo debole!");
+        this->isConnected = false;
         throw new std::runtime_error("Errore durante la connessione alla rete Wi-Fi!");
     }
-    //connessione a una rete Avvenuta con successo!
     isAP = false;
-    //return std::string(WiFi.localIP().toString().c_str());
 }
 
+// ===== NUOVE FUNZIONI PER RICONNESSIONE AUTOMATICA =====
+
+void WiFiManager::checkConnection()
+{
+    if (millis() - lastConnectionCheck < WIFI_CHECK_INTERVAL) return;
+    lastConnectionCheck = millis();
+    
+    updateConnectionStatus();
+    
+    if (!isConnected && autoReconnectEnabled && !isAP)
+    {
+        if (millis() - lastReconnectAttempt >= WIFI_AUTO_RECONNECT_INTERVAL)
+        {
+            Serial.println("⚠️ WiFi disconnesso, tentativo di riconnessione automatica...");
+            autoReconnect();
+            lastReconnectAttempt = millis();
+        }
+    }
+}
+
+bool WiFiManager::autoReconnect()
+{
+    if (isAP || !autoReconnectEnabled) return false;
+    
+    Serial.println("🔄 Tentativo riconnessione automatica...");
+    
+    WiFi.begin(ssid, password);
+    
+    int attempts = 0;
+    while (WiFi.status() != WL_CONNECTED && attempts < WIFI_AUTO_RECONNECT_ATTEMPTS)
+    {
+        delay(500);
+        Serial.print(".");
+        attempts++;
+    }
+    
+    if (WiFi.status() == WL_CONNECTED)
+    {
+        Serial.println("\n✅ WiFi riconnesso automaticamente!");
+        this->ip_address = std::string(WiFi.localIP().toString().c_str());
+        this->isConnected = true;
+        
+        // Ricrea il web server se necessario
+        if (my_webServer == nullptr)
+        {
+            my_webServer = new WebServer(ssid, password);
+        }
+        
+        return true;
+    }
+    else
+    {
+        Serial.println("\n❌ Riconnessione automatica fallita");
+        this->isConnected = false;
+        return false;
+    }
+}
+
+void WiFiManager::enableAutoReconnect(bool enable)
+{
+    autoReconnectEnabled = enable;
+    Serial.println(enable ? "✅ Riconnessione automatica abilitata" : "❌ Riconnessione automatica disabilitata");
+}
+
+bool WiFiManager::isWiFiConnected() const
+{
+    return isConnected && WiFi.status() == WL_CONNECTED;
+}
+
+void WiFiManager::updateConnectionStatus()
+{
+    bool wasConnected = isConnected;
+    isConnected = (WiFi.status() == WL_CONNECTED && !isAP);
+    
+    if (wasConnected && !isConnected)
+    {
+        Serial.println("⚠️ WiFi disconnesso rilevato!");
+    }
+    else if (!wasConnected && isConnected)
+    {
+        Serial.println("✅ WiFi connesso rilevato!");
+    }
+}
+
+// ===== FUNZIONI ESISTENTI =====
 
 std::vector<std::string> WiFiManager::scanNetworks()
 {
@@ -179,15 +269,14 @@ void WiFiManager::setNetwork(const char *ssid_new, const char *password_new)
     this->password = password_new;
     try
     {
-        this->smoothConnect(); //clearvar non fatto
+        this->smoothConnect();
         isFirstStart = false;
     }
-    catch(...) //se qualcosa e andato storto ripristino i vecchi valori
+    catch(...)
     {
         this->ssid = old_ssid;
         this->password = old_password;
 
-        //Serial.println("Errore durante la connessione alla Nuova rete Wi-Fi!");
         if (isAP)
         {
             this->setupAP();
@@ -196,19 +285,13 @@ void WiFiManager::setNetwork(const char *ssid_new, const char *password_new)
         {
             this->clear_var();
             this->setNetwork(old_ssid, old_password);
-            //this->setupAP(); //in ogni caso parto sempre dallo stato di AP! quando non riesco a connettermi!
         }
-        //inoltre lancio un eccezione che possa essere catturata da Route e gestita per inviare route di errore in switch network!
         throw std::runtime_error(std::string("Errore cambio rete Wi-Fi!, attivo la vecchia rete: ssid: ") + old_ssid + ", password: " + old_password);
-
     }
-    
 }
-
 
 WiFiManager::~WiFiManager()
 {
-    // Distruttore: Dealloca la memoria
     if (my_webServer != nullptr)
     {
         delete my_webServer;

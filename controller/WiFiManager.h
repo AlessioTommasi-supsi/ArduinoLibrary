@@ -3,15 +3,11 @@
 
 #include <Arduino.h>
 #include <WiFi.h>
-#include <AsyncTCP.h>
-
-//#include "WebServer.h"
-
-#include <ESPAsyncWebSrv.h>
-#include "SystemState.h"
+#include "Config.h"
 #include <string>
 #include <vector>
 
+// Forward declaration per evitare dipendenze circolari
 class WebServer;
 
 class WiFiManager
@@ -23,6 +19,12 @@ public:
     std::string ip_address="none";
     bool isFirstStart = true;
     bool isAP = true;
+    
+    // Variabili per riconnessione automatica
+    unsigned long lastConnectionCheck = 0;
+    unsigned long lastReconnectAttempt = 0;
+    bool isConnected = false;
+    bool autoReconnectEnabled = true;
 
     WebServer *my_webServer;
 
@@ -33,6 +35,13 @@ public:
     void smoothConnect();
     void setupAP();
     void clear_var();
+    
+    // Nuove funzioni per riconnessione automatica
+    void checkConnection();
+    bool autoReconnect();
+    void enableAutoReconnect(bool enable = true);
+    bool isWiFiConnected() const;
+    void updateConnectionStatus();
     
     void setNetwork(const char *ssid, const char *password);
 

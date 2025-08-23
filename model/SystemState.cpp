@@ -1,4 +1,3 @@
-
 #include "SystemState.h"
 #include "WiFiManager.h"
 
@@ -114,6 +113,10 @@ void SystemState::setWifiManager(WiFiManager *wifiController)
     wifiManager = wifiController;
 }
 
+WiFiManager* SystemState::getWifiManager()
+{
+    return wifiManager;
+}
 
 void SystemState::switchNetwork(const char *ssid, const char *password)
 {

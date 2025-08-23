@@ -107,6 +107,8 @@ public:
 
     void setWifiManager(WiFiManager *wifiController);
 
+    WiFiManager* getWifiManager(); // Nuovo metodo aggiunto
+
     void setPinoutData(PinoutData *pinoutData);
 
     void switchNetwork(const char *ssid, const char *password);

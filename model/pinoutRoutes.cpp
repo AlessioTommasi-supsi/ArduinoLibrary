@@ -1,4 +1,3 @@
-
 #include "pinoutRoutes.h"
 
 
@@ -131,12 +130,12 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
             String errorMessage = "Error: ";
             errorMessage += e.what();
             String popupScript = "showPopup('" + errorMessage + "');";
-            String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
+            String htmlContent = Pinout::generateHTML(popupScript);
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(500, "text/html", htmlContentPtr);
         } catch (...) {
             String popupScript = "showPopup('Unknown error occurred');";
-            String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
+            String htmlContent = Pinout::generateHTML(popupScript);
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(500, "text/html", htmlContentPtr);
     } });
@@ -147,7 +146,6 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
             String registerAddress = request->getParam("pin")->value();
 
             SystemState::getInstance()->pinoutData->getPin(registerAddress.toInt()).stopRecording();
-            //SystemState::getInstance()->stopRecordingRegister(registerAddress.toInt());
             Serial.println("Stop recording Pin " + registerAddress);
             String popupScript = "showPopup('Recording stopped');";
             String htmlContent = Pinout::generateHTML(popupScript);
@@ -158,12 +156,12 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
             String errorMessage = "Error: ";
             errorMessage += e.what();
             String popupScript = "showPopup('" + errorMessage + "');";
-            String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
+            String htmlContent = Pinout::generateHTML(popupScript);
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(500, "text/html", htmlContentPtr);
         } catch (...) {
             String popupScript = "showPopup('Unknown error occurred');";
-            String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
+            String htmlContent = Pinout::generateHTML(popupScript);
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(500, "text/html", htmlContentPtr);
     } });

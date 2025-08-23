@@ -24,83 +24,49 @@ String viewHome::generateHTML()
 
 String viewHome::pageContent()
 {
-    html += viewGeneric::dynamicUpdateContentScript(); //aggiungo script per aggiornamento dinamico
-    html += viewGeneric::dynamicUpdateContent("id_navbarStyle", "/navbarStyle", UI_AUTO_UPDATE_DISABLED); //aggiungo script per aggiornamento dinamico
-    html += viewGeneric::dynamicUpdateContent("", "/emoji_buttonStyle", UI_AUTO_UPDATE_DISABLED); //aggiungo script per aggiornamento dinamico
-    html += viewGeneric::dynamicUpdateContent("servicesContent", "/services", UI_AUTO_UPDATE_DISABLED); //carica contenuto servizi UNA SOLA VOLTA
+    // Aggiungi script per aggiornamento dinamico
+    html += viewGeneric::dynamicUpdateContentScript();
+    
+    // Carica dinamicamente tutti i CSS necessari
+    html += viewGeneric::dynamicUpdateContent("", "/navbarStyle", UI_AUTO_UPDATE_DISABLED);
+    html += viewGeneric::dynamicUpdateContent("", "/emoji_buttonStyle", UI_AUTO_UPDATE_DISABLED);
+    
+    // Aggiungi navbar
     html += viewGeneric::addNavbar();
-    html+= R"(
+    
+    // Struttura base della pagina
+    html += R"(
     <div class="main_container_absolute">
         <div class="main_container_relative">
             <div id="particles-js"></div>
         </div>
         
-        <div id="textTypingContainer">
-            <div id="textTypingAnimation" class="glassEffect">I am: Developer|</div>
+        <!-- Contenitore per header dinamico -->
+        <div id="homeHeaderContent">
+            <!-- Caricato dinamicamente da /homeHeader -->
         </div>
 
-        <div>
-            <div class="no_overflow">
-                <div class="logo_container">
-                    <div class="gear_logo_container">
-                        <img class="gear" src="https://alessiotommasi.com/view/images/gearNobg.png" alt="Immagine senza sfondo">
-                    </div>
-                    <div class="logo">
-                        <img class="logo_image" src="https://alessiotommasi.com/view/images/logo.png" alt="Immagine senza sfondo">
-                    </div>
-                </div>
-
-                <div class="gear_container_left">
-                    <img class="gear" src="https://alessiotommasi.com/view/images/gearNobg.png" alt="Immagine senza sfondo">
-                </div>
-
-                <div class="gear_container_bottom">
-                    <img class="gear" src="https://alessiotommasi.com/view/images/gearNobg.png" alt="Immagine senza sfondo">
-                </div>
-            </div>
-
-            <!-- Contenitore per il contenuto dinamico dei servizi -->
-            <div id="servicesContent">
-                <!-- Il contenuto verrà caricato dinamicamente da /services -->
-            </div>
-            
-            <a href="mailto:alessio.tommasi.lavoro@gmail.com"><button id="GetInTouchBtn">📲</button></a>
-            <a href="http://alessiotommasi.com/model/docs/curriculum.pdf"><button id="ResumeBtn">📖</button></a>
-
-            <!-- JavaScript per gestire i click sui bottoni dei servizi -->
-            <script>
-                function fetchData(button, apiUrl) {
-                    button.classList.add('loading-state');
-                    
-                    fetch(apiUrl)
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Network response was not ok');
-                            }
-                            return response.text();
-                        })
-                        .then(data => {
-                            console.log('Dati ricevuti:', data);
-                        })
-                        .catch(err => {
-                            console.error('Fetch error:', err);
-                        })
-                        .finally(() => {
-                            button.classList.remove('loading-state');
-                        });
-                }
-            </script>
-
-            <!--  JavaScript files -->
-            <script src="http://alessiotommasi.com/view/js/rotation_on_scroll.js"></script>
-            <script src="http://alessiotommasi.com/view/js/autoType.js"></script>
-            <script src="http://alessiotommasi.com/view/js/class_switcher.js"></script>
-
-            <script src="http://alessiotommasi.com/view/js/particleLib/particles.js"></script>
-            <script src="http://alessiotommasi.com/view/js/particleLib/app.js"></script>
+        <!-- Contenitore per contenuto principale dinamico -->
+        <div id="homeMainContentContainer">
+            <!-- Caricato dinamicamente da /homeMainContent -->
+        </div>
+        
+        <!-- Contenitore per script dinamici -->
+        <div id="homeScriptsContainer">
+            <!-- Caricato dinamicamente da /homeScripts -->
         </div>
     </div>
     )";
+    
+    // Script per caricare tutti i componenti dinamicamente
+    html += "<script>";
+    html += "document.addEventListener('DOMContentLoaded', function() {";
+    html += "  loadPageContent('/homeHeader', 'homeHeaderContent', " + String(UI_AUTO_UPDATE_DISABLED) + ");";
+    html += "  loadPageContent('/homeMainContent', 'homeMainContentContainer', " + String(UI_AUTO_UPDATE_DISABLED) + ");";
+    html += "  loadPageContent('/servicesButtonsOnly', 'servicesContent', " + String(UI_AUTO_UPDATE_DISABLED) + ");";
+    html += "  loadPageContent('/homeScripts', 'homeScriptsContainer', " + String(UI_AUTO_UPDATE_DISABLED) + ");";
+    html += "});";
+    html += "</script>";
 
     return html;
 }

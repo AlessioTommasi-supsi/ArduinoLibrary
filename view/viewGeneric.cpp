@@ -162,13 +162,20 @@ String viewGeneric::addEmoji_buttonCss(){
       margin-top: 30px;
     }
     
+    .emoji-button-wrapper {
+      position: relative;
+      flex: 0 1 calc(33.333% - 20px);
+      max-width: calc(33.333% - 20px);
+      display: flex;
+      justify-content: center;
+    }
+    
     .emoji-button {
       background-color: #fff;
       border: none;
       border-radius: 15px;
       box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-      flex: 0 1 calc(33.333% - 20px);
-      max-width: calc(33.333% - 20px);
+      width: 100%;
       height: 250px;
       display: flex;
       flex-direction: column;
@@ -176,9 +183,15 @@ String viewGeneric::addEmoji_buttonCss(){
       justify-content: center;
       font-size: 100px;
       cursor: pointer;
-      position: relative; /* per posizionare lo spinner assoluto */
+      position: relative;
       transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
       box-sizing: border-box;
+    }
+    
+    /* Bottoni senza wrapper (legacy support) */
+    .emoji-button-container > .emoji-button:not(.emoji-button-wrapper .emoji-button) {
+      flex: 0 1 calc(33.333% - 20px);
+      max-width: calc(33.333% - 20px);
     }
     
     .emoji-button:hover {
@@ -196,7 +209,7 @@ String viewGeneric::addEmoji_buttonCss(){
     /* Stato di loading: bottone traslucido */
     .emoji-button.loading-state {
       opacity: 0.5;
-      pointer-events: none; /* impedisce ulteriori click durante il fetch */
+      pointer-events: none;
     }
 
     /* Spinner all'interno del bottone */
@@ -213,22 +226,79 @@ String viewGeneric::addEmoji_buttonCss(){
       display: block;
     }
     
+    /* Bottone di cancellazione */
+    .delete-btn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: rgba(255, 0, 0, 0.8);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      font-size: 14px;
+      cursor: pointer;
+      z-index: 10;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .delete-btn:hover {
+      background: rgba(255, 0, 0, 1);
+      transform: scale(1.1);
+    }
+    
+    /* Nascondi il bottone di cancellazione per default */
+    .emoji-button-wrapper:not(:hover) .delete-btn {
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .emoji-button-wrapper:hover .delete-btn {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
     @media (max-width: 768px) {
-      .emoji-button {
+      .emoji-button-wrapper {
         flex: 0 1 calc(50% - 20px);
         max-width: calc(50% - 20px);
+      }
+      
+      .emoji-button-container > .emoji-button:not(.emoji-button-wrapper .emoji-button) {
+        flex: 0 1 calc(50% - 20px);
+        max-width: calc(50% - 20px);
+      }
+      
+      .emoji-button {
         height: 200px;
         font-size: 80px;
       }
       .emoji-button label {
         font-size: 20px;
       }
+      /* Mostra sempre il bottone cancella su mobile */
+      .delete-btn {
+        opacity: 1;
+        pointer-events: auto;
+      }
     }
     
     @media (max-width: 480px) {
-      .emoji-button {
+      .emoji-button-wrapper {
         flex: 0 1 90%;
         max-width: 90%;
+      }
+      
+      .emoji-button-container > .emoji-button:not(.emoji-button-wrapper .emoji-button) {
+        flex: 0 1 90%;
+        max-width: 90%;
+      }
+      
+      .emoji-button {
         height: auto;
         font-size: 80px;
         padding: 20px 0;

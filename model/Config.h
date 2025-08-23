@@ -44,4 +44,11 @@ const int UI_REFRESH_INTERVAL_SLOW = 5000;          // Aggiornamento lento UI (5
 // ===== CONFIGURAZIONE CSS =====
 const int CSS_NAVBAR_Z_INDEX = 2000;                // Z-index per navbar
 
+// ===== CONFIGURAZIONE BOTTONI PERSONALIZZATI =====
+const int MAX_CUSTOM_BUTTONS = 200;                  // Massimo numero di bottoni personalizzati
+const int MAX_BUTTON_LABEL_LENGTH = 50;             // Lunghezza massima etichetta bottone
+const int MAX_BUTTON_EMOJI_LENGTH = 10;             // Lunghezza massima emoji bottone
+const int MAX_BUTTON_URL_LENGTH = 200;              // Lunghezza massima URL bottone
+extern const char* CUSTOM_BUTTONS_PREF_NAMESPACE;   // Namespace per salvare bottoni
+
 #endif

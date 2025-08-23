@@ -12,7 +12,6 @@
 #include "viewGeneric.h"
 #include "viewHome.h"
 
-//#include "WiFiManager.h"
 #include "SystemState.h"
 
 #include "RoutesInterface.h"
@@ -20,7 +19,11 @@
 #include "wifiRoutes.h"
 #include "monitorResource.h"
 #include "cssRoutes.h"
-#include "servicesRoutes.h"
+
+// Nuove classi specializzate
+#include "CustomButtonRoutes.h"
+#include "ServiceControlRoutes.h"
+#include "HomeRoutes.h"
 
 class Routes : public RoutesInterface
 {

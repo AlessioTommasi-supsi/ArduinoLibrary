@@ -45,19 +45,19 @@ String viewHome::pageContent()
 
             <div class="logo_container">
                 <div class="gear_logo_container">
-                    <img class="gear" src="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/gearNobg.png" alt="Immagine senza sfondo">
+                    <img class="gear" src="https://alessiotommasi.com/view/images/gearNobg.png" alt="Immagine senza sfondo">
                 </div>
                 <div class="logo">
-                    <img class="logo_image" src="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/logo.png" alt="Immagine senza sfondo">
+                    <img class="logo_image" src="https://alessiotommasi.com/view/images/logo.png" alt="Immagine senza sfondo">
                 </div>
             </div>
 
             <div class="gear_container_left">
-                <img class="gear" src="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/gearNobg.png" alt="Immagine senza sfondo">
+                <img class="gear" src="https://alessiotommasi.com/view/images/gearNobg.png" alt="Immagine senza sfondo">
             </div>
 
             <div class="gear_container_bottom">
-                <img class="gear" src="https://raw.githubusercontent.com/AlessioTommasi-supsi/porfolio/main/html/view/images/gearNobg.png" alt="Immagine senza sfondo">
+                <img class="gear" src="https://alessiotommasi.com/view/images/gearNobg.png" alt="Immagine senza sfondo">
             </div>
         </div>
 

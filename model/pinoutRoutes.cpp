@@ -1,5 +1,5 @@
 #include "pinoutRoutes.h"
-
+#include "esp_task_wdt.h"  // Include per il watchdog timer ESP32
 
 void pinoutRoutes::defineRoutes(AsyncWebServer &server)
 {
@@ -233,9 +233,23 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
             pin_delay = request->getParam("delay")->value().toInt();
         }
 
-
+        // Attiva il pin
         SystemState::getInstance()->pinoutData->getPin(PinNumber).write(rise_direction);
-        delay(pin_delay);
+        Serial.println("Starting pulse on pin " + String(PinNumber) + " for " + String(pin_delay) + "ms"); 
+        
+        // Delay non bloccante con reset esplicito del watchdog
+        unsigned long startTime = millis();
+        int i = 0;
+        while (millis() - startTime < pin_delay) {
+            i++;
+            Serial.print(".");
+            esp_task_wdt_reset(); // Reset esplicito del watchdog timer
+            delay(100); // delay per evitare loop troppo veloce
+        }
+        Serial.println("");
+        Serial.println("Pin " + String(PinNumber) + " pulse completed after " + String(pin_delay) + " milliseconds");
+        
+        // Disattiva il pin
         SystemState::getInstance()->pinoutData->getPin(PinNumber).write(!rise_direction);
 
         String htmlContent = "Pin " + String(PinNumber) + " pulsed for " + String(pin_delay) + " milliseconds";

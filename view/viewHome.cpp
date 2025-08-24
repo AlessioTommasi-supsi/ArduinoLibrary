@@ -56,6 +56,7 @@ String viewHome::pageContent()
             <!-- Caricato dinamicamente da /homeScripts -->
         </div>
     </div>
+    <br><br><br><br><br><br> <!-- Spazio per evitare sovrapposizione con navbar -->
     )";
     
     // Script per caricare tutti i componenti dinamicamente

@@ -218,39 +218,52 @@ void pinoutRoutes::defineRoutes(AsyncWebServer &server)
         int PinNumber = -1;
         int pin_delay = DEFAULT_PIN_DELAY;
         bool rise_direction = false;  //di default se non specificato parametri tiro a pin a gnd per 1 secondo!   
+        
+        // LOG DETTAGLIATO SERIAL MONITOR
+        Serial.println("📞 Richiesta ricevuta per /pulsePin");
+        Serial.print("🔗 URL completo: ");
+        Serial.println(request->url());
+        
         if (!request->hasParam("pin")) {
+            Serial.println("❌ ERRORE: Pin parameter missing");
             request->send(500, "text/html", "Error: Pin parameter missing");
             return;
         }
+        
         PinNumber = request->getParam("pin")->value().toInt();
+        Serial.printf("📍 Pin da controllare: %d\n", PinNumber);
+        
         if (request->hasParam("rise_direction"))
         {
             rise_direction = request->getParam("rise_direction")->value() == "up";
+            Serial.printf("⬆️ Direzione: %s\n", rise_direction ? "UP" : "DOWN");
         }
 
         if (request->hasParam("delay"))
         {
             pin_delay = request->getParam("delay")->value().toInt();
         }
+        Serial.printf("⏱️ Durata impulso: %dms\n", pin_delay);
 
         // Attiva il pin
         SystemState::getInstance()->pinoutData->getPin(PinNumber).write(rise_direction);
-        Serial.println("Starting pulse on pin " + String(PinNumber) + " for " + String(pin_delay) + "ms"); 
+        Serial.printf("🚀 Avvio impulso su pin %d per %dms\n", PinNumber, pin_delay); 
         
         // Delay non bloccante con reset esplicito del watchdog
         unsigned long startTime = millis();
         int i = 0;
         while (millis() - startTime < pin_delay) {
             i++;
-            Serial.print(".");
+            if (i % 10 == 0) Serial.print("."); // Stampa un punto ogni 1000ms
             esp_task_wdt_reset(); // Reset esplicito del watchdog timer
             delay(100); // delay per evitare loop troppo veloce
         }
         Serial.println("");
-        Serial.println("Pin " + String(PinNumber) + " pulse completed after " + String(pin_delay) + " milliseconds");
+        Serial.printf("✅ Pin %d impulso completato dopo %dms\n", PinNumber, pin_delay);
         
         // Disattiva il pin
         SystemState::getInstance()->pinoutData->getPin(PinNumber).write(!rise_direction);
+        Serial.printf("🔴 Pin %d disattivato\n", PinNumber);
 
         String htmlContent = "Pin " + String(PinNumber) + " pulsed for " + String(pin_delay) + " milliseconds";
         const char *htmlContentPtr = htmlContent.c_str();

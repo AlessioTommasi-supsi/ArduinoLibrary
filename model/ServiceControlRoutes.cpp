@@ -160,39 +160,8 @@ String ServiceControlRoutes::generateServicesJavaScript()
 {
     String script = R"(
         <script>
-            // Funzione per gestire le richieste fetch dei bottoni
-            async function fetchData(button, url) {
-                // Aggiungi classe loading al bottone
-                button.classList.add('loading-state');
-                
-                try {
-                    // Determina se l'URL è completo (http/https) o relativo
-                    let fetchUrl;
-                    if (url.startsWith('http://') || url.startsWith('https://')) {
-                        // URL completo - chiamata diretta
-                        fetchUrl = url;
-                    } else {
-                        // URL relativo - chiamata locale all'ESP
-                        fetchUrl = url;
-                    }
-                    
-                    const response = await fetch(fetchUrl);
-                    if (response.ok) {
-                        console.log('Comando eseguito con successo per:', fetchUrl);
-                        // Rimuovi classe loading dopo 2 secondi
-                        setTimeout(() => {
-                            button.classList.remove('loading-state');
-                        }, 2000);
-                    } else {
-                        throw new Error('Risposta del server non valida');
-                    }
-                } catch (error) {
-                    console.error('Errore durante la richiesta:', error);
-                    // Rimuovi classe loading immediatamente in caso di errore
-                    button.classList.remove('loading-state');
-                    alert('Errore durante l\'esecuzione del comando: ' + error.message);
-                }
-            }
+            // JavaScript per bottoni di servizio - fetchData è già definita globalmente in viewGeneric
+            console.log('🔧 ServiceControlRoutes JavaScript caricato');
         </script>
     )";
     

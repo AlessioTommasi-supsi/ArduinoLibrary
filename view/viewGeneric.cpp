@@ -871,6 +871,44 @@ String viewGeneric::dynamicUpdateContentScript()
                     }, timeToUpdate);
                 }
             }
+
+            // Funzione globale per gestire i click sui bottoni dei servizi (DEVE essere definita prima del caricamento dei bottoni)
+            async function fetchData(button, url) {
+                console.log('🔗 Chiamando URL:', url); // LOG dell'URL
+                
+                // Aggiungi classe loading al bottone
+                button.classList.add('loading-state');
+                
+                try {
+                    // Determina se l'URL è completo (http/https) o relativo
+                    let fetchUrl;
+                    if (url.startsWith('http://') || url.startsWith('https://')) {
+                        // URL completo - chiamata diretta
+                        fetchUrl = url;
+                        console.log('🌐 URL esterno:', fetchUrl);
+                    } else {
+                        // URL relativo - chiamata locale all'ESP
+                        fetchUrl = url;
+                        console.log('🏠 URL locale ESP:', fetchUrl);
+                    }
+                    
+                    const response = await fetch(fetchUrl);
+                    if (response.ok) {
+                        console.log('✅ Comando eseguito con successo per:', fetchUrl);
+                        // Rimuovi classe loading dopo 2 secondi
+                        setTimeout(() => {
+                            button.classList.remove('loading-state');
+                        }, 2000);
+                    } else {
+                        throw new Error('Risposta del server non valida: ' + response.status);
+                    }
+                } catch (error) {
+                    console.error('❌ Errore durante la richiesta:', error);
+                    // Rimuovi classe loading immediatamente in caso di errore
+                    button.classList.remove('loading-state');
+                    alert('Errore durante l\'esecuzione del comando: ' + error.message);
+                }
+            }
         </script>
     )";
 

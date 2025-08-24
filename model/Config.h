@@ -46,6 +46,12 @@ const int MONITOR_HEAP_UPDATE_INTERVAL = 5000;      // Aggiornamento grafico HEA
 const int MONITOR_STACK_UPDATE_INTERVAL = 5000;     // Aggiornamento grafico STACK (5 sec)
 const bool MONITOR_CHART_ANIMATIONS = false;        // Abilita/disabilita animazioni grafici monitor
 
+// ===== CONFIGURAZIONE MONITOR WIFI =====
+const int MONITOR_WIFI_UPDATE_INTERVAL = 10000;     // Aggiornamento info WiFi (10 sec)
+const int WIFI_SCAN_TIMEOUT = 5000;                 // Timeout per scansione WiFi (5 sec)
+const int NETWORK_SCAN_TIMEOUT = 3000;              // Timeout per scansione dispositivi rete (3 sec)
+const int MAX_CONNECTED_DEVICES = 20;               // Massimo numero dispositivi connessi da tracciare
+
 // ===== CONFIGURAZIONE CSS =====
 const int CSS_NAVBAR_Z_INDEX = 2000;                // Z-index per navbar
 

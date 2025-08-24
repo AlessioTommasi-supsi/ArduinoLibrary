@@ -1146,6 +1146,78 @@ String viewGeneric::addMonitorGraphCss(){
                 height: 120px;
             }
         }
+        
+        /* CSS per sezione WiFi Monitor */
+        .wifi-info-container {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            min-height: 150px;
+            width: 100%;
+        }
+        
+        .wifi-status {
+            margin-bottom: 8px;
+            padding: 5px 0;
+            font-size: 0.95rem;
+            color: #2c3e50;
+        }
+        
+        .wifi-status.connected {
+            color: #27ae60;
+            font-weight: 600;
+        }
+        
+        .wifi-status.disconnected {
+            color: #e74c3c;
+            font-weight: 600;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .device-list {
+            margin-top: 15px;
+            padding: 10px;
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .device-list h4 {
+            margin: 0 0 10px 0;
+            color: #495057;
+            font-size: 1rem;
+        }
+        
+        .device-item {
+            padding: 5px 0;
+            color: #6c757d;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            border-bottom: 1px solid #f1f3f4;
+        }
+        
+        .device-item:last-child {
+            border-bottom: none;
+        }
+        
+        .loading-indicator {
+            text-align: center;
+            padding: 30px;
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+        
+        /* Animazione per loading */
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        .loading-indicator {
+            animation: pulse 2s infinite;
+        }
     )";
     return monitorGraphCss;
 }

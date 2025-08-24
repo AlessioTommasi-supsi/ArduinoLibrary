@@ -26,7 +26,7 @@ void MonitorResource::defineRoutes(AsyncWebServer &server)
             size_t heapUsed = heapTotal - heapFree;
 
             htmlContent += viewGraph::initCirularProgressBarGraph();
-            htmlContent += viewGraph::generateCirularProgressBarGraph("HEAP", heapUsed, heapTotal, "/monitorHeapData", 2000);
+            htmlContent += viewGraph::generateCirularProgressBarGraph("HEAP", heapUsed, heapTotal, "/monitorHeapData", MONITOR_HEAP_UPDATE_INTERVAL);
             htmlContent += viewGraph::endCirularProgressBarGraph();
             htmlContent += "</div>"; // Chiude monitor-section
 
@@ -60,7 +60,7 @@ void MonitorResource::defineRoutes(AsyncWebServer &server)
                             stackUsed, 
                             stackTotal, 
                             "/monitorPinStack?pin=" + String(pin->number), 
-                            3000
+                            MONITOR_STACK_UPDATE_INTERVAL
                         );
                     }
                 }

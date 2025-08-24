@@ -167,7 +167,7 @@ String viewGraph::endCirularProgressBarGraph()
             if (percentage > 80) color = '#e74c3c'; // Rosso
             else if (percentage > 60) color = '#f39c12'; // Arancione
             
-            // Crea nuovo grafico
+            // Crea nuovo grafico SENZA ANIMAZIONI per migliori performance
             charts[canvasId] = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
@@ -181,10 +181,7 @@ String viewGraph::endCirularProgressBarGraph()
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    animation: {
-                        duration: 800,
-                        easing: 'easeInOutQuart'
-                    },
+                    animation: false, // ANIMAZIONI DISABILITATE per performance
                     plugins: {
                         tooltip: { enabled: false },
                         legend: { display: false }

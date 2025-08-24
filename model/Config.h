@@ -41,6 +41,11 @@ const int UI_REFRESH_INTERVAL_FAST = 1000;          // Aggiornamento veloce UI (
 const int UI_REFRESH_INTERVAL_MEDIUM = 3000;        // Aggiornamento medio UI (3 sec)
 const int UI_REFRESH_INTERVAL_SLOW = 5000;          // Aggiornamento lento UI (5 sec)
 
+// ===== CONFIGURAZIONE GRAFICI MONITOR =====
+const int MONITOR_HEAP_UPDATE_INTERVAL = 5000;      // Aggiornamento grafico HEAP (5 sec)
+const int MONITOR_STACK_UPDATE_INTERVAL = 5000;     // Aggiornamento grafico STACK (5 sec)
+const bool MONITOR_CHART_ANIMATIONS = false;        // Abilita/disabilita animazioni grafici monitor
+
 // ===== CONFIGURAZIONE CSS =====
 const int CSS_NAVBAR_Z_INDEX = 2000;                // Z-index per navbar
 

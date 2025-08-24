@@ -882,20 +882,33 @@ String viewGeneric::dynamicUpdateContentScript()
                 try {
                     // Determina se l'URL è completo (http/https) o relativo
                     let fetchUrl;
+                    let isCrossOrigin = false;
+                    
                     if (url.startsWith('http://') || url.startsWith('https://')) {
                         // URL completo - chiamata diretta
                         fetchUrl = url;
-                        console.log('🌐 URL esterno:', fetchUrl);
+                        isCrossOrigin = !url.includes(window.location.hostname);
+                        console.log('🌐 URL esterno:', fetchUrl, isCrossOrigin ? '(Cross-Origin)' : '(Same-Origin)');
                     } else {
                         // URL relativo - chiamata locale all'ESP
                         fetchUrl = url;
                         console.log('🏠 URL locale ESP:', fetchUrl);
                     }
                     
-                    const response = await fetch(fetchUrl);
-                    if (response.ok) {
+                    const response = await fetch(fetchUrl, {
+                        mode: isCrossOrigin ? 'no-cors' : 'cors', // Usa no-cors per evitare errori CORS
+                        method: 'GET'
+                    });
+                    
+                    if (isCrossOrigin) {
+                        // Per richieste cross-origin con no-cors, non possiamo leggere la risposta
+                        // ma possiamo assumere che sia andata a buon fine se non ci sono errori
+                        console.log('✅ Comando cross-origin inviato (no-cors mode):', fetchUrl);
+                        setTimeout(() => {
+                            button.classList.remove('loading-state');
+                        }, 2000);
+                    } else if (response.ok) {
                         console.log('✅ Comando eseguito con successo per:', fetchUrl);
-                        // Rimuovi classe loading dopo 2 secondi
                         setTimeout(() => {
                             button.classList.remove('loading-state');
                         }, 2000);
@@ -904,15 +917,244 @@ String viewGeneric::dynamicUpdateContentScript()
                     }
                 } catch (error) {
                     console.error('❌ Errore durante la richiesta:', error);
-                    // Rimuovi classe loading immediatamente in caso di errore
-                    button.classList.remove('loading-state');
-                    alert('Errore durante l\'esecuzione del comando: ' + error.message);
+                    
+                    // Verifica se è un errore CORS specifico
+                    if (error.name === 'TypeError' && 
+                        (error.message.includes('CORS') || error.message.includes('NetworkError'))) {
+                        console.log('🔄 Tentativo alternativo per CORS...');
+                        
+                        // Prova con una richiesta diretta tramite iframe nascosto o popup
+                        try {
+                            // Usa window.open per bypassare CORS (apre e chiude velocemente)
+                            const popup = window.open(url, '_blank', 'width=1,height=1,top=0,left=0');
+                            if (popup) {
+                                setTimeout(() => {
+                                    popup.close();
+                                }, 1000);
+                                console.log('✅ Comando inviato tramite popup:', url);
+                            } else {
+                                // Fallback: apri in nuova tab (l'utente dovrà chiuderla)
+                                window.open(url, '_blank');
+                                console.log('✅ Comando aperto in nuova tab:', url);
+                            }
+                        } catch (popupError) {
+                            console.log('ℹ️ CORS bypassato - comando probabilmente eseguito:', url);
+                        }
+                    } else {
+                        // Solo per errori non-CORS mostra l'alert
+                        alert('Errore durante l\'esecuzione del comando: ' + error.message);
+                    }
+                    
+                    // Rimuovi classe loading dopo un breve delay
+                    setTimeout(() => {
+                        button.classList.remove('loading-state');
+                    }, 1500);
                 }
             }
         </script>
     )";
 
     return script;
+}
+
+String viewGeneric::addMonitorGraphCss(){
+    String monitorGraphCss = R"(
+        /* CSS per grafici Monitor */
+        .monitor-container {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .monitor-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .monitor-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .monitor-subtitle {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #34495e;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        /* Container per grafici circolari */
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            padding: 20px 0;
+        }
+        
+        /* Singolo grafico circolare */
+        .chart-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            border: 2px solid transparent;
+        }
+        
+        .chart-wrapper:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+        
+        .chart-label {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .chart-canvas-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin-bottom: 15px;
+        }
+        
+        .chart-canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        .chart-center-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2c3e50;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+            pointer-events: none;
+        }
+        
+        .chart-details {
+            font-size: 0.95rem;
+            color: #7f8c8d;
+            text-align: center;
+            line-height: 1.4;
+        }
+        
+        .chart-status {
+            margin-top: 10px;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-good {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+        
+        .status-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+        
+        .status-critical {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+        
+        /* Loading state */
+        .chart-loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        
+        .chart-loading::after {
+            content: '⏳';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.2rem;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .chart-wrapper {
+                padding: 15px;
+            }
+            
+            .chart-canvas-container {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .chart-center-label {
+                font-size: 1.4rem;
+            }
+            
+            .monitor-title {
+                font-size: 1.6rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .monitor-container {
+                padding: 10px;
+            }
+            
+            .monitor-section {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .chart-canvas-container {
+                width: 120px;
+                height: 120px;
+            }
+        }
+    )";
+    return monitorGraphCss;
+}
+
+String viewGeneric::addMonitorGraphStyleCss(){
+    String monitorGraphStyleCss = "<style>";
+    monitorGraphStyleCss += viewGeneric::addMonitorGraphCss();
+    monitorGraphStyleCss += "</style>";
+    return monitorGraphStyleCss;
 }
 
 

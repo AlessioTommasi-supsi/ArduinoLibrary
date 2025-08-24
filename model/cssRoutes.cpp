@@ -45,4 +45,17 @@ void cssRoutes::defineRoutes(AsyncWebServer &server)
         response->addHeader("Access-Control-Allow-Origin", "*"); // Aggiungi header CORS
         request->send(response); 
     });
+
+    server.on("/monitorGraphStyle", HTTP_GET, [](AsyncWebServerRequest *request)
+    {
+        try 
+        {
+            String content = viewGeneric::addMonitorGraphStyleCss();
+            request->send(200, "text/html", content);
+        }
+        catch (...)
+        {
+            request->send(500, "text/html", "Error loading monitor graph styles");
+        }
+    });
 }

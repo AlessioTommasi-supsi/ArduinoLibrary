@@ -3,54 +3,77 @@
 
 void MonitorResource::defineRoutes(AsyncWebServer &server)
 {
-    
-
     server.on("/monitor", HTTP_GET, [](AsyncWebServerRequest *request){
         try
         {
             String htmlContent = "";
-            htmlContent += viewGeneric::defaultCssHeader("Monitor");
+            htmlContent += viewGeneric::defaultCssHeader("System Monitor");
             
-            htmlContent += viewGraph::initCirularProgressBarGraph();
-
-            // Ottieni le metriche di sistema
-
-            // HEAP
+            // Carica CSS specifico per i grafici monitor dinamicamente
+            htmlContent += viewGeneric::dynamicUpdateContent("", "/monitorGraphStyle", UI_AUTO_UPDATE_DISABLED);
             
+            // Container principale con design moderno
+            htmlContent += "<div class='monitor-container'>";
+            
+            // Sezione HEAP
+            htmlContent += "<div class='monitor-section'>";
+            htmlContent += "<h1 class='monitor-title'>📊 System Monitor</h1>";
+            htmlContent += "<h2 class='monitor-subtitle'>💾 Memoria Heap</h2>";
+
+            // Ottieni le metriche di sistema HEAP
             size_t heapFree = heap_caps_get_free_size(MALLOC_CAP_8BIT);
             size_t heapTotal = heap_caps_get_total_size(MALLOC_CAP_8BIT);
             size_t heapUsed = heapTotal - heapFree;
 
-            //htmlContent += viewGraph::generateCirularProgressBarGraph("HEAP", heapUsed, heapTotal);
-            htmlContent += viewGraph::generateCirularProgressBarGraph("HEAP", heapUsed, heapTotal, "monitorHeapData", 1000);
-
-           
-
-
-            htmlContent += viewGraph::endCirularProgressBarGraph();
-
-            htmlContent += "<br><br><h2> STACK USAGE: </h2> <br><br>";
-            PinoutData *pinoutData = SystemState::getInstance()->pinoutData;
-
-
             htmlContent += viewGraph::initCirularProgressBarGraph();
+            htmlContent += viewGraph::generateCirularProgressBarGraph("HEAP", heapUsed, heapTotal, "/monitorHeapData", 2000);
+            htmlContent += viewGraph::endCirularProgressBarGraph();
+            htmlContent += "</div>"; // Chiude monitor-section
 
-            // Loop through each pin in the pinout data
+            // Sezione STACK USAGE
+            htmlContent += "<div class='monitor-section'>";
+            htmlContent += "<h2 class='monitor-subtitle'>🔧 Stack Usage per Pin Attivi</h2>";
+            
+            PinoutData *pinoutData = SystemState::getInstance()->pinoutData;
+            
+            // Conta pin attivi
+            int activePins = 0;
             for (auto pin = pinoutData->begin(); pin != pinoutData->end(); ++pin)
             {
-                if (pin->recordingTask != NULL)
-                {
-                    // STANPO GRAFICO CON LO STACK LIB
-                    size_t stackUsed = pin->getUsedStackInWords() * 4; // trasformo da parole a byte
-                    size_t stackTotal = pin->getStackSizeInWords() * 4;
-
-                    htmlContent += viewGraph::generateCirularProgressBarGraph("Pin" + String(pin->number) + "Stack", stackUsed, stackTotal, "/monitorPinStack?pin=" + String(pin->number), 1000);
-                }
+                if (pin->recordingTask != NULL) activePins++;
             }
-            htmlContent += viewGraph::endCirularProgressBarGraph();
+            
+            if (activePins > 0) {
+                htmlContent += viewGraph::initCirularProgressBarGraph();
 
-            //non funziona grafici non si aggiornano
-            //htmlContent += viewGeneric::dynamicUpdateContent("divMonitorHeapData"/*deve semplicemente essere id univoco*/, "/monitorPinStackDataContent", 10000 /*10 secondi*/);
+                // Loop through each pin in the pinout data
+                for (auto pin = pinoutData->begin(); pin != pinoutData->end(); ++pin)
+                {
+                    if (pin->recordingTask != NULL)
+                    {
+                        // GRAFICO STACK per ogni pin attivo
+                        size_t stackUsed = pin->getUsedStackInWords() * 4; // trasforma da parole a byte
+                        size_t stackTotal = pin->getStackSizeInWords() * 4;
+
+                        htmlContent += viewGraph::generateCirularProgressBarGraph(
+                            "Pin" + String(pin->number) + " Stack", 
+                            stackUsed, 
+                            stackTotal, 
+                            "/monitorPinStack?pin=" + String(pin->number), 
+                            3000
+                        );
+                    }
+                }
+                htmlContent += viewGraph::endCirularProgressBarGraph();
+            } else {
+                htmlContent += "<div style='text-align: center; padding: 40px; color: #7f8c8d;'>";
+                htmlContent += "<h3>ℹ️ Nessun pin in registrazione attiva</h3>";
+                htmlContent += "<p>Vai alla sezione <a href='/pinout' style='color: #3498db;'>Pinout</a> per avviare la registrazione di un pin.</p>";
+                htmlContent += "</div>";
+            }
+            
+            htmlContent += "</div>"; // Chiude monitor-section
+            htmlContent += "</div>"; // Chiude monitor-container
             
             htmlContent += viewGeneric::defaultFooter();
 
@@ -59,9 +82,8 @@ void MonitorResource::defineRoutes(AsyncWebServer &server)
         }
         catch(...)
         {
-            String htmlContent = "error";
-            const char *htmlContentPtr = htmlContent.c_str();
-            request->send(500, "text/html", htmlContentPtr);
+            String htmlContent = "<h1>❌ Errore nel caricamento del monitor</h1>";
+            request->send(500, "text/html", htmlContent);
         }
     });
 
@@ -162,4 +184,3 @@ void MonitorResource::defineRoutes(AsyncWebServer &server)
         }
     });
 }
-    

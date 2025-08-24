@@ -124,51 +124,150 @@ String viewGraph::generateGraph(std::vector<int> addresses, String apiFetch, Str
 String viewGraph::initCirularProgressBarGraph()
 {
     String var_circle_progressbar_html = "";
-    var_circle_progressbar_html += "<script src='https://cdn.jsdelivr.net/npm/chart.js' async></script>";
-    var_circle_progressbar_html += "<div class='circle_progressbar_chart-container' style='font-family: Raleway, sans-serif; display: flex; flex-wrap: wrap; justify-content: space-around; gap: 20px; padding: 20px;'>";
-    var_circle_progressbar_html += "<script>var charts = {};</script>"; // Aggiungi questa linea per inizializzare l'oggetto charts
+    // Usa Chart.js moderno da CDN
+    var_circle_progressbar_html += "<script src='https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js'></script>";
+    
+    // Container moderno con CSS di viewGeneric
+    var_circle_progressbar_html += "<div class='charts-container'>";
+    
+    // Script di inizializzazione globale
+    var_circle_progressbar_html += "<script>";
+    var_circle_progressbar_html += "var charts = {};"; // Oggetto per tracciare i grafici
+    var_circle_progressbar_html += "var chartUpdateIntervals = {};"; // Traccia gli intervalli
+    var_circle_progressbar_html += "</script>";
+    
     return var_circle_progressbar_html;
 }
 
 String viewGraph::endCirularProgressBarGraph()
 {
     String var_circle_progressbar_html = "";
-    var_circle_progressbar_html += "</div>";
+    var_circle_progressbar_html += "</div>"; // Chiude charts-container
+    
+    // Script principale per gestione grafici
     var_circle_progressbar_html += "<script>";
-    var_circle_progressbar_html += "function createChart(ctx, percentage, chartId) {";
-    var_circle_progressbar_html += "  if (charts[chartId]) {";
-    var_circle_progressbar_html += "    charts[chartId].destroy();";
-    var_circle_progressbar_html += "  }";
-    var_circle_progressbar_html += "  charts[chartId] = new Chart(ctx, {";
-    var_circle_progressbar_html += "    type: 'doughnut',";
-    var_circle_progressbar_html += "    data: {";
-    var_circle_progressbar_html += "      datasets: [{";
-    var_circle_progressbar_html += "        data: [percentage, 100 - percentage],";
-    var_circle_progressbar_html += "        backgroundColor: ['#4caf50', '#ddd'],";
-    var_circle_progressbar_html += "        borderWidth: 0";
-    var_circle_progressbar_html += "      }]";
-    var_circle_progressbar_html += "    },";
-    var_circle_progressbar_html += "    options: {";
-    var_circle_progressbar_html += "      cutout: '80%',";
-    var_circle_progressbar_html += "      animation: { duration: 0 },";
-    var_circle_progressbar_html += "      plugins: {";
-    var_circle_progressbar_html += "        tooltip: { enabled: false },";
-    var_circle_progressbar_html += "        legend: { display: false }";
-    var_circle_progressbar_html += "      }";
-    var_circle_progressbar_html += "    }";
-    var_circle_progressbar_html += "  });";
-    var_circle_progressbar_html += "}";
-    var_circle_progressbar_html += "function updateChart(apiUrl, ctx, labelId, chartId) {";
-    var_circle_progressbar_html += "  fetch(apiUrl)";
-    var_circle_progressbar_html += "    .then(response => response.json())";
-    var_circle_progressbar_html += "    .then(data => {";
-    var_circle_progressbar_html += "      const percentage = (data.used / data.total) * 100;";
-    var_circle_progressbar_html += "      createChart(ctx, percentage, chartId);";
-    var_circle_progressbar_html += "      document.getElementById(labelId).innerText = percentage.toFixed(2) + ' %';";
-    var_circle_progressbar_html += "    })";
-    var_circle_progressbar_html += "    .catch(error => console.error('Error fetching data:', error));";
-    var_circle_progressbar_html += "}";
+    var_circle_progressbar_html += R"(
+        // Funzione per creare/aggiornare grafico circolare
+        function createOrUpdateChart(canvasId, percentage, used, total) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) {
+                console.error('Canvas non trovato:', canvasId);
+                return;
+            }
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Distruggi grafico esistente se presente
+            if (charts[canvasId]) {
+                charts[canvasId].destroy();
+            }
+            
+            // Determina colore basato su percentuale
+            let color = '#2ecc71'; // Verde
+            if (percentage > 80) color = '#e74c3c'; // Rosso
+            else if (percentage > 60) color = '#f39c12'; // Arancione
+            
+            // Crea nuovo grafico
+            charts[canvasId] = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [percentage, 100 - percentage],
+                        backgroundColor: [color, '#ecf0f1'],
+                        borderWidth: 0,
+                        cutout: '75%'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 800,
+                        easing: 'easeInOutQuart'
+                    },
+                    plugins: {
+                        tooltip: { enabled: false },
+                        legend: { display: false }
+                    }
+                }
+            });
+            
+            // Aggiorna etichetta centrale
+            const labelElement = document.getElementById(canvasId.replace('canvas-', 'label-'));
+            if (labelElement) {
+                labelElement.textContent = percentage.toFixed(1) + '%';
+            }
+            
+            // Aggiorna dettagli
+            const detailsElement = document.getElementById(canvasId.replace('canvas-', 'details-'));
+            if (detailsElement) {
+                detailsElement.innerHTML = `
+                    <div>Utilizzato: ${formatBytes(used)}</div>
+                    <div>Totale: ${formatBytes(total)}</div>
+                `;
+            }
+            
+            // Aggiorna status
+            const statusElement = document.getElementById(canvasId.replace('canvas-', 'status-'));
+            if (statusElement) {
+                let statusClass = 'status-good';
+                let statusText = 'Normale';
+                
+                if (percentage > 80) {
+                    statusClass = 'status-critical';
+                    statusText = 'Critico';
+                } else if (percentage > 60) {
+                    statusClass = 'status-warning';
+                    statusText = 'Attenzione';
+                }
+                
+                statusElement.className = 'chart-status ' + statusClass;
+                statusElement.textContent = statusText;
+            }
+        }
+        
+        // Funzione per aggiornare grafico da API
+        async function updateChartFromAPI(apiUrl, canvasId) {
+            try {
+                const wrapper = document.getElementById(canvasId.replace('canvas-', 'wrapper-'));
+                if (wrapper) wrapper.classList.add('chart-loading');
+                
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('Errore API: ' + response.status);
+                
+                const data = await response.json();
+                const percentage = (data.used / data.total) * 100;
+                
+                createOrUpdateChart(canvasId, percentage, data.used, data.total);
+                
+                console.log('📊 Grafico aggiornato:', canvasId, percentage.toFixed(1) + '%');
+            } catch (error) {
+                console.error('❌ Errore aggiornamento grafico:', canvasId, error);
+            } finally {
+                const wrapper = document.getElementById(canvasId.replace('canvas-', 'wrapper-'));
+                if (wrapper) wrapper.classList.remove('chart-loading');
+            }
+        }
+        
+        // Utility per formattare bytes
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // Cleanup function per fermare aggiornamenti
+        function stopChartUpdates(canvasId) {
+            if (chartUpdateIntervals[canvasId]) {
+                clearInterval(chartUpdateIntervals[canvasId]);
+                delete chartUpdateIntervals[canvasId];
+            }
+        }
+    )";
     var_circle_progressbar_html += "</script>";
+    
     return var_circle_progressbar_html;
 }
 
@@ -176,43 +275,63 @@ String viewGraph::generateCirularProgressBarGraph(String circle_progressbar_labe
 {
     String var_circle_progressbar_html = "";
     float percentage = (circle_progressbar_used_value / circle_progressbar_total_value) * 100;
-    var_circle_progressbar_html += "<div class='circle_progressbar_chart-wrapper' style='display: flex; flex-direction: column; align-items: center; width: 45%; max-width: 300px; min-width: 150px; position: relative;'>";
-    var_circle_progressbar_html += "    <div class='circle_progressbar_label' style='font-size: 1.2rem; margin-bottom: 10px;'> " + circle_progressbar_label + "</div>";
-    var_circle_progressbar_html += "    <canvas id='circle_progressbar_chart_" + circle_progressbar_label + "' class='circle_progressbar_chart' style='width: 100%; height: auto;' width='200' height='200'></canvas>";
-    var_circle_progressbar_html += "    <div class='circle_progressbar_center-label' id='label" + circle_progressbar_label + "' style='position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2rem; font-weight: bold; color: #000; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);'>" + String((int)percentage) + " %</div>";
-    var_circle_progressbar_html += "<div class='circle_progressbar_percentage' style='font-size: 1rem; margin-top: 10px;'>Utilizzato: " + String(circle_progressbar_used_value) + " / Totale: " + String(circle_progressbar_total_value) + "</div>";
+    
+    // ID univoci per ogni elemento
+    String baseId = "chart-" + circle_progressbar_label;
+    String canvasId = "canvas-" + circle_progressbar_label;
+    String wrapperId = "wrapper-" + circle_progressbar_label;
+    String labelId = "label-" + circle_progressbar_label;
+    String detailsId = "details-" + circle_progressbar_label;
+    String statusId = "status-" + circle_progressbar_label;
+    
+    // Wrapper principale con nuovo CSS
+    var_circle_progressbar_html += "<div id='" + wrapperId + "' class='chart-wrapper'>";
+    
+    // Titolo del grafico
+    var_circle_progressbar_html += "<div class='chart-label'>" + circle_progressbar_label + "</div>";
+    
+    // Container canvas con etichetta centrale
+    var_circle_progressbar_html += "<div class='chart-canvas-container'>";
+    var_circle_progressbar_html += "<canvas id='" + canvasId + "' class='chart-canvas'></canvas>";
+    var_circle_progressbar_html += "<div id='" + labelId + "' class='chart-center-label'>" + String(percentage, 1) + "%</div>";
     var_circle_progressbar_html += "</div>";
+    
+    // Dettagli utilizzo
+    var_circle_progressbar_html += "<div id='" + detailsId + "' class='chart-details'>";
+    var_circle_progressbar_html += "Utilizzato: " + String(circle_progressbar_used_value) + "<br>";
+    var_circle_progressbar_html += "Totale: " + String(circle_progressbar_total_value);
+    var_circle_progressbar_html += "</div>";
+    
+    // Status badge
+    var_circle_progressbar_html += "<div id='" + statusId + "' class='chart-status status-good'>Normale</div>";
+    
+    var_circle_progressbar_html += "</div>"; // Chiude chart-wrapper
+    
+    // Script per inizializzazione e aggiornamento
     var_circle_progressbar_html += "<script>";
-    var_circle_progressbar_html += "document.addEventListener('DOMContentLoaded', () => {";
-    var_circle_progressbar_html += "  const ctx = document.getElementById('circle_progressbar_chart_" + circle_progressbar_label + "').getContext('2d');";
-    var_circle_progressbar_html += "  const percentage = " + String(percentage) + ";";
-    var_circle_progressbar_html += "  createChart(ctx, percentage, 'circle_progressbar_chart_" + circle_progressbar_label + "');";
-    var_circle_progressbar_html += "  setInterval(() => {";
-    var_circle_progressbar_html += "    updateChart('" + apiFetchData + "', ctx, 'label" + circle_progressbar_label + "', 'circle_progressbar_chart_" + circle_progressbar_label + "');";
-    var_circle_progressbar_html += "  }, " + String(timeToUpdate) + ");";
+    var_circle_progressbar_html += "document.addEventListener('DOMContentLoaded', function() {";
+    
+    // Crea grafico iniziale
+    var_circle_progressbar_html += "setTimeout(() => {";
+    var_circle_progressbar_html += "createOrUpdateChart('" + canvasId + "', " + String(percentage) + ", " + String(circle_progressbar_used_value) + ", " + String(circle_progressbar_total_value) + ");";
+    var_circle_progressbar_html += "}, 100);"; // Piccolo delay per assicurarsi che Chart.js sia caricato
+    
+    // Imposta aggiornamento automatico se richiesto
+    if (timeToUpdate > 0) {
+        var_circle_progressbar_html += "chartUpdateIntervals['" + canvasId + "'] = setInterval(() => {";
+        var_circle_progressbar_html += "updateChartFromAPI('" + apiFetchData + "', '" + canvasId + "');";
+        var_circle_progressbar_html += "}, " + String(timeToUpdate) + ");";
+    }
+    
     var_circle_progressbar_html += "});";
     var_circle_progressbar_html += "</script>";
+    
     return var_circle_progressbar_html;
 }
 
 String viewGraph::generateCirularProgressBarGraph(String circle_progressbar_label, float circle_progressbar_used_value, float circle_progressbar_total_value)
 {
-    String var_circle_progressbar_html = "";
-    float percentage = (circle_progressbar_used_value / circle_progressbar_total_value) * 100;
-    var_circle_progressbar_html += "<div class='circle_progressbar_chart-wrapper' style='display: flex; flex-direction: column; align-items: center; width: 45%; max-width: 300px; min-width: 150px; position: relative;'>";
-    var_circle_progressbar_html += "    <div class='circle_progressbar_label' style='font-size: 1.2rem; margin-bottom: 10px;'> " + circle_progressbar_label + "</div>";
-    var_circle_progressbar_html += "    <canvas id='circle_progressbar_chart_" + circle_progressbar_label + "' class='circle_progressbar_chart' style='width: 100%; height: auto;' width='200' height='200'></canvas>";
-    var_circle_progressbar_html += "    <div class='circle_progressbar_center-label' id='label" + circle_progressbar_label + "' style='position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2rem; font-weight: bold; color: #000; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);'>" + String((int)percentage) + " %</div>";
-    var_circle_progressbar_html += "<div class='circle_progressbar_percentage' style='font-size: 1rem; margin-top: 10px;'>Utilizzato: " + String(circle_progressbar_used_value) + " / Totale: " + String(circle_progressbar_total_value) + "</div>";
-    var_circle_progressbar_html += "</div>";
-    var_circle_progressbar_html += "<script>";
-    var_circle_progressbar_html += "document.addEventListener('DOMContentLoaded', () => {";
-    var_circle_progressbar_html += "  const ctx = document.getElementById('circle_progressbar_chart_" + circle_progressbar_label + "').getContext('2d');";
-    var_circle_progressbar_html += "  const percentage = " + String(percentage) + ";";
-    var_circle_progressbar_html += "  createChart(ctx, percentage);";
-    var_circle_progressbar_html += "});";
-    var_circle_progressbar_html += "</script>";
-
-    return var_circle_progressbar_html;
+    // Versione senza aggiornamento automatico
+    return generateCirularProgressBarGraph(circle_progressbar_label, circle_progressbar_used_value, circle_progressbar_total_value, "", -1);
 }
 

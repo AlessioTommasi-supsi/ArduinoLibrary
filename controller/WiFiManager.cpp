@@ -9,10 +9,11 @@ const char* WiFiManager::PREF_SSID_KEY = "ssid";
 const char* WiFiManager::PREF_PASSWORD_KEY = "password";
 const char* WiFiManager::PREF_SAVED_KEY = "saved";
 
-WiFiManager::WiFiManager()
+WiFiManager::WiFiManager(bool enableAPAlways)
 {
     this->ssid = DEFAULT_AP_SSID;
     this->password = DEFAULT_AP_PASSWORD;
+    this->alwaysEnableAP = enableAPAlways;
     autoReconnectEnabled = true;
     lastConnectionCheck = 0;
     lastReconnectAttempt = 0;
@@ -20,19 +21,24 @@ WiFiManager::WiFiManager()
     // Inizializza Preferences
     preferences.begin(PREF_NAMESPACE, false);
     
-    // Prova prima a connettersi con credenziali salvate
-    if (!tryConnectWithSavedCredentials()) {
-        // Se non ci sono credenziali salvate o connessione fallita, avvia AP
-        this->setupAP();
-        isAP = true;
-        isConnected = false;
+    if (alwaysEnableAP) {
+        // ➕ MODALITÀ DUAL: Prova a connettersi E mantieni sempre l'AP
+        setupDualMode();
+    } else {
+        // Modalità originale
+        if (!tryConnectWithSavedCredentials()) {
+            this->setupAP();
+            isAP = true;
+            isConnected = false;
+        }
     }
 }
 
-WiFiManager::WiFiManager(const char *ssid, const char *password)
+WiFiManager::WiFiManager(const char *ssid, const char *password, bool enableAPAlways)
 {
     this->ssid = ssid;
     this->password = password;
+    this->alwaysEnableAP = enableAPAlways;
     this->isConnected = false;
     this->autoReconnectEnabled = true;
     this->lastConnectionCheck = 0;
@@ -41,7 +47,39 @@ WiFiManager::WiFiManager(const char *ssid, const char *password)
     // Inizializza Preferences
     preferences.begin(PREF_NAMESPACE, false);
     
-    this->connect();
+    if (alwaysEnableAP) {
+        setupDualMode();
+        // Poi prova a connettersi al WiFi specificato
+        try {
+            WiFi.begin(ssid, password);
+            
+            int attempts = 0;
+            while (WiFi.status() != WL_CONNECTED && attempts < WIFI_CONNECT_TIMEOUT) {
+                delay(CONNECTION_RETRY_DELAY);
+                Serial.println("Connessione WiFi in corso...");
+                attempts++;
+            }
+            
+            if (WiFi.status() == WL_CONNECTED) {
+                Serial.println("✅ WiFi connesso in modalità dual!");
+                Serial.printf("   WiFi IP: %s\n", WiFi.localIP().toString().c_str());
+                Serial.printf("   AP IP: %s\n", ap_ip_address.c_str());
+                
+                this->ip_address = std::string(WiFi.localIP().toString().c_str());
+                this->isConnected = true;
+                // isAP rimane true perché l'AP è sempre attivo
+                
+                if (my_webServer == nullptr) {
+                    my_webServer = new WebServer(ssid, password);
+                }
+            }
+        } catch (...) {
+            Serial.println("❌ Connessione WiFi fallita, ma AP rimane attivo");
+            isConnected = false;
+        }
+    } else {
+        this->connect();
+    }
 }
 
 void WiFiManager::setupAP()
@@ -378,6 +416,98 @@ void WiFiManager::saveCurrentCredentials()
 bool WiFiManager::hasSavedCredentials()
 {
     return preferences.getBool(PREF_SAVED_KEY, false);
+}
+
+// ===== NUOVI METODI PER MODALITÀ DUAL (WiFi + AP) =====
+
+void WiFiManager::setupDualMode()
+{
+    Serial.println("\n🌐 Inizializzazione modalità dual (WiFi + AP)...");
+    
+    try {
+        clear_var();
+        
+        // Configura modalità AP+STA
+        WiFi.mode(WIFI_AP_STA);
+        delay(WIFI_MODE_DELAY);
+        
+        // Avvia Access Point
+        bool apResult = WiFi.softAP(DEFAULT_AP_SSID, DEFAULT_AP_PASSWORD);
+        if (apResult) {
+            IPAddress apIP = WiFi.softAPIP();
+            ap_ip_address = apIP.toString().c_str();
+            
+            Serial.printf("✅ Access Point attivo!\n");
+            Serial.printf("   SSID: %s\n", DEFAULT_AP_SSID);
+            Serial.printf("   IP AP: %s\n", ap_ip_address.c_str());
+            
+            isAP = true;
+            
+            // Crea il web server per l'AP
+            my_webServer = new WebServer(DEFAULT_AP_SSID, DEFAULT_AP_PASSWORD);
+            
+            // Prova a connettersi con credenziali salvate
+            if (hasSavedCredentials() && loadSavedCredentials()) {
+                Serial.printf("🔄 Tentativo connessione WiFi a: %s\n", ssid);
+                
+                WiFi.begin(ssid, password);
+                
+                int attempts = 0;
+                while (WiFi.status() != WL_CONNECTED && attempts < WIFI_CONNECT_TIMEOUT) {
+                    delay(CONNECTION_RETRY_DELAY);
+                    Serial.print(".");
+                    attempts++;
+                }
+                
+                if (WiFi.status() == WL_CONNECTED) {
+                    ip_address = WiFi.localIP().toString().c_str();
+                    isConnected = true;
+                    
+                    Serial.printf("\n✅ Modalità dual attiva!\n");
+                    Serial.printf("   WiFi SSID: %s\n", WiFi.SSID().c_str());
+                    Serial.printf("   WiFi IP: %s\n", ip_address.c_str());
+                    Serial.printf("   AP SSID: %s\n", DEFAULT_AP_SSID);
+                    Serial.printf("   AP IP: %s\n", ap_ip_address.c_str());
+                } else {
+                    Serial.println("\n⚠️ WiFi non connesso, solo AP attivo");
+                    isConnected = false;
+                }
+            } else {
+                Serial.println("📱 Nessuna credenziale WiFi salvata, solo AP attivo");
+                isConnected = false;
+            }
+            
+        } else {
+            Serial.println("❌ Errore creazione Access Point!");
+            isAP = false;
+            isConnected = false;
+        }
+        
+    } catch (...) {
+        Serial.println("❌ Errore durante setup modalità dual!");
+        isAP = false;
+        isConnected = false;
+    }
+}
+
+void WiFiManager::enableDualMode(bool enable)
+{
+    alwaysEnableAP = enable;
+    
+    if (enable) {
+        Serial.println("🔄 Attivazione modalità dual...");
+        setupDualMode();
+    } else {
+        Serial.println("🔄 Disattivazione modalità dual...");
+        if (isConnected) {
+            // Mantieni solo la connessione WiFi
+            WiFi.mode(WIFI_STA);
+            isAP = false;
+        } else {
+            // Torna alla modalità AP singola
+            setupAP();
+        }
+    }
 }
 
 WiFiManager::~WiFiManager()

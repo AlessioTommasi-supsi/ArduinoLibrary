@@ -19,6 +19,10 @@ private:
     bool isAP;
     bool isFirstStart = true;
     
+    // ➕ NUOVA OPZIONE: AP sempre attivo
+    bool alwaysEnableAP;
+    std::string ap_ip_address;  // IP separato per l'AP
+    
     // Variabili per riconnessione automatica
     bool autoReconnectEnabled;
     unsigned long lastConnectionCheck;
@@ -36,8 +40,9 @@ private:
     void clearSavedCredentials();
 
 public:
-    WiFiManager();
-    WiFiManager(const char *ssid, const char *password);
+    // ➕ NUOVO COSTRUTTORE con opzione AP sempre attivo
+    WiFiManager(bool enableAPAlways = true);
+    WiFiManager(const char *ssid, const char *password, bool enableAPAlways = true);
     ~WiFiManager();
     
     void setupAP();
@@ -59,6 +64,12 @@ public:
     bool hasSavedCredentials();
     
     std::vector<std::string> scanNetworks();
+    
+    // ➕ NUOVI METODI per gestione dual mode
+    void enableDualMode(bool enable = true);
+    void setupDualMode();
+    std::string getAPIP() const { return ap_ip_address; }
+    bool isDualModeActive() const { return isConnected && isAP; }
     
     const char *getSSID() const { return ssid; }
     std::string getIP() const { return ip_address; }

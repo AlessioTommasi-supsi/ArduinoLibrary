@@ -17,7 +17,7 @@ extern const char* DEFAULT_AP_SSID;
 extern const char* DEFAULT_AP_PASSWORD;
 
 // ===== CONFIGURAZIONE SISTEMA =====
-const int SYSTEM_CHECK_INTERVAL = 5000;             // Controllo sistema ogni 5 secondi
+const int SYSTEM_CHECK_INTERVAL = 1000;             // Controllo sistema ogni 1 secondo
 const int CONNECTION_RETRY_DELAY = 1000;            // Delay tra tentativi connessione
 const int SMOOTH_CONNECT_ATTEMPTS = 10;             // Tentativi per smoothConnect
 const int SMOOTH_CONNECT_DELAY = 200;               // Delay per smoothConnect

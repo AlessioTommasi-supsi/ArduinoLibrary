@@ -3,10 +3,20 @@
 
 #include <Arduino.h>
 #include <Preferences.h>
-#include <fauxmoESP.h>
+// ➕ RIMOSSE DIPENDENZE FAUXMO - IMPLEMENTAZIONE PULITA
+#ifdef ESP32
+#include <WiFi.h>
+#include <AsyncTCP.h>
+#elif defined(ESP8266)
+#include <ESP8266WiFi.h>
+#include <ESPAsyncTCP.h>
+#endif
+#include <ESPAsyncWebSrv.h>
+
 #include "AlexaConfig.h"
 #include "DeviceManager.h"
-#include "AlexaManager.h"
+#include "AlexaUDP.h"        // ➕ Nuovo server UDP modulare
+#include "AlexaTemplate.h"   // ➕ Template XML/JSON separati
 #include "WiFiManager.h"
 
 enum AlexaSerialState {
@@ -19,12 +29,13 @@ enum AlexaSerialState {
 
 class AlexaController {
 private:
-    // Istanze delle classi
+    // ➕ IMPLEMENTAZIONE PULITA - NO FAUXMO
     Preferences preferences;
-    fauxmoESP fauxmo;
     DeviceManager* deviceManager;
-    AlexaManager* alexaManager;
+    AlexaUDP* udpServer;           // ➕ Server UDP modulare
+    AlexaTemplate* templateEngine; // ➕ Template engine separato
     WiFiManager* systemWifiManager;
+    AsyncWebServer* externalServer;
     
     // Gestione input seriale
     AlexaSerialState currentState;
@@ -55,18 +66,25 @@ private:
     // Utilità
     void printWelcome();
     
+    // ➕ Metodi per gestione server HTTP integrato
+    void setupAlexaHTTPHandlers();
+    void handleDescriptionXML(AsyncWebServerRequest* request);
+    void handleAlexaAPI(AsyncWebServerRequest* request, bool isGet);
+    void handleLightsRequest(AsyncWebServerRequest* request, const String& url);
+    void handleLightControl(AsyncWebServerRequest* request, const String& url, const String& body);
+    
 public:
     AlexaController();
     ~AlexaController();
     
     // Metodi pubblici principali
-    bool initialize(WiFiManager* wifiManager = nullptr);
+    bool initialize(WiFiManager* wifiManager = nullptr, AsyncWebServer* server = nullptr);
     void handle();
     void enableAlexa(bool enable);
     bool isAlexaEnabled() const { return alexaEnabled; }
     bool isAlexaInitialized() const;
     
-    // Metodi per aggiungere dispositivi dal sistema - SOLO URL
+    // Metodi per aggiungere dispositivi dal sistema
     bool addDeviceFromSystem(const String& name, const String& url);
     DeviceManager* getDeviceManager() { return deviceManager; }
     

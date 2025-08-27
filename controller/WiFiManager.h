@@ -9,6 +9,9 @@
 
 class WebServer;
 
+// ➕ Dichiarazione della variabile globale my_webServer
+extern WebServer *my_webServer;
+
 class WiFiManager
 {
 private:

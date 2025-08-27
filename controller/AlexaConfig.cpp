@@ -17,7 +17,9 @@ void AlexaConfig::initialize() {
 
 void AlexaConfig::printConfig() {
     Serial.println("\n📋 Configurazione Alexa:");
-    Serial.printf("   🔌 Porta FauxmoESP: %d\n", FAUXMO_PORT);
+    Serial.printf("   🌐 Porta UDP Discovery: 1900\n");
+    Serial.printf("   🌐 Porta HTTP API: 80 (condivisa)\n");
     Serial.printf("   📱 Max dispositivi: %d\n", MAX_DEVICES);
     Serial.printf("   ⏱️ HTTP Timeout: %d ms\n", ALEXA_HTTP_TIMEOUT);
+    Serial.println("   🏗️ Architettura: Modulare (UDP + Template + Controller)");
 }

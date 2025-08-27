@@ -37,6 +37,9 @@ public:
     void SafeDeleteAllRoutes();
 
     void begin();
+    
+    // ➕ Metodo per esporre il server AsyncWebServer ad Alexa
+    AsyncWebServer* getAsyncWebServer() { return &server; }
 };
 
 #endif

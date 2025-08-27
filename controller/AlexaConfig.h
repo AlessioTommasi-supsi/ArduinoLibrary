@@ -4,10 +4,10 @@
 #include <Arduino.h>
 #include <Preferences.h>
 
-// ===== CONFIGURAZIONE ALEXA =====
+// ===== CONFIGURAZIONE ALEXA MODULARE =====
 #define MAX_DEVICES 10
-#define FAUXMO_PORT 80
-#define FAUXMO_DISABLE_DELAY 500
+#define ALEXA_UDP_PORT 1900
+#define ALEXA_HTTP_PORT 80
 #define ALEXA_RESTART_DELAY 1000
 
 // ===== CONFIGURAZIONE HTTP ALEXA =====

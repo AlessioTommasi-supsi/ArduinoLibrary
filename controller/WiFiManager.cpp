@@ -3,83 +3,13 @@
 
 WebServer *my_webServer = nullptr;
 
-// Costanti per Preferences
-const char* WiFiManager::PREF_NAMESPACE = "wifi_creds";
-const char* WiFiManager::PREF_SSID_KEY = "ssid";
-const char* WiFiManager::PREF_PASSWORD_KEY = "password";
-const char* WiFiManager::PREF_SAVED_KEY = "saved";
-
-WiFiManager::WiFiManager(bool enableAPAlways)
+WiFiManager::WiFiManager()
 {
-    this->ssid = DEFAULT_AP_SSID;
-    this->password = DEFAULT_AP_PASSWORD;
-    this->alwaysEnableAP = enableAPAlways;
-    autoReconnectEnabled = true;
-    lastConnectionCheck = 0;
-    lastReconnectAttempt = 0;
-    
-    // Inizializza Preferences
-    preferences.begin(PREF_NAMESPACE, false);
-    
-    if (alwaysEnableAP) {
-        // ➕ MODALITÀ DUAL: Prova a connettersi E mantieni sempre l'AP
-        setupDualMode();
-    } else {
-        // Modalità originale
-        if (!tryConnectWithSavedCredentials()) {
-            this->setupAP();
-            isAP = true;
-            isConnected = false;
-        }
-    }
-}
-
-WiFiManager::WiFiManager(const char *ssid, const char *password, bool enableAPAlways)
-{
-    this->ssid = ssid;
-    this->password = password;
-    this->alwaysEnableAP = enableAPAlways;
-    this->isConnected = false;
-    this->autoReconnectEnabled = true;
-    this->lastConnectionCheck = 0;
-    this->lastReconnectAttempt = 0;
-    
-    // Inizializza Preferences
-    preferences.begin(PREF_NAMESPACE, false);
-    
-    if (alwaysEnableAP) {
-        setupDualMode();
-        // Poi prova a connettersi al WiFi specificato
-        try {
-            WiFi.begin(ssid, password);
-            
-            int attempts = 0;
-            while (WiFi.status() != WL_CONNECTED && attempts < WIFI_CONNECT_TIMEOUT) {
-                delay(CONNECTION_RETRY_DELAY);
-                Serial.println("Connessione WiFi in corso...");
-                attempts++;
-            }
-            
-            if (WiFi.status() == WL_CONNECTED) {
-                Serial.println("✅ WiFi connesso in modalità dual!");
-                Serial.printf("   WiFi IP: %s\n", WiFi.localIP().toString().c_str());
-                Serial.printf("   AP IP: %s\n", ap_ip_address.c_str());
-                
-                this->ip_address = std::string(WiFi.localIP().toString().c_str());
-                this->isConnected = true;
-                // isAP rimane true perché l'AP è sempre attivo
-                
-                if (my_webServer == nullptr) {
-                    my_webServer = new WebServer(ssid, password);
-                }
-            }
-        } catch (...) {
-            Serial.println("❌ Connessione WiFi fallita, ma AP rimane attivo");
-            isConnected = false;
-        }
-    } else {
-        this->connect();
-    }
+    /*qui creo Esp32 funziona come AP!*/
+    this->ssid = "AP-SmartHome";
+    this->password = "123456789";
+    this->setupAP();
+    isAP = true;
 }
 
 void WiFiManager::setupAP()
@@ -89,7 +19,7 @@ void WiFiManager::setupAP()
         clear_var();
        
         WiFi.mode(WIFI_AP);
-        delay(WIFI_MODE_DELAY);
+        delay(100);
         WiFi.softAP(ssid, password);
         IPAddress IP = WiFi.softAPIP();
         Serial.print("ESP32 AP IP address: ");
@@ -104,7 +34,6 @@ void WiFiManager::setupAP()
         Serial.println("Errore durante la creazione dell'access point!");
     }
     isAP = true;
-    isConnected = false;
 }
 
 void WiFiManager::clear_var()
@@ -115,8 +44,9 @@ void WiFiManager::clear_var()
         {
             if (!isFirstStart)
             {
-                delete my_webServer;
+                delete my_webServer; // da errore di double free soprattutto all avvio non riesco a catturarlo con eccezzione.
             }
+                       
         }
         catch (const std::exception &e)
         {
@@ -124,8 +54,14 @@ void WiFiManager::clear_var()
         }
         my_webServer = nullptr;
     }
-    WiFi.disconnect();
-    isConnected = false;
+    WiFi.disconnect(); // Disconnetti eventuali connessioni pregresse
+}
+
+WiFiManager::WiFiManager(const char *ssid, const char *password)
+{
+    this->ssid = ssid;
+    this->password = password;
+    this->connect();
 }
 
 void WiFiManager::connect()
@@ -135,172 +71,82 @@ void WiFiManager::connect()
         clear_var();
         WiFi.mode(WIFI_STA);
         
-        delay(WIFI_MODE_DELAY);
+        delay(100);
 
         Serial.println("Connessione alla rete Wi-Fi...");
 
         WiFi.begin(ssid, password);
 
-        int attempts = 0;
-        while (WiFi.status() != WL_CONNECTED && attempts < WIFI_CONNECT_TIMEOUT)
+        while (WiFi.status() != WL_CONNECTED)
         {
-            delay(CONNECTION_RETRY_DELAY);
+            delay(1000);
             Serial.println("Connessione in corso...");
-            attempts++;
         }
 
-        if (WiFi.status() == WL_CONNECTED)
-        {
-            my_webServer = new WebServer(ssid, password);
+        my_webServer = new WebServer(ssid, password);
 
-            Serial.println("Connessione Wi-Fi stabilita!");
-            Serial.print("Indirizzo IP: ");
-            Serial.println(WiFi.localIP());
-            this->ip_address = std::string(WiFi.localIP().toString().c_str());
-            this->isConnected = true;
-            this->isAP = false;
-        }
-        else
-        {
-            throw std::runtime_error("Timeout connessione WiFi");
-        }
+        Serial.println("Connessione Wi-Fi stabilita!");
+        Serial.print("Indirizzo IP: ");
+        Serial.println(WiFi.localIP());
+        //this->ip_address = WiFi.localIP().toString();
+        this->ip_address = std::string(WiFi.localIP().toString().c_str());
     }
     catch(...)
     {
         Serial.println("Errore durante la connessione alla rete Wi-Fi!");
-        this->ssid = DEFAULT_AP_SSID;
-        this->password = DEFAULT_AP_PASSWORD;
+        //throw new std::runtime_error("Errore durante la connessione alla rete Wi-Fi!");
+        this->ssid = "ESP32-Access-Point";
+        this->password = "123456789";
         this->setupAP();
         isAP = true;
-        isConnected = false;
     }
 }
 
-void WiFiManager::smoothConnect()
+void WiFiManager::smoothConnect() //nota ce ancora errore quando sbaglio a inserire password!
 {
     try
     {
-        delay(WIFI_MODE_DELAY);
+        //WiFi.mode(WIFI_STA);
+        
+        delay(100);
 
         Serial.println("Connessione alla rete Wi-Fi...");
 
         WiFi.begin(ssid, password);
 
         int attempts = 0;
-        while (WiFi.status() != WL_CONNECTED && attempts < SMOOTH_CONNECT_ATTEMPTS)
+        while (WiFi.status() != WL_CONNECTED && attempts < 10)
         {
+            // Controlla lo stato WiFi
             Serial.println("Connessione in corso...");
+
+            // Aumenta il contatore dei tentativi
             attempts++;
-            delay(SMOOTH_CONNECT_DELAY);
+
+            delay(200);
         }
 
         if (WiFi.status() != WL_CONNECTED)
         {
-            throw std::runtime_error("Errore durante la connessione alla rete Wi-Fi dopo tentativi!");
+            throw std::runtime_error("Errore durante la connessione alla rete Wi-Fi dopo 10 tentativi!");
         }
 
         Serial.println("smooth Connessione Wi-Fi stabilita!");
         Serial.print("Indirizzo IP: ");
         Serial.println(WiFi.localIP());
         this->ip_address = std::string(WiFi.localIP().toString().c_str());
-        this->isConnected = true;
         Serial.println("ip_address: ");
         Serial.println(this->ip_address.c_str());
     }
     catch(const std::exception& e)
     {
         Serial.println("Errore non sono riuscito a connettermi, password probabilmente errata o potenza segnale troppo debole!");
-        this->isConnected = false;
-        throw new std::runtime_error("Errore durante la connessione alla rete Wi-Fi!");
+        throw std::runtime_error("Errore durante la connessione alla rete Wi-Fi!");
     }
+    //connessione a una rete Avvenuta con successo!
     isAP = false;
+    //return std::string(WiFi.localIP().toString().c_str());
 }
-
-// ===== NUOVE FUNZIONI PER RICONNESSIONE AUTOMATICA =====
-
-void WiFiManager::checkConnection()
-{
-    if (millis() - lastConnectionCheck < WIFI_CHECK_INTERVAL) return;
-    lastConnectionCheck = millis();
-    
-    updateConnectionStatus();
-    
-    if (!isConnected && autoReconnectEnabled && !isAP)
-    {
-        if (millis() - lastReconnectAttempt >= WIFI_AUTO_RECONNECT_INTERVAL)
-        {
-            Serial.println("⚠️ WiFi disconnesso, tentativo di riconnessione automatica...");
-            autoReconnect();
-            lastReconnectAttempt = millis();
-        }
-    }
-}
-
-bool WiFiManager::autoReconnect()
-{
-    if (isAP || !autoReconnectEnabled) return false;
-    
-    Serial.println("🔄 Tentativo riconnessione automatica...");
-    
-    WiFi.begin(ssid, password);
-    
-    int attempts = 0;
-    while (WiFi.status() != WL_CONNECTED && attempts < WIFI_AUTO_RECONNECT_ATTEMPTS)
-    {
-        delay(WIFI_RECONNECT_DELAY);
-        Serial.print(".");
-        attempts++;
-    }
-    
-    if (WiFi.status() == WL_CONNECTED)
-    {
-        Serial.println("\n✅ WiFi riconnesso automaticamente!");
-        this->ip_address = std::string(WiFi.localIP().toString().c_str());
-        this->isConnected = true;
-        
-        // Ricrea il web server se necessario
-        if (my_webServer == nullptr)
-        {
-            my_webServer = new WebServer(ssid, password);
-        }
-        
-        return true;
-    }
-    else
-    {
-        Serial.println("\n❌ Riconnessione automatica fallita");
-        this->isConnected = false;
-        return false;
-    }
-}
-
-void WiFiManager::enableAutoReconnect(bool enable)
-{
-    autoReconnectEnabled = enable;
-    Serial.println(enable ? "✅ Riconnessione automatica abilitata" : "❌ Riconnessione automatica disabilitata");
-}
-
-bool WiFiManager::isWiFiConnected() const
-{
-    return isConnected && WiFi.status() == WL_CONNECTED;
-}
-
-void WiFiManager::updateConnectionStatus()
-{
-    bool wasConnected = isConnected;
-    isConnected = (WiFi.status() == WL_CONNECTED && !isAP);
-    
-    if (wasConnected && !isConnected)
-    {
-        Serial.println("⚠️ WiFi disconnesso rilevato!");
-    }
-    else if (!wasConnected && isConnected)
-    {
-        Serial.println("✅ WiFi connesso rilevato!");
-    }
-}
-
-// ===== FUNZIONI ESISTENTI =====
 
 std::vector<std::string> WiFiManager::scanNetworks()
 {
@@ -324,19 +170,15 @@ void WiFiManager::setNetwork(const char *ssid_new, const char *password_new)
     this->password = password_new;
     try
     {
-        this->smoothConnect();
-        
-        // Se la connessione ha successo, salva le credenziali
-        saveCurrentCredentials();
-        Serial.println("✅ Credenziali WiFi salvate con successo!");
-        
+        this->smoothConnect(); //clearvar non fatto
         isFirstStart = false;
     }
-    catch(...)
+    catch(...) //se qualcosa e andato storto ripristino i vecchi valori
     {
         this->ssid = old_ssid;
         this->password = old_password;
 
+        //Serial.println("Errore durante la connessione alla Nuova rete Wi-Fi!");
         if (isAP)
         {
             this->setupAP();
@@ -345,173 +187,16 @@ void WiFiManager::setNetwork(const char *ssid_new, const char *password_new)
         {
             this->clear_var();
             this->setNetwork(old_ssid, old_password);
+            //this->setupAP(); //in ogni caso parto sempre dallo stato di AP! quando non riesco a connettermi!
         }
+        //inoltre lancio un eccezione che possa essere catturata da Route e gestita per inviare route di errore in switch network!
         throw std::runtime_error(std::string("Errore cambio rete Wi-Fi!, attivo la vecchia rete: ssid: ") + old_ssid + ", password: " + old_password);
-    }
-}
-
-// ===== METODI PER PERSISTENZA CREDENZIALI =====
-
-void WiFiManager::saveCredentials(const char* ssid, const char* password)
-{
-    preferences.putString(PREF_SSID_KEY, ssid);
-    preferences.putString(PREF_PASSWORD_KEY, password);
-    preferences.putBool(PREF_SAVED_KEY, true);
-    Serial.println("💾 Credenziali salvate in memoria persistente");
-}
-
-bool WiFiManager::loadSavedCredentials()
-{
-    if (preferences.getBool(PREF_SAVED_KEY, false)) {
-        String saved_ssid = preferences.getString(PREF_SSID_KEY, "");
-        String saved_password = preferences.getString(PREF_PASSWORD_KEY, "");
-        
-        if (saved_ssid.length() > 0) {
-            // Alloca memoria statica per le stringhe
-            static String static_ssid;
-            static String static_password;
-            static_ssid = saved_ssid;
-            static_password = saved_password;
-            
-            this->ssid = static_ssid.c_str();
-            this->password = static_password.c_str();
-            
-            Serial.println("📱 Credenziali caricate: " + saved_ssid);
-            return true;
-        }
-    }
-    return false;
-}
-
-void WiFiManager::clearSavedCredentials()
-{
-    preferences.clear();
-    Serial.println("🗑️ Credenziali WiFi cancellate dalla memoria");
-}
-
-bool WiFiManager::tryConnectWithSavedCredentials()
-{
-    if (loadSavedCredentials()) {
-        Serial.println("🔄 Tentativo connessione con credenziali salvate...");
-        try {
-            this->connect();
-            if (isConnected) {
-                Serial.println("✅ Connesso con credenziali salvate!");
-                return true;
-            }
-        } catch (...) {
-            Serial.println("❌ Connessione fallita con credenziali salvate");
-        }
-    }
-    return false;
-}
-
-void WiFiManager::saveCurrentCredentials()
-{
-    if (!isAP && isConnected) {
-        saveCredentials(this->ssid, this->password);
-    }
-}
-
-bool WiFiManager::hasSavedCredentials()
-{
-    return preferences.getBool(PREF_SAVED_KEY, false);
-}
-
-// ===== NUOVI METODI PER MODALITÀ DUAL (WiFi + AP) =====
-
-void WiFiManager::setupDualMode()
-{
-    Serial.println("\n🌐 Inizializzazione modalità dual (WiFi + AP)...");
-    
-    try {
-        clear_var();
-        
-        // Configura modalità AP+STA
-        WiFi.mode(WIFI_AP_STA);
-        delay(WIFI_MODE_DELAY);
-        
-        // Avvia Access Point
-        bool apResult = WiFi.softAP(DEFAULT_AP_SSID, DEFAULT_AP_PASSWORD);
-        if (apResult) {
-            IPAddress apIP = WiFi.softAPIP();
-            ap_ip_address = apIP.toString().c_str();
-            
-            Serial.printf("✅ Access Point attivo!\n");
-            Serial.printf("   SSID: %s\n", DEFAULT_AP_SSID);
-            Serial.printf("   IP AP: %s\n", ap_ip_address.c_str());
-            
-            isAP = true;
-            
-            // Crea il web server per l'AP
-            my_webServer = new WebServer(DEFAULT_AP_SSID, DEFAULT_AP_PASSWORD);
-            
-            // Prova a connettersi con credenziali salvate
-            if (hasSavedCredentials() && loadSavedCredentials()) {
-                Serial.printf("🔄 Tentativo connessione WiFi a: %s\n", ssid);
-                
-                WiFi.begin(ssid, password);
-                
-                int attempts = 0;
-                while (WiFi.status() != WL_CONNECTED && attempts < WIFI_CONNECT_TIMEOUT) {
-                    delay(CONNECTION_RETRY_DELAY);
-                    Serial.print(".");
-                    attempts++;
-                }
-                
-                if (WiFi.status() == WL_CONNECTED) {
-                    ip_address = WiFi.localIP().toString().c_str();
-                    isConnected = true;
-                    
-                    Serial.printf("\n✅ Modalità dual attiva!\n");
-                    Serial.printf("   WiFi SSID: %s\n", WiFi.SSID().c_str());
-                    Serial.printf("   WiFi IP: %s\n", ip_address.c_str());
-                    Serial.printf("   AP SSID: %s\n", DEFAULT_AP_SSID);
-                    Serial.printf("   AP IP: %s\n", ap_ip_address.c_str());
-                } else {
-                    Serial.println("\n⚠️ WiFi non connesso, solo AP attivo");
-                    isConnected = false;
-                }
-            } else {
-                Serial.println("📱 Nessuna credenziale WiFi salvata, solo AP attivo");
-                isConnected = false;
-            }
-            
-        } else {
-            Serial.println("❌ Errore creazione Access Point!");
-            isAP = false;
-            isConnected = false;
-        }
-        
-    } catch (...) {
-        Serial.println("❌ Errore durante setup modalità dual!");
-        isAP = false;
-        isConnected = false;
-    }
-}
-
-void WiFiManager::enableDualMode(bool enable)
-{
-    alwaysEnableAP = enable;
-    
-    if (enable) {
-        Serial.println("🔄 Attivazione modalità dual...");
-        setupDualMode();
-    } else {
-        Serial.println("🔄 Disattivazione modalità dual...");
-        if (isConnected) {
-            // Mantieni solo la connessione WiFi
-            WiFi.mode(WIFI_STA);
-            isAP = false;
-        } else {
-            // Torna alla modalità AP singola
-            setupAP();
-        }
     }
 }
 
 WiFiManager::~WiFiManager()
 {
+    // Distruttore: Dealloca la memoria
     if (my_webServer != nullptr)
     {
         delete my_webServer;

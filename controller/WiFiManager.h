@@ -4,6 +4,7 @@
 #include <WiFi.h>
 #include <vector>
 #include <string>
+#include "Config.h"
 
 class WebServer;
 

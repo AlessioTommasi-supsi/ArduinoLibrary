@@ -1,13 +1,15 @@
 #include "WiFiManager.h"
 #include "WebServer.h"
 
+
+
 WebServer *my_webServer = nullptr;
 
 WiFiManager::WiFiManager()
 {
     /*qui creo Esp32 funziona come AP!*/
-    this->ssid = "AP-SmartHome";
-    this->password = "123456789";
+    this->ssid = DEFAULT_AP_SSID;
+    this->password = DEFAULT_AP_PASSWORD;
     this->setupAP();
     isAP = true;
 }
@@ -19,7 +21,7 @@ void WiFiManager::setupAP()
         clear_var();
        
         WiFi.mode(WIFI_AP);
-        delay(100);
+        delay(WIFI_MODE_DELAY);
         WiFi.softAP(ssid, password);
         IPAddress IP = WiFi.softAPIP();
         Serial.print("ESP32 AP IP address: ");
@@ -71,7 +73,7 @@ void WiFiManager::connect()
         clear_var();
         WiFi.mode(WIFI_STA);
         
-        delay(100);
+        delay(WIFI_MODE_DELAY);
 
         Serial.println("Connessione alla rete Wi-Fi...");
 
@@ -79,7 +81,7 @@ void WiFiManager::connect()
 
         while (WiFi.status() != WL_CONNECTED)
         {
-            delay(1000);
+            delay(CONNECTION_RETRY_DELAY);
             Serial.println("Connessione in corso...");
         }
 
@@ -95,8 +97,8 @@ void WiFiManager::connect()
     {
         Serial.println("Errore durante la connessione alla rete Wi-Fi!");
         //throw new std::runtime_error("Errore durante la connessione alla rete Wi-Fi!");
-        this->ssid = "ESP32-Access-Point";
-        this->password = "123456789";
+        this->ssid = DEFAULT_AP_SSID;
+        this->password = DEFAULT_AP_PASSWORD;
         this->setupAP();
         isAP = true;
     }
@@ -108,7 +110,7 @@ void WiFiManager::smoothConnect() //nota ce ancora errore quando sbaglio a inser
     {
         //WiFi.mode(WIFI_STA);
         
-        delay(100);
+        delay(WIFI_MODE_DELAY);
 
         Serial.println("Connessione alla rete Wi-Fi...");
 
@@ -123,7 +125,7 @@ void WiFiManager::smoothConnect() //nota ce ancora errore quando sbaglio a inser
             // Aumenta il contatore dei tentativi
             attempts++;
 
-            delay(200);
+            delay(SMOOTH_CONNECT_DELAY);
         }
 
         if (WiFi.status() != WL_CONNECTED)

@@ -15,13 +15,14 @@ private:
     
 public:
     static String html ;
-    static String generateHTML();
+    static String generateHTML(String popupScript = "");
     static String generateEmptyFormRegister();
-    static String generateHTML(String registerAddress, float registerValue);
+    static String generateMasterHtml(String registerAddress, float registerValue);
     static String generateHTMLConfirm(String registerAddress, float registerValue);
-    static String generateHTML(String registerAddress, float registerValue, String popupScript);
+    static String generateMasterHtml(String registerAddress, float registerValue, String popupScript);
     static String pageContent(String registerAddress, float registerValue);
     static String generateOfflineHTML(String registerAddress, float registerValue, String popupScript = "");
+    static String generateHtmlSlave();
 
 };
 

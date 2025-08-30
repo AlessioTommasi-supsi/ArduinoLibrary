@@ -42,23 +42,33 @@ String viewCurrentRegister::generateEmptyFormRegister()
 }
 
 
-String viewCurrentRegister::generateHTML() //codice generato solo la prima volta quando nessun registro e stato ancora selezionato!
+String viewCurrentRegister::generateHTML(String popupScript) //codice generato solo la prima volta quando nessun registro e stato ancora selezionato!
 {
     html = viewGeneric::defaultCssHeader("Current Register");
 
     html += viewCurrentRegister::generateEmptyFormRegister();
+
+    if (popupScript.length() > 0) {
+        html += "<div id='popupOverlay' style='display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:999' onclick=\"document.getElementById('popup').style.display='none';document.getElementById('popupOverlay').style.display='none'\"></div>";
+        html += "<div id='popup' style='display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);padding:15px;background:white;border:1px solid #ccc;border-radius:8px;z-index:1000;box-shadow:0 4px 8px rgba(0,0,0,0.2)'>";
+        html += "<p id='popupMessage'></p>";
+        html += "<button onclick=\"document.getElementById('popup').style.display='none';document.getElementById('popupOverlay').style.display='none'\" style='background:#4CAF50;color:white;border:none;padding:8px 12px;border-radius:4px;cursor:pointer'>Close</button>";
+        html += "</div>";
+        html += "<script>function showPopup(m){document.getElementById('popupMessage').innerText=m;document.getElementById('popup').style.display='block';document.getElementById('popupOverlay').style.display='block'}</script>";
+        html += "<script>" + popupScript + "</script>";
+    }
 
     html += viewGeneric::defaultFooter();
 
     return html;
 }
 
-String viewCurrentRegister::generateHTML(String registerAddress, float registerValue)
+String viewCurrentRegister::generateMasterHtml(String registerAddress, float registerValue)
 {
-    return viewCurrentRegister::generateHTML(registerAddress, registerValue, "");
+    return viewCurrentRegister::generateMasterHtml(registerAddress, registerValue, "");
 }
 
-String viewCurrentRegister::generateHTML(String registerAddress, float registerValue, String popupScript = "")
+String viewCurrentRegister::generateMasterHtml(String registerAddress, float registerValue, String popupScript = "")
 {
     // Header ultra-minimalista con caricamento dinamico totale
     html = "<!DOCTYPE html><html><head>";
@@ -77,13 +87,14 @@ String viewCurrentRegister::generateHTML(String registerAddress, float registerV
     html += "<div id='register_content'><div style='text-align:center;padding:20px'>Loading register...</div></div>";
     
     // Popup minimale
+    html += "<div id='popupOverlay' style='display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:999' onclick=\"document.getElementById('popup').style.display='none';document.getElementById('popupOverlay').style.display='none'\"></div>";
     html += "<div id='popup' style='display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);padding:15px;background:white;border:1px solid #ccc;border-radius:8px;z-index:1000;box-shadow:0 4px 8px rgba(0,0,0,0.2)'>";
     html += "<p id='popupMessage'></p>";
-    html += "<button onclick=\"document.getElementById('popup').style.display='none'\" style='background:#4CAF50;color:white;border:none;padding:8px 12px;border-radius:4px;cursor:pointer'>Close</button>";
+    html += "<button onclick=\"document.getElementById('popup').style.display='none';document.getElementById('popupOverlay').style.display='none'\" style='background:#4CAF50;color:white;border:none;padding:8px 12px;border-radius:4px;cursor:pointer'>Close</button>";
     html += "</div>";
     
     // Script popup compresso
-    html += "<script>function showPopup(m){document.getElementById('popupMessage').innerText=m;document.getElementById('popup').style.display='block'}</script>";
+    html += "<script>function showPopup(m){document.getElementById('popupMessage').innerText=m;document.getElementById('popup').style.display='block';document.getElementById('popupOverlay').style.display='block'}</script>";
     
     // Script personalizzato se fornito
     if (popupScript.length() > 0) {
@@ -203,6 +214,7 @@ String viewCurrentRegister::generateOfflineHTML(String registerAddress, float re
     html += "function showPopup(message) {";
     html += "  document.getElementById('popupMessage').innerText = message;";
     html += "  document.getElementById('popup').style.display = 'block';";
+    html += "  document.getElementById('popupOverlay').style.display = 'block';";
     html += "}";
     html += "</script>";
     
@@ -212,11 +224,32 @@ String viewCurrentRegister::generateOfflineHTML(String registerAddress, float re
         html += "window.addEventListener('DOMContentLoaded', function() {";
         html += popupScript;
         html += "});";
-        html += "</script>";
     }
     
     html += "</body>";
     html += "</html>";
     
+    return html;
+}
+
+String viewCurrentRegister::generateHtmlSlave()
+{
+    String html = viewGeneric::defaultCssHeader("Slave Success");
+
+    // Include form CSS for styling
+    html += "<style>";
+    html += viewGeneric::addFormCss();
+    html += ".btn { display: inline-block; padding: 10px 20px; background: #4CAF50; color: white; text-decoration: none; border-radius: 4px; font-size: 14px; }";
+    html += ".btn:hover { background: #45a049; }";
+    html += "</style>";
+
+    html += "<div class=\"form-container\" style=\"text-align: center;\">";
+    html += "<h1 style=\"color: #4CAF50;\">Scrittura avviata con successo!</h1>";
+    html += "<p>Il registro è stato scritto correttamente come slave.</p>";
+    html += "<a href=\"/currentregister\" class=\"btn\">OK</a>";
+    html += "</div>";
+
+    html += viewGeneric::defaultFooter();
+
     return html;
 }

@@ -105,7 +105,12 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
     });
 
     server.on("/currentregister", HTTP_GET, [](AsyncWebServerRequest *request){
-            String htmlContent = viewCurrentRegister::generateHTML();
+            String popup = "";
+            if (request->hasParam("popup")) {
+                popup = request->getParam("popup")->value();
+                popup.replace("%20", " ");
+            }
+            String htmlContent = viewCurrentRegister::generateHTML(popup);
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(200, "text/html", htmlContentPtr); 
              
@@ -144,14 +149,14 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
         catch (const std::exception& e) {
             Serial.println("Error in modbusMaster: " + String(e.what()));
             String popupScript = "showPopup('Error reading register: " + String(e.what()) + "');";
-            String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
+            String htmlContent = viewCurrentRegister::generateMasterHtml("", 0.0, popupScript);
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(500, "text/html", htmlContentPtr);
         }
         catch (...) {
             Serial.println("Unknown error in modbusMaster");
             String popupScript = "showPopup('Unknown error occurred while reading register');";
-            String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
+            String htmlContent = viewCurrentRegister::generateMasterHtml("", 0.0, popupScript);
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(500, "text/html", htmlContentPtr);
         }
@@ -182,27 +187,21 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
             // Initialize or verify polling state
             ModBusSlaveController::getInstance()->poll();
         
-            // Generate success popup and return to current register page
-            String popupScript = "showPopup('Scrittura come slave avviata con successo!');";
-            String htmlContent = viewCurrentRegister::generateHTML(
-                registerAddress, 
-                registerValue.toFloat(), 
-                popupScript
-            );
-            const char *htmlContentPtr = htmlContent.c_str();
-            request->send(200, "text/html", htmlContentPtr);
+            // Send a simple success page with OK button to return to /currentregister
+            String htmlContent = viewCurrentRegister::generateHtmlSlave();
+            request->send(200, "text/html", htmlContent.c_str());
         }
         catch (const std::exception& e) {
             Serial.println("Error in modbusSlave: " + String(e.what()));
             String popupScript = "showPopup('Error writing register: " + String(e.what()) + "');";
-            String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
+            String htmlContent = viewCurrentRegister::generateHTML(popupScript);
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(500, "text/html", htmlContentPtr);
         }
         catch (...) {
             Serial.println("Unknown error in modbusSlave");
             String popupScript = "showPopup('Unknown error occurred while writing register');";
-            String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
+            String htmlContent = viewCurrentRegister::generateHTML(popupScript);
             const char *htmlContentPtr = htmlContent.c_str();
             request->send(500, "text/html", htmlContentPtr);
         }
@@ -263,7 +262,7 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
         SystemState::getInstance()->startRecordingRegister(registerAddress.toInt(), milliseconds.toInt());
 
         String popupScript = "showPopup('Recording started');";
-        String htmlContent = viewCurrentRegister::generateHTML(registerAddress, 0.0, popupScript);
+        String htmlContent = viewCurrentRegister::generateMasterHtml(registerAddress, 0.0, popupScript);
         const char *htmlContentPtr = htmlContent.c_str();
         request->send(200, "text/html", htmlContentPtr);
          
@@ -271,12 +270,12 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
         String errorMessage = "Error: ";
         errorMessage += e.what();
         String popupScript = "showPopup('" + errorMessage + "');";
-        String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
+        String htmlContent = viewCurrentRegister::generateMasterHtml("", 0.0, popupScript);
         const char *htmlContentPtr = htmlContent.c_str();
         request->send(500, "text/html", htmlContentPtr);
     } catch (...) {
         String popupScript = "showPopup('Unknown error occurred');";
-        String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
+        String htmlContent = viewCurrentRegister::generateMasterHtml("", 0.0, popupScript);
         const char *htmlContentPtr = htmlContent.c_str();
         request->send(500, "text/html", htmlContentPtr);
     }
@@ -288,7 +287,7 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
         SystemState::getInstance()->stopRecordingRegister(registerAddress.toInt());
 
         String popupScript = "showPopup('Recording stopped');";
-        String htmlContent = viewCurrentRegister::generateHTML(registerAddress, 0.0, popupScript);
+        String htmlContent = viewCurrentRegister::generateMasterHtml(registerAddress, 0.0, popupScript);
         const char *htmlContentPtr = htmlContent.c_str();
         request->send(200, "text/html", htmlContentPtr);
          
@@ -296,12 +295,12 @@ void ModbusRoutes::defineRoutes(AsyncWebServer &server)
         String errorMessage = "Error: ";
         errorMessage += e.what();
         String popupScript = "showPopup('" + errorMessage + "');";
-        String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
+        String htmlContent = viewCurrentRegister::generateMasterHtml("", 0.0, popupScript);
         const char *htmlContentPtr = htmlContent.c_str();
         request->send(500, "text/html", htmlContentPtr);
     } catch (...) {
         String popupScript = "showPopup('Unknown error occurred');";
-        String htmlContent = viewCurrentRegister::generateHTML("", 0.0, popupScript);
+        String htmlContent = viewCurrentRegister::generateMasterHtml("", 0.0, popupScript);
         const char *htmlContentPtr = htmlContent.c_str();
         request->send(500, "text/html", htmlContentPtr);
     }

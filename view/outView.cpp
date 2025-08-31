@@ -59,6 +59,7 @@ String outView::generateHTML(String signalType, String popupScript)
 
 String outView::generatePopupPage(String signalType, String message, String redirectPage)
 {
+    
     String html = viewGeneric::defaultCssHeader("Notifica");
 
     html += "<div style='display:flex;align-items:center;justify-content:center;height:60vh;'>";

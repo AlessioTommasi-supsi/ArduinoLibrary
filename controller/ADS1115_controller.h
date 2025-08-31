@@ -21,10 +21,13 @@ public:
     // Avvia la registrazione dei dati: signalType viene mappato in un canale (0..7).
     // interval è l'intervallo in ms.
     void startRecording(const String &signalType, int interval);
+    // replica il valore letto da ads sul pin outputPinNumber
     void startMonitorTask(int outputPinNumber);
+    // replica HIGH se il valore letto supera alertValue, LOW altrimenti
     void startAlertMonitorTask(int outputPinNumber, float alertValue);
     void stopMonitorTask();
 
+    // Imposta il canale del multiplexer (0..7) in base al signalType
     void setChannel(const String &signalType);
     
     // Ferma la registrazione

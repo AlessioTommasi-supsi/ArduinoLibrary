@@ -75,15 +75,8 @@ float ADS1115_controller::signalCorrectionValue(int channel, float volts) {
     switch (channel)
     {//ohm
     case 0:
-        
-        
-        
-        //volts = volts * correctionValue; //ritorna dato in V!
-        Serial.print("valore in volt letto da AD:     ");
-        Serial.println(volts);
         //formula data da prof: R da calcolare = (tensione letta in ch0 * 2700)/ (2.5 - tensione letta in ch0)
         volts = (volts * 2700) / (2.5 - volts); //ritorna dato in Ohm!
-    
     break;
     case 1:
         volts  = (volts/110)*1000; //ma corrente
@@ -296,7 +289,7 @@ float ADS1115_controller::read(){
     return volts;
 }
 
-void ADS1115_controller::startMonitorTask(int outputPinNumber) {
+void ADS1115_controller::startMonitorTask(int outputPinNumber, float OutScale, float lowOffset) {
     Serial.println("Starting ADS1115 monitor task...");
     if (initializationFailed) {
         Serial.println("Errore: ads non inizializzato!: ");
@@ -305,6 +298,8 @@ void ADS1115_controller::startMonitorTask(int outputPinNumber) {
     create_startMonitorTask:
     if (xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE) {
         this->outputPinNumber = outputPinNumber;
+        this->OutScale = OutScale;
+        this->lowOffset = lowOffset;
         if (monitorTask == NULL) {
             xTaskCreatePinnedToCore(
                 monitorTaskFunction,
@@ -384,29 +379,16 @@ void ADS1115_controller::monitorTaskFunction(void *parameter) {
                     int16_t adc = controller->ads.readADC_SingleEnded(0);
                     float volts = controller->ads.computeVolts(adc);
                     volts = controller->signalCorrectionValue(controller->currentChannel, volts); // Applica la correzione del segnale
-                    
+                    volts = (volts - controller->lowOffset) * controller->OutScale;
 
                     Pin &outputPin = SystemState::getInstance()->pinoutData->getPin(controller->outputPinNumber);
-                    
-                    if (controller->outputPinNumber == 25) // Se l'uscita è digitale
-                    {
-                        // Esegui il monitoraggio digitale
-                        Serial.println("Monitoraggio digitale attivo.");
-                        bool goHigh = volts > 1.5; // Soglia di attivazione
-                        outputPin.write(goHigh);
-                    }
-                    else if (controller->outputPinNumber == 26) // Se l'uscita è analogica
-                    {
-                        // Esegui il monitoraggio analogico
-                        Serial.println("Monitoraggio analogico attivo.");
-                        pinMode(26, OUTPUT);
-                        //devo convertrire: 0 - 3.3V in 0 - 255
-                        outputPin.setVoltage(volts * 1000); // Converte V in mV e usa il setter thread-safe
-                        int dacValue = static_cast<int>((volts / 3.3) * 255); // Converti 0-3.3V in 0-255
-                        dacWrite(26, dacValue);  // Scrivi il valore convertito nel DAC
-                    }
-                    
-                    controller->lastRecordTime = currentTime;
+                    // Esegui il monitoraggio analogico
+                    pinMode(controller->outputPinNumber, OUTPUT);
+                    //devo convertrire: 0 - 3.3V in 0 - 255
+                    outputPin.setVoltage(volts * 1000); // Converte V in mV e usa il setter thread-safe
+                    int dacValue = static_cast<int>((volts / 3.3) * 255); // Converti 0-3.3V in 0-255
+                    dacWrite(controller->outputPinNumber, dacValue);  // Scrivi il valore convertito nel DAC
+                
                 }
                 catch(...)
                 {

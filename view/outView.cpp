@@ -51,6 +51,14 @@ String outView::generateHTML(String signalType, String popupScript)
     html += "</div>";
     html += "<button type='submit'>Imposta Allarme</button>";
     html += "</form>";
+
+    html += "<form action='/stopAlarm' method='get'>";
+    html += "<input type='hidden' name='signalType' value='" + signalType + "'>";
+    html += "<label for='stopSignal'>Segnale da fermare:</label>";
+    
+    html += "<button type='submit'>Ferma Allarme</button>";
+    html += "</form>";
+    
     html += "<script>";
     html += "document.getElementById('type').addEventListener('change', function() {";
     html += "    if (this.value === 'alarm') {";

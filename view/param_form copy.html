@@ -1,148 +1,165 @@
 <!DOCTYPE html>
-<html lang="it">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Configurazione Sistema - Segnali e Uscite</title>
-  <!-- Link a Font Awesome (CDN per le icone) -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-  
-  <style>
-    /* Stili di base e layout */
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #ece9e6, #ffffff);
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-    }
-    
-    /* Contenitore con effetto glass */
-    .form-container {
-      background: rgba(255, 255, 255, 0.75);
-      backdrop-filter: blur(5px);
-      -webkit-backdrop-filter: blur(5px);
-      border-radius: 16px;
-      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-      padding: 30px;
-      margin-top: 100px;
-      width: 90%;
-      max-width: 700px;
-    }
-    
-    h2 {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    
-    fieldset {
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      margin-bottom: 25px;
-      padding: 15px;
-    }
-    
-    legend {
-      font-size: 1.2em;
-      font-weight: bold;
-      padding: 0 10px;
-    }
-    
-    h3 {
-      margin: 15px 0 5px;
-      font-size: 1.1em;
-    }
-    
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
-    
-    input[type="number"],
-    input[type="text"],
-    select {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 16px;
-    }
-    
-    /* Bottone di invio */
-    button {
-      width: 100%;
-      padding: 15px;
-      font-size: 18px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    
-    button:hover {
-      background-color: #45a049;
-    }
-  </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uscite - [signalType]</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .content {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .form-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 20px auto;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .control-group input[type="number"],
+        .control-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            margin-right: 5px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
-  
-  <!-- Contenitore principale del form -->
-  <div class="form-container">
-    <h2>Configurazione Sistema</h2>
-    <form id="configForm" action="multiplex_graph" method="get">
-      
-      <!-- Sezione: Seleziona il tipo di segnale -->
-      <fieldset>
-        <legend>Seleziona il tipo di segnale</legend>
-        <label for="signalType">Tipo di segnale:</label>
-        <select id="signalType" name="signalType" onchange="updateSignalMessage()">
-          <option value="resistenza">Resistenza</option>
-          <option value="tensione_non_amplificato">Segnale di tensione non amplificato</option>
-          <option value="tensione_amp_331">Segnale di tensione con guadagno pari a 331</option>
-          <option value="tensione_amp_0.216">Segnale di tensione con guadagno pari a 0.216</option>
-        </select>
-      </fieldset>
-      
-      <!-- Messaggio che compare in base alla selezione -->
-      <div id="signalMessage" style="margin: 20px 0; font-weight: bold;"></div>
-      
-      <!-- Pulsante di invio -->
-      <button type="submit">Invia Configurazione</button>
-    </form>
-  </div>
-  
-  <script>
-    function updateSignalMessage() {
-      var signalType = document.getElementById("signalType").value;
-      var messageDiv = document.getElementById("signalMessage");
-      
-      switch (signalType) {
-        case "resistenza":
-          messageDiv.textContent = "La resistenza PT100 la devi collegare tra il morsetto 8 e il morsetto 2 della morsettiera CN2.";
-          break;
-        case "tensione_non_amplificato":
-          messageDiv.textContent = "Devi collegare segnale al morsetto 7 della morsettiera CN2.";
-          break;
-        case "tensione_amp_331":
-          messageDiv.textContent = "Collegare al morsetto 6 della morsettiera CN2: max signal readed +5v, -5v.";
-          break;
-        case "tensione_amp_0.216":
-          messageDiv.textContent = "Collegare al morsetto 1 dekka morsettiera CN2.";
-          break;
-        default:
-          messageDiv.textContent = "";
-      }
-    }
-    
-    document.addEventListener("DOMContentLoaded", function() {
-      updateSignalMessage();
+
+    <div class="header">
+        <a href="/" style="color:white; text-decoration: none;">Uscite - [signalType]</a>
+    </div>
+
+    <div id='popupOverlay' style='display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:999' onclick="document.getElementById('popup').style.display='none';document.getElementById('popupOverlay').style.display='none'"></div>
+    <div id='popup' style='display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);padding:15px;background:white;border:1px solid #ccc;border-radius:8px;z-index:1000;box-shadow:0 4px 8px rgba(0,0,0,0.2)'>
+        <p id='popupMessage'></p>
+        <button onclick="document.getElementById('popup').style.display='none';document.getElementById('popupOverlay').style.display='none'" style='background:#4CAF50;color:white;border:none;padding:8px 12px;border-radius:4px;cursor:pointer'>Close</button>
+    </div>
+    <script>function showPopup(m){document.getElementById('popupMessage').innerText=m;document.getElementById('popup').style.display='block';document.getElementById('popupOverlay').style.display='block'}</script>
+    <script>[popupScript]</script>
+
+    <div class="content">
+        <div class="form-container">
+            <h1>Uscite per [signalType]</h1>
+            
+            <form action="/setOut" method="get">
+                <input type="hidden" name="signalType" value="[signalType]">
+                
+                <div class="control-group">
+                    <label for="pin">Seleziona Pin:</label>
+                    <select id="pin" name="pin">
+                        <option value="[PIN_25]">[PIN_25]</option>
+                        <option value="[PIN_26]">[PIN_26]</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="type">Tipologia:</label>
+                    <select id="type" name="type">
+                        <option value="monitor">Monitor</option>
+                        <option value="alarm">Allarme</option>
+                    </select>
+                </div>
+                
+                <div id="monitorFields">
+                    <div class="control-group">
+                        <label for="minScale">Valore input per 0V output:</label>
+                        <input type="number" id="minScale" name="minScale" step="0.01" placeholder="Es. 25.5">
+                    </div>
+                    <div class="control-group">
+                        <label for="maxScale">Valore input per 3.3V output:</label>
+                        <input type="number" id="maxScale" name="maxScale" step="0.01" placeholder="Es. 9000.5">
+                    </div>
+                </div>
+
+                <div id="alarmFields" style="display:none;">
+                    <div class="control-group">
+                        <label for="alarmLevel">Livello Soglia Allarme:</label>
+                        <input type="number" id="alarmLevel" name="alarmLevel" step="0.01" placeholder="Es. 25.5">
+                    </div>
+                </div>
+                
+                <button type="submit" name="action" value="set">Imposta Uscita</button>
+                <button type="submit" name="action" value="stop">Ferma Uscita</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="footer">
+        &copy; 2024 by Smart Tech
+    </div>
+
+    <script>
+    document.getElementById('type').addEventListener('change', function() {
+        if (this.value === 'alarm') {
+            document.getElementById('alarmFields').style.display = 'block';
+            document.getElementById('monitorFields').style.display = 'none';
+        } else {
+            document.getElementById('alarmFields').style.display = 'none';
+            document.getElementById('monitorFields').style.display = 'block';
+        }
     });
-  </script>
+    </script>
 </body>
 </html>

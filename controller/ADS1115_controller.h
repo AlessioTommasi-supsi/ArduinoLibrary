@@ -22,9 +22,10 @@ public:
     // interval è l'intervallo in ms.
     void startRecording(const String &signalType, int interval);
     // replica il valore letto da ads sul pin outputPinNumber
-    void startMonitorTask(int outputPinNumber);
+    void startMonitorTask(int outputPinNumber, float OutScale = 1.0, float lowOffset = 0.0);
     // replica HIGH se il valore letto supera alertValue, LOW altrimenti
     void startAlertMonitorTask(int outputPinNumber, float alertValue);
+    // Ferma sia il task di monitoraggio che il task di allarme
     void stopMonitorTask();
 
     // Imposta il canale del multiplexer (0..7) in base al signalType
@@ -68,6 +69,8 @@ public:
     int recordingInterval;
     float alertValue;
 
+    float OutScale = 1.0; // Fattore di scala per l'uscita (default 1.0, nessuna scala)
+    float lowOffset = 0.0; // Offset output necessario per scala corretta output (default 0.0)
 private:
     ADS1115_controller();
     static ADS1115_controller* instance;  // Puntatore statico all'unica istanza

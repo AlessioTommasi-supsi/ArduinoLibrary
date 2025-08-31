@@ -47,11 +47,6 @@ void OutRoutes::defineRoutes(AsyncWebServer &server) {
             return;
         }
 
-        // Ensure alarmLevel has a numeric default
-        if (type != "alarm") {
-            alarmLevel = "0.0";
-        }
-
         // Now it's safe to initialize ADS controller and start tasks
         ADS1115_controller* adsCtrl = ADS1115_controller::getInstance();
         adsCtrl->setChannel(signalType);
@@ -70,7 +65,7 @@ void OutRoutes::defineRoutes(AsyncWebServer &server) {
             adsCtrl->startAlertMonitorTask(pin.toInt(), alarmLevel.toFloat());
             Serial.println("Started alert monitor on pin " + pin + " with threshold " + alarmLevel);
         } else if (type == "monitor") {
-            adsCtrl->startMonitorTask(pin.toInt());
+            adsCtrl->startMonitorTask(pin.toInt(), 1.0, 0.0); // Default scale and offset
             Serial.println("Started monitor on pin " + pin);
         }
 

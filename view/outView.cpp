@@ -51,7 +51,7 @@ String outView::generateHTML(String signalType, String popupScript)
     html += "    }";
     html += "});";
     html += "</script>";
-
+    //devo mettere bottone di stop e ampiezza segnale: mappa cosa voglio a 3.3V e a 0 per quando sono in monitor!!
     html += viewGeneric::defaultFooter();
 
     return html;

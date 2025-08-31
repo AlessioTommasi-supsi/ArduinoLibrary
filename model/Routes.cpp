@@ -46,6 +46,9 @@ void Routes::defineRoutes(AsyncWebServer &server)
     MultiplexRoutes multiplex;
     multiplex.defineRoutes(server);
 
+    OutRoutes out;
+    out.defineRoutes(server);
+
     
 
 }

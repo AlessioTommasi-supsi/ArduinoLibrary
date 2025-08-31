@@ -277,6 +277,7 @@ void MultiplexRoutes::defineRoutes(AsyncWebServer &server) {
         html += "<div class='links'>";
         html += "<a href='/ADS_history'>📈 View History</a>";
         html += "<a href='/multiplex_config'>⚙️ Config</a>";
+        html += "<a href='/uscite?signalType=" + signalType + "'>📤​ Uscite</a>";
         html += "</div>";
         html += "</div>";
         

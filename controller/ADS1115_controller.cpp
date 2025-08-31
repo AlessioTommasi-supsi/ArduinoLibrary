@@ -70,8 +70,7 @@ int ADS1115_controller::signalTypeToChannel(const String &signalType) {
 }
 
 float ADS1115_controller::signalCorrectionValue(int channel, float volts) {
-    Serial.print("SignalCorrectionValue!! raw READINGS FOR ADS: ");
-    Serial.println(volts);
+    
     float correctionValue = 1.0;
     switch (channel)
     {//ohm
@@ -298,7 +297,7 @@ float ADS1115_controller::read(){
 }
 
 void ADS1115_controller::startMonitorTask(int outputPinNumber) {
-
+    Serial.println("Starting ADS1115 monitor task...");
     if (initializationFailed) {
         Serial.println("Errore: ads non inizializzato!: ");
         return;
@@ -334,6 +333,7 @@ void ADS1115_controller::startAlertMonitorTask(int outputPinNumber, float alertV
         Serial.println("Errore: ads non inizializzato!: ");
         return;
     }
+    Serial.println("Starting ADS1115 alert task...");
     create_alertMonitorTask:
     if (xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE) {
         this->outputPinNumber = outputPinNumber;
@@ -384,11 +384,7 @@ void ADS1115_controller::monitorTaskFunction(void *parameter) {
                     int16_t adc = controller->ads.readADC_SingleEnded(0);
                     float volts = controller->ads.computeVolts(adc);
                     volts = controller->signalCorrectionValue(controller->currentChannel, volts); // Applica la correzione del segnale
-                    Serial.print("Monitor ADS (canale ");
-                    Serial.print(controller->currentChannel);
-                    Serial.print("): ");
-                    Serial.print(volts);
-                    Serial.println(" V");
+                    
 
                     Pin &outputPin = SystemState::getInstance()->pinoutData->getPin(controller->outputPinNumber);
                     
@@ -438,14 +434,7 @@ void ADS1115_controller::monitorAlertTaskFunction(void *parameter) {
                     int16_t adc = controller->ads.readADC_SingleEnded(0);
                     float volts = controller->ads.computeVolts(adc);
                     volts =  controller->signalCorrectionValue(controller->currentChannel, volts); // Applica la correzione del segnale
-                    Serial.print("Monitor Alert ADS (canale ");
-                    Serial.print(controller->currentChannel);
-                    Serial.print("): ");
-                    Serial.print(volts);
-                    Serial.println(" V ");
-                    Serial.print("Soglia: ");
-                    Serial.print(controller->alertValue);
-                    Serial.println(" ");
+                    
 
                     Pin &outputPin = SystemState::getInstance()->pinoutData->getPin(controller->outputPinNumber);
                     bool goHigh = volts > controller->alertValue; // Soglia di attivazione

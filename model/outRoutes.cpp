@@ -18,11 +18,15 @@ void OutRoutes::defineRoutes(AsyncWebServer &server) {
     });
 
     server.on("/setAlarm", HTTP_GET, [](AsyncWebServerRequest *request){
+        String popupMessage = "";
         // Parse parameters with safe defaults
         String signalType = request->hasParam("signalType") ? request->getParam("signalType")->value() : "";
         String pin = request->hasParam("pin") ? request->getParam("pin")->value() : "";
         String type = request->hasParam("type") ? request->getParam("type")->value() : "";
         String alarmLevel = request->hasParam("alarmLevel") ? request->getParam("alarmLevel")->value() : "0.0";
+        String minScale = request->hasParam("minScale") ? request->getParam("minScale")->value() : "1.0";
+        String maxScale = request->hasParam("maxScale") ? request->getParam("maxScale")->value() : "1.0";
+
 
         // Validate required parameters and redirect to popup page on error
         if (signalType.length() == 0) {
@@ -63,10 +67,13 @@ void OutRoutes::defineRoutes(AsyncWebServer &server) {
 
         if (type == "alarm") {
             adsCtrl->startAlertMonitorTask(pin.toInt(), alarmLevel.toFloat());
-            Serial.println("Started alert monitor on pin " + pin + " with threshold " + alarmLevel);
+            popupMessage = "Started alert monitor on pin " + pin + " with threshold " + alarmLevel;
         } else if (type == "monitor") {
-            adsCtrl->startMonitorTask(pin.toInt(), 1.0, 0.0); // Default scale and offset
-            Serial.println("Started monitor on pin " + pin);
+            float scaleFactor = maxScale.toFloat() - minScale.toFloat();//ampiezza del segnale
+            scaleFactor = 3.3 / scaleFactor; // stepsize
+            adsCtrl->startMonitorTask(pin.toInt(), scaleFactor, minScale.toFloat());
+            popupMessage = "Started monitor on pin " + pin + " with scale factor " + String(scaleFactor) + " and low offset " + minScale+" minScale: " + minScale+" maxScale: " + maxScale;
+            
         }
 
         // Background action: log the setup
@@ -76,7 +83,7 @@ void OutRoutes::defineRoutes(AsyncWebServer &server) {
         }
 
         // Build success popup message and redirect to the popup page
-        String popupMessage = "Allarme impostato con successo per il segnale: " + signalType;
+        Serial.println(popupMessage);
         String encoded = popupMessage;
         encoded.replace(" ", "%20");
         request->redirect("/uscitePopup?signalType=" + signalType + "&message=" + encoded);

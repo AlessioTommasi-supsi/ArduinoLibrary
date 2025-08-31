@@ -1,13 +1,11 @@
 #include "outView.h"
 
+
 String outView::generateHTML(String signalType, String popupScript)
 {
     String html = viewGeneric::defaultCssHeader("Uscite - " + signalType);
-
-    // Include CSS from cssControlGroup
     html += cssControlGroup::getCSS();
 
-    // Add popup elements if popupScript is provided
     if (popupScript.length() > 0) {
         html += "<div id='popupOverlay' style='display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:999' onclick=\"document.getElementById('popup').style.display='none';document.getElementById('popupOverlay').style.display='none'\"></div>";
         html += "<div id='popup' style='display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);padding:15px;background:white;border:1px solid #ccc;border-radius:8px;z-index:1000;box-shadow:0 4px 8px rgba(0,0,0,0.2)'>";
@@ -20,6 +18,8 @@ String outView::generateHTML(String signalType, String popupScript)
 
     html += "<div class=\"form-container\" style=\"text-align: center;\">";
     html += "<h1>Uscite per " + signalType + "</h1>";
+    
+    // Form per impostare una singola uscita
     html += "<form action='/setAlarm' method='get'>";
     html += "<input type='hidden' name='signalType' value='" + signalType + "'>";
     html += "<div class='control-group'>";
@@ -37,26 +37,24 @@ String outView::generateHTML(String signalType, String popupScript)
     html += "</select>";
     html += "</div>";
     html += "<div id='minMonitorScaleDiv' style='display:block;' class='control-group'>";
-    html += "<label for='alarmLevel'>valore dell input da associare a 0v in out:</label>";
+    html += "<label>valore dell input da associare a 0v in out:</label>";
     html += "<input type='number' id='minScale' name='minScale' step='0.01' placeholder='Es. 25.5'>";
     html += "</div>";
     html += "<div id='maxMonitorScaleDiv' style='display:block;' class='control-group'>";
-    html += "<label for='alarmLevel'>valore dell input da associare a 3.3v in out:</label>";
+    html += "<label>valore dell input da associare a 3.3v in out:</label>";
     html += "<input type='number' id='maxScale' name='maxScale' step='0.01' placeholder='Es. 9000.5'>";
     html += "</div>";
-
     html += "<div id='alarmLevelDiv' style='display:none;' class='control-group'>";
-    html += "<label for='alarmLevel'>Livello Soglia Allarme:</label>";
+    html += "<label>Livello Soglia Uscita:</label>";
     html += "<input type='number' id='alarmLevel' name='alarmLevel' step='0.01' placeholder='Es. 25.5'>";
     html += "</div>";
-    html += "<button type='submit'>Imposta Allarme</button>";
+    html += "<button type='submit'>Imposta Uscita</button>";
     html += "</form>";
-
-    html += "<form action='/stopAlarm' method='get'>";
-    html += "<input type='hidden' name='signalType' value='" + signalType + "'>";
-    html += "<label for='stopSignal'>Segnale da fermare:</label>";
     
-    html += "<button type='submit'>Ferma Allarme</button>";
+    // Form per fermare tutte le uscite
+    html += "<br>";
+    html += "<form action='/stopAllAlarms' method='get'>";
+    html += "<button type='submit'>Ferma Tutte le Uscite</button>";
     html += "</form>";
     
     html += "<script>";
@@ -65,7 +63,6 @@ String outView::generateHTML(String signalType, String popupScript)
     html += "        document.getElementById('alarmLevelDiv').style.display = 'block';";
     html += "        document.getElementById('minMonitorScaleDiv').style.display = 'none';";
     html += "        document.getElementById('maxMonitorScaleDiv').style.display = 'none';";
-    
     html += "    } else {";
     html += "        document.getElementById('alarmLevelDiv').style.display = 'none';";
     html += "        document.getElementById('minMonitorScaleDiv').style.display = 'block';";
@@ -73,9 +70,8 @@ String outView::generateHTML(String signalType, String popupScript)
     html += "    }";
     html += "});";
     html += "</script>";
-    //devo mettere bottone di stop e ampiezza segnale: mappa cosa voglio a 3.3V e a 0 per quando sono in monitor!!
-    html += viewGeneric::defaultFooter();
 
+    html += viewGeneric::defaultFooter();
     return html;
 }
 

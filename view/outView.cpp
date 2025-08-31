@@ -36,6 +36,15 @@ String outView::generateHTML(String signalType, String popupScript)
     html += "<option value='alarm'>Allarme</option>";
     html += "</select>";
     html += "</div>";
+    html += "<div id='minMonitorScaleDiv' style='display:block;' class='control-group'>";
+    html += "<label for='alarmLevel'>valore dell input da associare a 0v in out:</label>";
+    html += "<input type='number' id='minScale' name='minScale' step='0.01' placeholder='Es. 25.5'>";
+    html += "</div>";
+    html += "<div id='maxMonitorScaleDiv' style='display:block;' class='control-group'>";
+    html += "<label for='alarmLevel'>valore dell input da associare a 3.3v in out:</label>";
+    html += "<input type='number' id='maxScale' name='maxScale' step='0.01' placeholder='Es. 9000.5'>";
+    html += "</div>";
+
     html += "<div id='alarmLevelDiv' style='display:none;' class='control-group'>";
     html += "<label for='alarmLevel'>Livello Soglia Allarme:</label>";
     html += "<input type='number' id='alarmLevel' name='alarmLevel' step='0.01' placeholder='Es. 25.5'>";
@@ -46,8 +55,13 @@ String outView::generateHTML(String signalType, String popupScript)
     html += "document.getElementById('type').addEventListener('change', function() {";
     html += "    if (this.value === 'alarm') {";
     html += "        document.getElementById('alarmLevelDiv').style.display = 'block';";
+    html += "        document.getElementById('minMonitorScaleDiv').style.display = 'none';";
+    html += "        document.getElementById('maxMonitorScaleDiv').style.display = 'none';";
+    
     html += "    } else {";
     html += "        document.getElementById('alarmLevelDiv').style.display = 'none';";
+    html += "        document.getElementById('minMonitorScaleDiv').style.display = 'block';";
+    html += "        document.getElementById('maxMonitorScaleDiv').style.display = 'block';";
     html += "    }";
     html += "});";
     html += "</script>";

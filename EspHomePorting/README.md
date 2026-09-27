@@ -147,3 +147,10 @@ esphome run smarthome-esps3.yaml
 
 
 non va bene, ESP deve stare in pooling sullo stato dei bottoni se no ce un disallineamenteo
+
+
+idea esp e detentore stato: bottone prende segnale da pine esp e lo riporta sul relay
+3.3V cosi anche cosi se cambia quel pin di stato il bottone riporta cosa giusta, quando bottone porta 3.3V sul tale pin di lettura so che devo cambiare e se da stato precedente  si apre  ce qualcosa che ogni mezzo secondo mi tira giu quel pin e quindi dopo un secondo io mi accorgo che il bottone ha cambiato stato. questo fatto per ogni  bottone,,
+
+
+oppure piu semplice relay ad impulsi finder 12V

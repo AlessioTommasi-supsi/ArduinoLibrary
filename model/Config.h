@@ -30,8 +30,12 @@ const int DEBUG_PRINT_INTERVAL = 30000;             // Intervallo debug WiFi
 const int WEBSERVER_PORT = 80;                      // Porta del web server
 const int HTTP_TIMEOUT = 5000;                      // Timeout richieste HTTP
 
-// ===== CONFIGURAZIONE PIN ESP32 =====
-const int DEFAULT_SD_PIN = 5;                       // Pin di default per SD card
+// ===== CONFIGURAZIONE PIN ESP32 / ESP32-S3 =====
+#if defined(CONFIG_IDF_TARGET_ESP32S3) || defined(ARDUINO_ESP32S3_DEV)
+const int DEFAULT_SD_PIN = 10;                      // Pin di default per SD card su ESP32-S3
+#else
+const int DEFAULT_SD_PIN = 5;                       // Pin di default per SD card su ESP32
+#endif
 const int DEFAULT_PIN_DELAY = 1000;                 // Delay di default per impulsi pin (ms)
 const int DEFAULT_RECORDING_INTERVAL = 1000;        // Intervallo di default per registrazione pin (ms)
 

@@ -1,0 +1,120 @@
+esphome:
+  name: smarthome-s3
+  friendly_name: SmartHome ESP32-S3
+  comment: "Complete ESPHome Porting of SmartHome C++ MVC Project for ESP32-S3"
+  includes:
+    - src/model/CustomButtonModel.h
+    - src/model/CustomButtonModel.cpp
+    - src/view/NavigationManager.h
+    - src/view/NavigationManager.cpp
+    - src/view/ImagesData.h
+    - src/view/ImagesData.cpp
+    - src/view/ViewConfig.h
+    - src/view/ViewConfig.cpp
+    - src/view/ViewServices.h
+    - src/view/ViewServices.cpp
+    - src/controller/CustomWebController.h
+    - src/controller/CustomWebController.cpp
+  on_boot:
+    priority: -100.0
+    then:
+      - lambda: |-
+          auto *custom_controller = new smarthome::CustomWebController();
+          custom_controller->setup();
+
+esp32:
+  board: esp32-s3-devkitc-1
+  variant: esp32s3
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+  level: INFO
+  baud_rate: 115200
+
+# Native Home Assistant API (Optional Encryption)
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+# OTA Updates
+ota:
+  - platform: esphome
+
+# Wi-Fi Configuration (Dual Mode: Wi-Fi Casa + AP SEMPRE ATTIVO "Panigale-Mel-AP")
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  ap:
+    ssid: !secret ap_ssid
+    password: !secret ap_password
+
+# Captive Portal for easy Wi-Fi provisioning via browser
+captive_portal:
+
+# Standalone Web Server (v3) with Glassmorphism CSS theme
+web_server:
+  port: 80
+  version: 3
+  css_include: "glassmorphism.css"
+  sorting_groups:
+    - id: group_relays
+      name: "Controllo Luci"
+      sorting_weight: 10
+    - id: group_system
+      name: "Diagnostica Sistema"
+      sorting_weight: 20
+
+# ==========================================
+# RELAYS / SWITCHES (ESP32-S3 GPIO Mappings)
+# ==========================================
+switch:
+  - platform: gpio
+    name: "Posizione"
+    pin: GPIO4
+    id: relay_posizione
+    icon: "mdi:car-parking-lights"
+
+  - platform: gpio
+    name: "Anabbagliante"
+    pin: GPIO5
+    id: relay_anabbagliante
+    icon: "mdi:car-light-dimmed"
+
+  - platform: gpio
+    name: "Abbagliante"
+    pin: GPIO6
+    id: relay_abbagliante
+    icon: "mdi:car-light-high"
+
+# ==========================================
+# DIAGNOSTICS & SYSTEM SENSORS
+# ==========================================
+sensor:
+  - platform: wifi_signal
+    name: "Segnale Wi-Fi (RSSI)"
+    update_interval: 10s
+
+  - platform: uptime
+    name: "Uptime Sistema"
+    update_interval: 60s
+
+# System Memory Monitoring (Heap)
+debug:
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "Indirizzo IP ESP32-S3"
+    ssid:
+      name: "Rete Wi-Fi Connessa"
+
+  - platform: version
+    name: "Versione ESPHome"
+
+# Control Buttons
+button:
+  - platform: restart
+    name: "Riavvia ESP32-S3"

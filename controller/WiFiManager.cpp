@@ -1,153 +1,191 @@
 #include "WiFiManager.h"
 #include "WebServer.h"
-
-
+#include <stdexcept>
 
 WebServer *my_webServer = nullptr;
 
 WiFiManager::WiFiManager()
 {
-    /*qui creo Esp32 funziona come AP!*/
-    this->ssid = DEFAULT_AP_SSID;
-    this->password = DEFAULT_AP_PASSWORD;
-    this->setupAP();
-    isAP = true;
+    this->ap_ssid = DEFAULT_AP_SSID;
+    this->ap_password = DEFAULT_AP_PASSWORD;
+    this->sta_ssid = "";
+    this->sta_password = "";
+    this->sta_ip = "";
+    this->ap_ip = "";
+    this->isSTAConnected = false;
+    this->isFirstStart = true;
+
+    initializeDualMode();
 }
 
-void WiFiManager::setupAP()
+void WiFiManager::initializeDualMode()
 {
     try
     {
-        clear_var();
-       
-        WiFi.mode(WIFI_AP);
+        // 1. Configura la modalità Dual Mode (WIFI_AP_STA)
+        WiFi.mode(WIFI_AP_STA);
         delay(WIFI_MODE_DELAY);
-        WiFi.softAP(ssid, password);
-        IPAddress IP = WiFi.softAPIP();
-        Serial.print("ESP32 AP IP address: ");
-        Serial.println(IP);
 
-        this->ip_address = IP.toString().c_str();
+        // 2. Avvia l'Access Point (SEMPRE ATTIVO)
+        WiFi.softAP(ap_ssid.c_str(), ap_password.c_str());
+        IPAddress apIP = WiFi.softAPIP();
+        this->ap_ip = apIP.toString().c_str();
 
-        my_webServer = new WebServer(ssid, password);
+        Serial.print("ESP32 Dual Mode - AP attivato con IP: ");
+        Serial.println(apIP);
+
+        // 3. Inizializza il WebServer una sola volta (se non esiste)
+        if (my_webServer == nullptr)
+        {
+            my_webServer = new WebServer(ap_ssid.c_str(), ap_password.c_str());
+        }
+
+        // 4. Carica credenziali da NVS e tenta la connessione STA in background
+        String savedSsid, savedPass;
+        if (CredentialsStorage::loadCredentials(savedSsid, savedPass))
+        {
+            Serial.print("Credenziali NVS trovate per SSID: ");
+            Serial.println(savedSsid);
+            if (tryConnectSTA(savedSsid.c_str(), savedPass.c_str(), SMOOTH_CONNECT_ATTEMPTS))
+            {
+                sta_ssid = savedSsid.c_str();
+                sta_password = savedPass.c_str();
+                Serial.print("Connessione STA riuscita! IP locale: ");
+                Serial.println(sta_ip.c_str());
+            }
+            else
+            {
+                Serial.println("Connessione STA alle credenziali salvate fallita. L'AP rimane comunque attivo a 192.168.4.1.");
+            }
+        }
+        else
+        {
+            Serial.println("Nessuna credenziale salvata in NVS. In attesa di configurazione tramite Web UI.");
+        }
     }
-    catch(...)
+    catch (...)
     {
-        Serial.println("Errore durante la creazione dell'access point!");
+        Serial.println("Errore durante l'inizializzazione della modalità Dual Mode AP+STA!");
     }
-    isAP = true;
 }
 
-void WiFiManager::clear_var()
+bool WiFiManager::tryConnectSTA(const char *ssid, const char *password, int maxAttempts)
 {
-    if (my_webServer != nullptr)
+    if (ssid == nullptr || strlen(ssid) == 0)
     {
-        try
-        {
-            if (!isFirstStart)
-            {
-                delete my_webServer; // da errore di double free soprattutto all avvio non riesco a catturarlo con eccezzione.
-            }
-                       
-        }
-        catch (const std::exception &e)
-        {
-            Serial.println("Errore durante la distruzione del web server!");
-        }
-        my_webServer = nullptr;
+        return false;
     }
-    WiFi.disconnect(); // Disconnetti eventuali connessioni pregresse
+
+    Serial.print("Tentativo di connessione STA a ");
+    Serial.println(ssid);
+
+    WiFi.begin(ssid, password);
+
+    int attempts = 0;
+    while (WiFi.status() != WL_CONNECTED && attempts < maxAttempts)
+    {
+        delay(SMOOTH_CONNECT_DELAY);
+        Serial.print(".");
+        attempts++;
+    }
+    Serial.println();
+
+    if (WiFi.status() == WL_CONNECTED)
+    {
+        this->sta_ip = std::string(WiFi.localIP().toString().c_str());
+        this->isSTAConnected = true;
+        return true;
+    }
+    else
+    {
+        WiFi.disconnect(false);
+        this->isSTAConnected = false;
+        this->sta_ip = "";
+        return false;
+    }
 }
 
 WiFiManager::WiFiManager(const char *ssid, const char *password)
 {
-    this->ssid = ssid;
-    this->password = password;
-    this->connect();
+    this->ap_ssid = DEFAULT_AP_SSID;
+    this->ap_password = DEFAULT_AP_PASSWORD;
+    this->isSTAConnected = false;
+    this->isFirstStart = true;
+
+    initializeDualMode();
+
+    if (ssid != nullptr && strlen(ssid) > 0)
+    {
+        setNetwork(ssid, password);
+    }
+}
+
+void WiFiManager::setupAP()
+{
+    WiFi.mode(WIFI_AP_STA);
+    WiFi.softAP(ap_ssid.c_str(), ap_password.c_str());
+    this->ap_ip = WiFi.softAPIP().toString().c_str();
 }
 
 void WiFiManager::connect()
 {
-    try
+    if (!sta_ssid.empty())
     {
-        clear_var();
-        WiFi.mode(WIFI_STA);
-        
-        delay(WIFI_MODE_DELAY);
-
-        Serial.println("Connessione alla rete Wi-Fi...");
-
-        WiFi.begin(ssid, password);
-
-        while (WiFi.status() != WL_CONNECTED)
-        {
-            delay(CONNECTION_RETRY_DELAY);
-            Serial.println("Connessione in corso...");
-        }
-
-        my_webServer = new WebServer(ssid, password);
-
-        Serial.println("Connessione Wi-Fi stabilita!");
-        Serial.print("Indirizzo IP: ");
-        Serial.println(WiFi.localIP());
-        //this->ip_address = WiFi.localIP().toString();
-        this->ip_address = std::string(WiFi.localIP().toString().c_str());
-    }
-    catch(...)
-    {
-        Serial.println("Errore durante la connessione alla rete Wi-Fi!");
-        //throw new std::runtime_error("Errore durante la connessione alla rete Wi-Fi!");
-        this->ssid = DEFAULT_AP_SSID;
-        this->password = DEFAULT_AP_PASSWORD;
-        this->setupAP();
-        isAP = true;
+        tryConnectSTA(sta_ssid.c_str(), sta_password.c_str());
     }
 }
 
-void WiFiManager::smoothConnect() //nota ce ancora errore quando sbaglio a inserire password!
+bool WiFiManager::smoothConnect()
 {
-    try
+    if (sta_ssid.empty())
     {
-        //WiFi.mode(WIFI_STA);
-        
-        delay(WIFI_MODE_DELAY);
+        return false;
+    }
+    return tryConnectSTA(sta_ssid.c_str(), sta_password.c_str(), SMOOTH_CONNECT_ATTEMPTS);
+}
 
-        Serial.println("Connessione alla rete Wi-Fi...");
+void WiFiManager::clear_var()
+{
+    WiFi.disconnect(false);
+    isSTAConnected = false;
+    sta_ip = "";
+}
 
-        WiFi.begin(ssid, password);
+void WiFiManager::setNetwork(const char *ssid_new, const char *password_new)
+{
+    std::string old_ssid = this->sta_ssid;
+    std::string old_password = this->sta_password;
 
-        int attempts = 0;
-        while (WiFi.status() != WL_CONNECTED && attempts < 10)
+    Serial.print("Richiesto cambio rete STA a: ");
+    Serial.println(ssid_new);
+
+    bool success = tryConnectSTA(ssid_new, password_new, SMOOTH_CONNECT_ATTEMPTS);
+
+    if (success)
+    {
+        this->sta_ssid = ssid_new;
+        this->sta_password = password_new;
+
+        if (CredentialsStorage::saveCredentials(ssid_new, password_new))
         {
-            // Controlla lo stato WiFi
-            Serial.println("Connessione in corso...");
+            Serial.println("Credenziali salvate con successo in NVS!");
+        }
+        else
+        {
+            Serial.println("Errore durante il salvataggio delle credenziali in NVS.");
+        }
+    }
+    else
+    {
+        Serial.println("Connessione alla nuova rete fallita! L'AP rimane attivo a 192.168.4.1.");
 
-            // Aumenta il contatore dei tentativi
-            attempts++;
-
-            delay(SMOOTH_CONNECT_DELAY);
+        if (!old_ssid.empty())
+        {
+            tryConnectSTA(old_ssid.c_str(), old_password.c_str(), 5);
         }
 
-        if (WiFi.status() != WL_CONNECTED)
-        {
-            throw std::runtime_error("Errore durante la connessione alla rete Wi-Fi dopo 10 tentativi!");
-        }
-
-        Serial.println("smooth Connessione Wi-Fi stabilita!");
-        Serial.print("Indirizzo IP: ");
-        Serial.println(WiFi.localIP());
-        this->ip_address = std::string(WiFi.localIP().toString().c_str());
-        Serial.println("ip_address: ");
-        Serial.println(this->ip_address.c_str());
+        throw std::runtime_error(std::string("Errore cambio rete Wi-Fi! Impossibile connettersi a: ") + ssid_new);
     }
-    catch(const std::exception& e)
-    {
-        Serial.println("Errore non sono riuscito a connettermi, password probabilmente errata o potenza segnale troppo debole!");
-        throw std::runtime_error("Errore durante la connessione alla rete Wi-Fi!");
-    }
-    //connessione a una rete Avvenuta con successo!
-    isAP = false;
-    //return std::string(WiFi.localIP().toString().c_str());
 }
 
 std::vector<std::string> WiFiManager::scanNetworks()
@@ -157,52 +195,21 @@ std::vector<std::string> WiFiManager::scanNetworks()
     for (int i = 0; i < n; ++i)
     {
         networks.push_back(std::string(WiFi.SSID(i).c_str()));
-        Serial.println(WiFi.SSID(i));
-        Serial.println("potenza segnale: "+String(WiFi.RSSI(i)));
+        Serial.print("Rete trovata: ");
+        Serial.print(WiFi.SSID(i));
+        Serial.print(" (RSSI: ");
+        Serial.print(WiFi.RSSI(i));
+        Serial.println(")");
     }
     return networks;
 }
 
-void WiFiManager::setNetwork(const char *ssid_new, const char *password_new)
-{
-    const char * old_ssid = this->ssid;
-    const char * old_password = this->password;
-
-    this->ssid = ssid_new;
-    this->password = password_new;
-    try
-    {
-        this->smoothConnect(); //clearvar non fatto
-        isFirstStart = false;
-    }
-    catch(...) //se qualcosa e andato storto ripristino i vecchi valori
-    {
-        this->ssid = old_ssid;
-        this->password = old_password;
-
-        //Serial.println("Errore durante la connessione alla Nuova rete Wi-Fi!");
-        if (isAP)
-        {
-            this->setupAP();
-        }
-        else
-        {
-            this->clear_var();
-            this->setNetwork(old_ssid, old_password);
-            //this->setupAP(); //in ogni caso parto sempre dallo stato di AP! quando non riesco a connettermi!
-        }
-        //inoltre lancio un eccezione che possa essere catturata da Route e gestita per inviare route di errore in switch network!
-        throw std::runtime_error(std::string("Errore cambio rete Wi-Fi!, attivo la vecchia rete: ssid: ") + old_ssid + ", password: " + old_password);
-    }
-}
-
 WiFiManager::~WiFiManager()
 {
-    // Distruttore: Dealloca la memoria
     if (my_webServer != nullptr)
     {
         delete my_webServer;
         my_webServer = nullptr;
     }
-    Serial.println("Oggetto WiFiManager distrutto, liberazione della memoria...");
+    Serial.println("WiFiManager distrutto.");
 }

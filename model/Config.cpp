@@ -1,7 +1,7 @@
 #include "Config.h"
 
 // ===== DEFINIZIONI CONFIGURAZIONE ACCESS POINT =====
-const char* DEFAULT_AP_SSID = "SmartHome-Access-Point";
+const char* DEFAULT_AP_SSID = "Panigale-Mel-AP";
 const char* DEFAULT_AP_PASSWORD = "123456789";
 
 // ===== DEFINIZIONI CONFIGURAZIONE BOTTONI PERSONALIZZATI =====

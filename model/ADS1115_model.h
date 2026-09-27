@@ -3,10 +3,28 @@
 
 #include <Arduino.h>
 
-// Definizione dei pin del multiplexer (collegati all'ESP32)
-#define PIN_A 12  // S0 MUX
-#define PIN_B 13  // S1 MUX
-#define PIN_C 14  // S2 MUX
+// Definizione dei pin del multiplexer (collegati all'ESP32 / ESP32-S3)
+#if defined(CONFIG_IDF_TARGET_ESP32S3) || defined(ARDUINO_ESP32S3_DEV)
+  #ifndef PIN_A
+    #define PIN_A 4  // S0 MUX per ESP32-S3
+  #endif
+  #ifndef PIN_B
+    #define PIN_B 5  // S1 MUX per ESP32-S3
+  #endif
+  #ifndef PIN_C
+    #define PIN_C 6  // S2 MUX per ESP32-S3
+  #endif
+#else
+  #ifndef PIN_A
+    #define PIN_A 12 // S0 MUX per ESP32 Standard
+  #endif
+  #ifndef PIN_B
+    #define PIN_B 13 // S1 MUX per ESP32 Standard
+  #endif
+  #ifndef PIN_C
+    #define PIN_C 14 // S2 MUX per ESP32 Standard
+  #endif
+#endif
 
 class ADS1115_model {
 public:

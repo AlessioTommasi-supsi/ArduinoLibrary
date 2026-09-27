@@ -4,11 +4,11 @@ namespace smarthome {
 
 String NavigationManager::getNavbar() {
     String navbar = R"raw(
-        <!-- Navbar Responsive (2 Voci Attive: Services & WiFi Config) -->
+        <!-- Navbar Floating Glassmorphism (Home & WiFi Config) -->
         <div class="navbar">
-            <a href="/services">
-                <div class="icon">&#9889;</div>
-                <span>Services</span>
+            <a href="/home">
+                <div class="icon">&#127968;</div>
+                <span>Home</span>
             </a>
             <a href="/config">
                 <div class="icon">&#128246;</div>
@@ -26,33 +26,33 @@ String NavigationManager::getNavbarCss() {
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      background-color: rgba(255, 255, 255, 0.4);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-radius: 12px;
+      background: rgba(10, 5, 8, 0.85);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 30px;
+      padding: 10px 30px;
       display: flex;
-      justify-content: space-around;
-      align-items: center;
-      padding: 10px 20px;
-      width: 90%;
-      max-width: 400px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      gap: 30px;
       z-index: 2000;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
     }
     .navbar a {
       text-decoration: none;
-      color: #333;
+      color: #94a3b8;
       display: flex;
       flex-direction: column;
       align-items: center;
-      font-size: 14px;
+      font-size: 13px;
+      font-weight: 600;
       transition: color 0.3s ease;
     }
-    .navbar a:hover {
-      color: #4CAF50;
+    .navbar a:hover, .navbar a.active {
+      color: #ff1a1a;
     }
     .navbar .icon {
       font-size: 24px;
+      margin-bottom: 2px;
     }
     )raw";
     return css;

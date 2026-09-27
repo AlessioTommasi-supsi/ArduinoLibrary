@@ -12,7 +12,7 @@ String ViewServices::generateCustomButtonsHTML(const std::vector<CustomButtonIte
         html += "    <label>" + btn.label + "</label>";
         html += "    <div class='loading-icon'>&#8987;</div>";
         html += "  </button>";
-        html += "  <button class='delete-btn' onclick=\"window.location.href='/removeButton?label=" + btn.label + "'\">&#10060;</button>";
+        html += "  <button class='trash-btn' title='Elimina' onclick=\"if(confirm('Eliminare " + btn.label + "?')) window.location.href='/removeButton?label=" + btn.label + "'\">&#128465; Elimina</button>";
         html += "</div>";
     }
     return html;
@@ -23,7 +23,7 @@ String ViewServices::generateServicesHTML(const std::vector<CustomButtonItem> &c
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Panigale - Controllo Luci</title>
+    <title>Panigale - Home</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/glassmorphism.css">
     <style>
@@ -33,7 +33,7 @@ String ViewServices::generateServicesHTML(const std::vector<CustomButtonItem> &c
         .logo_top_image { max-width: 250px; height: auto; }
         .glass_container { background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(12px); border-radius: 20px; padding: 25px; border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8); margin: 0 auto; max-width: 1000px; }
         .emoji-button-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
-        .emoji-button-wrapper { position: relative; flex: 0 1 calc(33.333% - 20px); max-width: calc(33.333% - 20px); min-width: 240px; }
+        .emoji-button-wrapper { position: relative; flex: 0 1 calc(33.333% - 20px); max-width: calc(33.333% - 20px); min-width: 240px; display: flex; flex-direction: column; align-items: center; }
         .image-button { position: relative; width: 100%; height: 220px; border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 16px; overflow: hidden; padding: 0; cursor: pointer; background: #000; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6); transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
         .image-button:hover { transform: translateY(-4px) scale(1.02); border-color: #ff1a1a; box-shadow: 0 12px 25px rgba(255, 26, 26, 0.35); }
         .image-button:active, .image-button.loading-state { transform: scale(0.97); opacity: 0.85; }
@@ -44,7 +44,8 @@ String ViewServices::generateServicesHTML(const std::vector<CustomButtonItem> &c
         .emoji-button { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 16px; width: 100%; height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 70px; color: #fff; cursor: pointer; transition: 0.2s ease; position: relative; }
         .emoji-button:hover { transform: translateY(-4px) scale(1.02); background: rgba(255, 255, 255, 0.18); border-color: #ff1a1a; }
         .emoji-button label { display: block; margin-top: 10px; font-size: 18px; font-weight: 700; color: #f1f5f9; }
-        .delete-btn { position: absolute; top: 8px; right: 8px; background: rgba(255, 0, 0, 0.85); border: none; color: white; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; z-index: 12; font-size: 14px; }
+        .trash-btn { margin-top: 10px; background: rgba(255, 34, 34, 0.15); border: 1px solid rgba(255, 34, 34, 0.4); color: #ff5555; border-radius: 8px; padding: 6px 16px; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease; }
+        .trash-btn:hover { background: rgba(255, 34, 34, 0.85); color: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255, 34, 34, 0.4); }
     </style>
     <script>
         function fetchData(button, apiUrl) {

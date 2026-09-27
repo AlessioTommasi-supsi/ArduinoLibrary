@@ -13,6 +13,8 @@ esphome:
     - src/view/ViewConfig.cpp
     - src/view/ViewServices.h
     - src/view/ViewServices.cpp
+    - src/controller/DnsServerEspIdf.h
+    - src/controller/DnsServerEspIdf.cpp
     - src/controller/CustomWebController.h
     - src/controller/CustomWebController.cpp
   on_boot:
@@ -50,9 +52,6 @@ wifi:
   ap:
     ssid: !secret ap_ssid
     password: !secret ap_password
-
-# Captive Portal for easy Wi-Fi provisioning via browser
-captive_portal:
 
 # Standalone Web Server (v3) with Glassmorphism CSS theme
 web_server:

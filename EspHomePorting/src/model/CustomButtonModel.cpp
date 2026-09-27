@@ -38,6 +38,7 @@ void CustomButtonModel::loadCustomButtons() {
 void CustomButtonModel::saveCustomButtons() {
     nvs_handle_t handle;
     if (nvs_open("custom_btn", NVS_READWRITE, &handle) == ESP_OK) {
+        nvs_erase_all(handle); // Pulisce chiavi precedenti (evita orfani alla rimozione)
         nvs_set_i32(handle, "btn_count", (int32_t)customButtons_.size());
         for (size_t i = 0; i < customButtons_.size(); i++) {
             nvs_set_str(handle, ("l_" + String(i)).c_str(), customButtons_[i].label.c_str());

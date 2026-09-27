@@ -99,14 +99,16 @@ EspHomePorting/
     │   ├── ImagesData.h         # Array binari immagini WebP salvati in Flash (PROGMEM)
     │   ├── ImagesData.cpp
     │   ├── NavigationManager.h
-    │   ├── NavigationManager.cpp # Navbar con voci Services e WiFi Config
+    │   ├── NavigationManager.cpp # Navbar fissa sul fondo dello schermo (Home e WiFi Config)
     │   ├── ViewConfig.h
     │   ├── ViewConfig.cpp       # Form gestione Wi-Fi con scansione reti
     │   ├── ViewServices.h
     │   └── ViewServices.cpp     # UI 3 Bottoni Immagine 100% puliti senza scritte sovrapposte
     └── controller/
+        ├── DnsServerEspIdf.h    # Server DNS nativo ESP-IDF (lwip sockets) per Captive Portal
+        ├── DnsServerEspIdf.cpp
         ├── CustomWebController.h
-        └── CustomWebController.cpp # Gestione rotte HTTP, invio binario WebP e pulso 500ms
+        └── CustomWebController.cpp # Gestione rotte HTTP (/home), invio binario WebP e pulso 500ms
 ```
 
 ---
@@ -121,9 +123,14 @@ EspHomePorting/
    * **Abbagliante** (`/abbagliante.webp`): Immagine pulita a tutto spazio, impulso GPIO 6 per 500 ms.
 4. **Animazione Visiva a Impulso (500 ms):**
    * Al clic del pulsante, compare l'icona clessidra ⏳ sovrapposta per esattamente **500 ms** in sincronia con l'impulso hardware inviato al relè, per poi scomparire automaticamente.
-5. **Funzionalità Offline al 100%:**
+5. **Navbar Fissa a Bordo Schermo:**
+   * Barra di navigazione ancorata al bordo inferiore dello schermo con icona casa **🏠 Home** (`/home`) e icona segnale **📶 WiFi Config** (`/config`).
+6. **Captive Portal Automatico alla Home:**
+   * Appena ci si connette all'AP `Panigale-Mel-AP`, il sistema reindirizza il popup captive portal direttamente su `http://192.168.4.1/home` (aprendo i comandi luci).
+   * La configurazione Wi-Fi non compare più in automatico: è accessibile manualmente premendo su `📶 WiFi Config` nella navbar.
+7. **Funzionalità Offline al 100%:**
    * Tutte e 4 le immagini WebP sono memorizzate nella Flash dell'ESP32-S3 e servite localmente con invio binario nativo (`image/webp` con `Content-Length`), senza richiedere connessione ad internet.
-6. **Wi-Fi Dual Mode:**
+8. **Wi-Fi Dual Mode:**
    * L'Access Point **`Panigale-Mel-AP`** rimane sempre attivo e accessibile per connessioni dirette da smartphone.
 
 ---
@@ -136,3 +143,7 @@ Come da tue istruzioni, la compilazione non viene avviata automaticamente. Quand
 cd /home/none/Arduino/libraries/EspHomePorting
 esphome run smarthome-esps3.yaml
 ```
+
+
+
+non va bene, ESP deve stare in pooling sullo stato dei bottoni se no ce un disallineamenteo

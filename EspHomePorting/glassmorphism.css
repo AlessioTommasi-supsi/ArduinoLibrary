@@ -70,6 +70,9 @@ h1, h2, h3, label {
   flex: 0 1 calc(33.333% - 20px);
   max-width: calc(33.333% - 20px);
   min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* 100% Image Filled Buttons */
@@ -127,20 +130,29 @@ h1, h2, h3, label {
   100% { transform: scale(1.0) rotate(180deg); }
 }
 
-/* Delete Button for Custom items */
-.delete-btn {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: rgba(255, 0, 0, 0.85);
-  border: none;
-  color: white;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  cursor: pointer;
-  z-index: 12;
+/* Trash / Delete Button under Custom buttons */
+.trash-btn {
+  margin-top: 10px;
+  background: rgba(255, 34, 34, 0.15);
+  border: 1px solid rgba(255, 34, 34, 0.4);
+  color: #ff5555;
+  border-radius: 8px;
+  padding: 6px 16px;
   font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.trash-btn:hover {
+  background: rgba(255, 34, 34, 0.85);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 34, 34, 0.4);
 }
 
 /* Standard Emoji Button for Custom Items and + Button */

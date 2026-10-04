@@ -1,7 +1,8 @@
 #ifndef IMAGES_DATA_H
 #define IMAGES_DATA_H
 
-#include <Arduino.h>
+#include <cstddef>
+#include <cstdint>
 
 namespace smarthome {
 extern const size_t LOGO_MEL_SIZE;

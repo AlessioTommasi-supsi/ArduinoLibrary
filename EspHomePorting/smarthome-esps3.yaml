@@ -1,6 +1,6 @@
 esphome:
-  name: smarthome-s3
-  friendly_name: SmartHome ESP32-S3
+  name: panigalemel
+  friendly_name: Panigale Mel ESP32-S3
   comment: "Complete ESPHome Porting of SmartHome C++ MVC Project for ESP32-S3"
   includes:
     - src/model/CustomButtonModel.h
@@ -13,8 +13,6 @@ esphome:
     - src/view/ViewConfig.cpp
     - src/view/ViewServices.h
     - src/view/ViewServices.cpp
-    - src/controller/DnsServerEspIdf.h
-    - src/controller/DnsServerEspIdf.cpp
     - src/controller/CustomWebController.h
     - src/controller/CustomWebController.cpp
   on_boot:
@@ -22,13 +20,18 @@ esphome:
     then:
       - lambda: |-
           auto *custom_controller = new smarthome::CustomWebController();
+          custom_controller->set_relays(relay_posizione, relay_anabbagliante);
           custom_controller->setup();
 
 esp32:
   board: esp32-s3-devkitc-1
   variant: esp32s3
   framework:
-    type: arduino
+    type: esp-idf
+
+mdns:
+  disabled: false
+
 
 # Enable logging
 logger:
@@ -48,10 +51,22 @@ ota:
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
+  power_save_mode: none
+  reboot_timeout: 0s
 
   ap:
     ssid: !secret ap_ssid
     password: !secret ap_password
+    ap_timeout: 0s
+
+  on_connect:
+    - lambda: |-
+        if (smarthome::global_custom_web_controller != nullptr) {
+          smarthome::global_custom_web_controller->enable_dual_mode_ap();
+        }
+
+# Native Captive Portal (DNS Server automatico su porta 53 + rilevamento OS)
+captive_portal:
 
 # Standalone Web Server (v3) with Glassmorphism CSS theme
 web_server:
@@ -67,26 +82,56 @@ web_server:
       sorting_weight: 20
 
 # ==========================================
-# RELAYS / SWITCHES (ESP32-S3 GPIO Mappings)
+# RELAYS / SWITCHES (ESP32-S3 GPIO Mappings - 2 Canali Active-LOW)
 # ==========================================
 switch:
   - platform: gpio
     name: "Posizione"
-    pin: GPIO4
+    pin:
+      number: GPIO4
+      inverted: true
     id: relay_posizione
     icon: "mdi:car-parking-lights"
+    restore_mode: RESTORE_DEFAULT_OFF
 
   - platform: gpio
     name: "Anabbagliante"
-    pin: GPIO5
+    pin:
+      number: GPIO5
+      inverted: true
     id: relay_anabbagliante
     icon: "mdi:car-light-dimmed"
+    restore_mode: RESTORE_DEFAULT_OFF
+
+# ==========================================
+# PULSANTI FISICI BISTABILI SPST (GPIO 7 e 6 verso GND) CON DEBOUNCE NATIVO
+# ==========================================
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO7
+      mode: INPUT_PULLUP
+      inverted: true
+    name: "Pulsante Fisico Posizione"
+    id: button_sw1
+    internal: true
+    filters:
+      - delayed_on_off: 50ms
+    on_press:
+      - switch.toggle: relay_posizione
 
   - platform: gpio
-    name: "Abbagliante"
-    pin: GPIO6
-    id: relay_abbagliante
-    icon: "mdi:car-light-high"
+    pin:
+      number: GPIO6
+      mode: INPUT_PULLUP
+      inverted: true
+    name: "Pulsante Fisico Anabbagliante"
+    id: button_sw2
+    internal: true
+    filters:
+      - delayed_on_off: 50ms
+    on_press:
+      - switch.toggle: relay_anabbagliante
 
 # ==========================================
 # DIAGNOSTICS & SYSTEM SENSORS

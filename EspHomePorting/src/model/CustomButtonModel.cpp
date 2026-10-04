@@ -1,4 +1,5 @@
 #include "CustomButtonModel.h"
+#include <cstring>
 
 namespace smarthome {
 
@@ -23,12 +24,12 @@ void CustomButtonModel::loadCustomButtons() {
             size_t e_len = sizeof(e_buf);
             size_t u_len = sizeof(u_buf);
 
-            nvs_get_str(handle, ("l_" + String(i)).c_str(), l_buf, &l_len);
-            nvs_get_str(handle, ("e_" + String(i)).c_str(), e_buf, &e_len);
-            nvs_get_str(handle, ("u_" + String(i)).c_str(), u_buf, &u_len);
+            nvs_get_str(handle, ("l_" + std::to_string(i)).c_str(), l_buf, &l_len);
+            nvs_get_str(handle, ("e_" + std::to_string(i)).c_str(), e_buf, &e_len);
+            nvs_get_str(handle, ("u_" + std::to_string(i)).c_str(), u_buf, &u_len);
 
             if (strlen(l_buf) > 0) {
-                customButtons_.push_back({String(l_buf), String(e_buf), String(u_buf)});
+                customButtons_.push_back({std::string(l_buf), std::string(e_buf), std::string(u_buf)});
             }
         }
         nvs_close(handle);
@@ -41,21 +42,21 @@ void CustomButtonModel::saveCustomButtons() {
         nvs_erase_all(handle); // Pulisce chiavi precedenti (evita orfani alla rimozione)
         nvs_set_i32(handle, "btn_count", (int32_t)customButtons_.size());
         for (size_t i = 0; i < customButtons_.size(); i++) {
-            nvs_set_str(handle, ("l_" + String(i)).c_str(), customButtons_[i].label.c_str());
-            nvs_set_str(handle, ("e_" + String(i)).c_str(), customButtons_[i].emoji.c_str());
-            nvs_set_str(handle, ("u_" + String(i)).c_str(), customButtons_[i].url.c_str());
+            nvs_set_str(handle, ("l_" + std::to_string(i)).c_str(), customButtons_[i].label.c_str());
+            nvs_set_str(handle, ("e_" + std::to_string(i)).c_str(), customButtons_[i].emoji.c_str());
+            nvs_set_str(handle, ("u_" + std::to_string(i)).c_str(), customButtons_[i].url.c_str());
         }
         nvs_commit(handle);
         nvs_close(handle);
     }
 }
 
-void CustomButtonModel::addButton(const String &label, const String &emoji, const String &url) {
+void CustomButtonModel::addButton(const std::string &label, const std::string &emoji, const std::string &url) {
     customButtons_.push_back({label, emoji, url});
     saveCustomButtons();
 }
 
-void CustomButtonModel::removeButton(const String &label) {
+void CustomButtonModel::removeButton(const std::string &label) {
     for (auto it = customButtons_.begin(); it != customButtons_.end(); ++it) {
         if (it->label == label) {
             customButtons_.erase(it);

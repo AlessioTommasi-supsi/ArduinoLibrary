@@ -1,156 +1,206 @@
 # Panigale ESP32-S3 Lighting Control - ESPHome Porting
 
-Porting completo in **ESPHome** del firmware C++ MVC per **ESP32-S3**, con interfaccia web personalizzata ad alto contrasto per il controllo luci (Posizione, Anabbagliante, Abbagliante), Access Point fisso `Panigale-Mel-AP` e risorse grafiche WebP salvate direttamente in Flash locale.
+Porting completo in **ESPHome** con architettura C++ MVC per **ESP32-S3**, con interfaccia web ad alto contrasto per il controllo di 2 lampade a 12V (Posizione e Anabbagliante), Access Point fisso `Panigale-Mel-AP`, gestione pulsanti fisici bistabili con anti-rimbalzo non bloccante e sincronizzazione bidirezionale in tempo reale.
 
 ---
 
 ## ⚡ Schema Elettrico e Collegamenti Hardware
 
-### 1. Tabella dei Collegamenti GPIO
-
-| Funzione / Carico | Pin ESP32-S3 | Pin Modulo Relè | Tipo Segnale | Comportamento |
-| :--- | :--- | :--- | :--- | :--- |
-| **Luci di Posizione** | **GPIO 4** | **IN 1** | Digitale OUT (3.3V) | Impulso 500 ms (HIGH -> 500ms -> LOW) |
-| **Anabbagliante** | **GPIO 5** | **IN 2** | Digitale OUT (3.3V) | Impulso 500 ms (HIGH -> 500ms -> LOW) |
-| **Abbagliante** | **GPIO 6** | **IN 3** | Digitale OUT (3.3V) | Impulso 500 ms (HIGH -> 500ms -> LOW) |
-| **Alimentazione Modulo Relè** | **5V (VIN / VBUS)** | **VCC** | Alimentazione 5V DC | Corrente per pilotaggio bobine relè |
-| **Massa Comune** | **GND** | **GND** | Riferimento massa 0V | GND comune tra ESP32-S3 e scheda relè |
+### 1. Architettura dell'Alimentazione e Isolamento
+* **Bus Primario:** 12V DC (es. impianto batteria veicolo/moto).
+* **Step-Down DC-DC XL4015:** Converte i 12V in ingresso a **5.0V DC stabilizzati** in uscita.
+  * Alimenta il pin **5V (VIN / VBUS)** dell'ESP32-S3.
+  * Alimenta il morsetto **VCC** del modulo relè optoisolato.
+* **Massa Comune (GND):** Il negativo a 12V del bus, il polo negativo dello step-down (IN- e OUT-), il pin **GND** dell'ESP32-S3, il pin **GND** del modulo relè, il ritorno dei pulsanti SPST e il ritorno negativo delle 2 lampadine a 12V sono tutti collegati a **massa comune**.
 
 ---
 
-### 2. Schema di Principio dei Collegamenti (ASCII Diagram)
+### 2. Tabella dei Collegamenti GPIO e Morsetti
+
+| Componente | Pin ESP32-S3 | Pin Modulo / Carico | Tipo Segnale | Livello / Logica | Descrizione Funzionale |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Step-Down XL4015** | **5V (VIN)** | **OUT+ (5V)** | Alimentazione IN | +5.0V DC | Alimentazione logica ESP32-S3 |
+| **Massa Comune** | **GND** | **OUT- / Bus GND**| Riferimento 0V | 0V (GND) | Riferimento massa condiviso del sistema |
+| **Relè 1 (Posizione)** | **GPIO 4** | **IN 1** | Digitale OUT | Active-LOW (0V = ON) | Pilotaggio fotoaccoppiatore canale 1 |
+| **Relè 2 (Anabbagliante)**| **GPIO 5** | **IN 2** | Digitale OUT | Active-LOW (0V = ON) | Pilotaggio fotoaccoppiatore canale 2 |
+| **VCC Scheda Relè** | **—** | **VCC (Relè)** | Alimentazione 5V | +5.0V DC (da XL4015) | Corrente bobine e fotoaccoppiatori relè |
+| **GND Scheda Relè** | **GND** | **GND (Relè)** | Riferimento 0V | 0V (GND) | Massa modulo relè |
+| **Pulsante Bistabile 1** | **GPIO 7** | **Terminale A (Sw1)**| Digitale IN | `INPUT_PULLUP` (3.3V a riposo) | Comando manuale SPST Posizione (verso GND) |
+| **Pulsante Bistabile 2** | **GPIO 6** | **Terminale A (Sw2)**| Digitale IN | `INPUT_PULLUP` (3.3V a riposo) | Comando manuale SPST Anabbagliante (verso GND) |
+| **Ritorno Pulsanti 1 e 2**| **GND** | **Terminale B (Sw1/2)**| Riferimento 0V | 0V (GND) | Chiusura interruttore verso massa |
+| **Linea Potenza Relè 1/2**| **—** | **COM 1 & COM 2** | Linea Potenza 12V | +12V Bus Primario | Ingresso alimentazione lampadine |
+| **Lampadina 1 (+12V)** | **—** | **NO 1 (Relè 1)** | Contatto Potenza | 12V commutati | Uscita normalmente aperta per Posizione |
+| **Lampadina 2 (+12V)** | **—** | **NO 2 (Relè 2)** | Contatto Potenza | 12V commutati | Uscita normalmente aperta per Anabbagliante|
+| **Ritorno Lampade (-)** | **—** | **GND 12V Bus** | Riferimento 0V | 0V (GND) | Polo negativo delle lampade a 12V |
+
+> [!IMPORTANT]
+> **Nessun pulsante in serie ai relè:** I pulsanti bistabili/autobloccanti sono interfacciati esclusivamente come ingressi logici digitali tra i pin GPIO e GND, proteggendo i contatti da archi elettrici e garantendo la totale indipendenza dal carico a 12V.
+
+---
+
+### 3. Schema Elettrico Completo di Principio (ASCII Diagram)
 
 ```text
-       +---------------------------------------------+
-       |                  ESP32-S3                   |
-       |                                             |
-       |  [GPIO 4] ----------------------------+     |
-       |  [GPIO 5] ---------------------+      |     |
-       |  [GPIO 6] --------------+      |      |     |
-       |                         |      |      |     |
-       |  [  5V  ] --------+     |      |      |     |
-       |  [ GND  ] ----+   |     |      |      |     |
-       +---------------+---+-----+------+------+-----+
-                       |   |     |      |      |
-                       |   |     |      |      |
-        +--------------+   |     |      |      |
-        |                  |     |      |      |
-        |   +--------------+     |      |      |
-        |   |                    |      |      |
-       +v---+v-------------------v------v------v-----+
-       |   GND    VCC           IN3    IN2    IN1    |
-       |                                             |
-       |         MODULO RELE' A 3 o 4 CANALI         |
-       |                                             |
-       |   RELE' 3 (Abbagliante)    NO3 ---+         |
-       |                            COM ---|---> +12V / Circuito Abbagliante
-       |                                             |
-       |   RELE' 2 (Anabbagliante)  NO2 ---+         |
-       |                            COM ---|---> +12V / Circuito Anabbagliante
-       |                                             |
-       |   RELE' 1 (Posizione)      NO1 ---+         |
-       |                            COM ---|---> +12V / Circuito Posizione
-       +---------------------------------------------+
+                    +-----------------------------+
+                    |      BUS 12V PRIMARIO       |
+                    |   (+12V)            (GND)   |
+                    +-----+-----------------+-----+
+                          |                 |
+                          |                 +-----------------------------------------+
+                          |                 | (GND 12V)                               |
+                          v [IN+]           v [IN-]                                   |
+                  +-------------------------------+                                   |
+                  |       STEP-DOWN XL4015        |                                   |
+                  |     (Uscita fissa a 5.0V)     |                                   |
+                  +-------+---------------+-------+                                   |
+                          | [OUT+]        | [OUT-]                                    |
+                          | (+5V)         | (GND)                                     |
+                          |               +--------------------+                      |
+                          |                                    |                      |
+                          +------------------+                 |                      |
+                                             |                 |                      |
+                                             v [5V / VIN]      v [GND]                |
+                                     +---------------------------------+              |
+                                     |            ESP32-S3             |              |
+                                     |                                 |              |
+   [SW 1 - Posizione]                |                                 |              |
+   GND <---[ / ]---------------------+ [GPIO  7] (INPUT_PULLUP)        |              |
+                                     |                                 |              |
+   [SW 2 - Anabbagliante]            |                                 |              |
+   GND <---[ / ]---------------------+ [GPIO 6] (INPUT_PULLUP)        |              |
+                                     |                                 |              |
+                                     |  [GPIO 4] (Comando OUT) --------+----+         |
+                                     |  [GPIO 5] (Comando OUT) --------+--+ |         |
+                                     +---------------------------------+  | |         |
+                                                                          | |         |
+                      +-------------------+                               | |         |
+                      | +5V (da OUT+ XL)  |                               | |         |
+                      +---------+---------+                               | |         |
+                                |                                         | |         |
+                                v [VCC]                                   | |         |
+                  +-------------------------------+                       | |         |
+                  |                               |                       | |         |
+                  |  MODULO RELÈ 2 CANALI (5V)    |                       | |         |
+                  |         OPTOISOLATO           |                       | |         |
+                  |                               |                       | |         |
+                  |  [IN1] (Active-LOW) <---------+-----------------------+ | (GPIO 4)|
+                  |  [IN2] (Active-LOW) <---------+-------------------------+ (GPIO 5)|
+                  |                               |                                   |
+                  |  [GND] -----------------------+--------------------+              |
+                  |                               |                    |              |
+                  |  RELÈ 1 (Posizione):          |                    |              |
+(+12V Bus) ------>|    COM 1                      |                    |              |
+                  |    NO 1 ----------------------+---> (+) LAMPADINA 1 (Posizione)   |
+                  |                               |     (-) ------------+             |
+                  |  RELÈ 2 (Anabbagliante):      |                     |             |
+(+12V Bus) ------>|    COM 2                      |                     |             |
+                  |    NO 2 ----------------------+---> (+) LAMPADINA 2 (Anabbagl.)   |
+                  |                               |     (-) ------------+             |
+                  +-------------------------------+                     |             |
+                                                                        v             v
+                                                                 ========================
+                                                                    MASSA COMUNE (GND)
+                                                                 ========================
 ```
 
-### 3. Significato delle Sigle dei Relè (NO, COM, NC)
-Ogni canale del modulo relè dispone di una morsettiera a 3 vie:
-* **COM (Common / Comune):** Morsetto centrale comune. Si collega al polo positivo dell'alimentazione della lampada (es. +12V della moto o linea di comando).
-* **NO (Normally Open / Normalmente Aperto):** 
-  * **NO1, NO2, NO3** indicano rispettivamente il contatto Normalmente Aperto del **Relè 1 (Posizione)**, **Relè 2 (Anabbagliante)** e **Relè 3 (Abbagliante)**.
-  * **Funzionamento:** A riposo (relè diseccitato/spento) il contatto tra COM e NO è aperto (circuito interrotto, luce spenta). Quando il relè viene eccitato (scatta), il contatto interno si chiude tra COM e NO, permettendo il passaggio della corrente e accendendo la lampada.
-* **NC (Normally Closed / Normalmente Chiuso):** Contatto chiuso a riposo e aperto quando il relè si eccita (non utilizzato per il comando luci standard).
+---
+
+### 4. Logica di Pilotaggio Active-LOW dei Relè
+I moduli a 2 canali con fotoaccoppiatore conducono quando l'anodo interno è alimentato a 5V e il catodo viene abbassato a massa (0V) dall'ESP32-S3:
+* **Relè Diseccitato / Lampada Spenta:** Pin GPIO a **3.3V (HIGH)** -> Fotoaccoppiatore spento, contatto NO aperto.
+* **Relè Eccitato / Lampada Accesa:** Pin GPIO a **0V (LOW)** -> Fotoaccoppiatore attivo, contatto NO chiuso su COM (+12V).
+* **Configurazione ESPHome:** Impostata con `inverted: true` su `GPIO4` e `GPIO5` per mantenere le entità switch coerenti (`state: true` = luce accesa = relè scattato a livello basso).
 
 ---
 
-### 4. Livelli di Tensione GPIO: Scatto a 0V o 3.3V?
+## 🧠 Firmware & Logica di Controllo
 
-Nel firmware e nel controller attuale:
-* **Logica Predefinita nel Codice: Active-HIGH (Scatto a 3.3V)**
-  * **Stato di riposo:** Il pin GPIO si trova a **0V (LOW / GND)**.
-  * **All'attivazione (impulso 500ms):** Il pin GPIO viene portato a **3.3V (HIGH)** per 500 millisecondi, per poi ritornare a **0V**.
-* **Compatibilità Moduli Relè sul Mercato:**
-  * **Moduli con jumper H / L:** Impostare il jumper su **H (High Level Trigger)** per scattare a 3.3V.
-  * **Moduli solo Active-LOW (scatto a 0V):** Se il modulo relè necessita di **0V (GND)** per scattare (molto comuni i moduli con fotoaccoppiatore optoisolato che conducono a livello basso), è possibile invertire il segnale sia in `smarthome-esps3.yaml` (`inverted: true`) sia nel controller modificando lo stato da LOW ad HIGH.
+### 1. Toggle Logico su Transizione di Fronte (Edge Transition)
+I pulsanti SPST utilizzati sono autobloccanti/bistabili (mantengono la posizione premuto o rilasciato). 
+* **Problema del controllo statico (HIGH/LOW):** Se si leggesse il livello statico, un'accensione remota via Web verrebbe subito sovrascritta dalla posizione fisica del pulsante non appena valutato.
+* **Soluzione adottata (Edge Toggle):** Il firmware rileva esclusivamente la **variazione di fronte** (sia fronte di discesa da rilascio a pressione, sia fronte di salita da pressione a rilascio). Ogni click fisico inverte (toggle) lo stato logico della luce corrispondente, consentendo l'accensione manuale e lo spegnimento da remoto (o viceversa) senza alcun disallineamento.
+
+### 2. Meccanismo Software di Anti-Rimbalzo Non Bloccante (Debounce Nativo ESPHome)
+La gestione dei pulsanti bistabili e del debounce hardware (50 ms) è affidata nativamente a ESPHome in `smarthome-esps3.yaml`:
+```yaml
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO7
+      mode: INPUT_PULLUP
+      inverted: true
+    filters:
+      - delayed_on_off: 50ms   # Anti-rimbalzo hardware non bloccante
+    on_press:
+      - switch.toggle: relay_posizione
+
+  - platform: gpio
+    pin:
+      number: GPIO6
+      mode: INPUT_PULLUP
+      inverted: true
+    filters:
+      - delayed_on_off: 50ms   # Anti-rimbalzo hardware non bloccante
+    on_press:
+      - switch.toggle: relay_anabbagliante
+```
+* **Nessun ritardo bloccante (`delay()`):** La gestione hardware nativa tramite `binary_sensor` di ESPHome garantisce un rilevamento del fronte istantaneo e affidabile, preservando la CPU e la stabilità dello stack Wi-Fi.
 
 ---
 
-## 📁 Struttura della Cartella `/EspHomePorting`
+## 🎨 Interfaccia Web Grafica e Feedback di Stato
+
+1. **Dashboard a 2 Riquadri Centrali:** Ottimizzata per smartphone con i pulsanti grafici ad alta risoluzione per **Posizione** e **Anabbagliante**.
+2. **Spia LED Centrale di Stato:** Posizionata direttamente al di sotto di ciascun pulsante:
+   * **Stato ACCESO:** Spia circolare verde fluorescente brillante (`#00ff66`) con bagliore neon ad alone (`box-shadow`), bordo card illuminato in tinta verde e dicitura **ACCESO**.
+   * **Stato SPENTO:** Spia grigio scuro (`#404040`), bordo card neutro trasparente e dicitura **SPENTO**.
+3. **Sincronizzazione Live Continua:** 
+   * La pagina esegue polling in background su `/status` ogni **1.2 secondi**. Se l'utente agisce sul pulsante fisico sul manubrio/cruscotto, la spia LED e il bordo del tasto nella pagina web cambiano istantaneamente senza dover ricaricare la schermata.
+   * Toccando il riquadro grafico sul touchscreen dello smartphone, viene invocata la rotta `/togglePin?pin=X` che inverte il relè e aggiorna la grafica in tempo reale.
+
+---
+
+## 🌐 Connettività di Rete: `panigalemel.local` e Captive Portal Automatico
+
+### 1. Risoluzione Hostname mDNS (`http://panigalemel.local`)
+* L'ESP32-S3 pubblica il nome host mDNS `panigalemel.local` su multicast DNS (porta 5353 UDP).
+* **Rete di Casa (STA Mode):** Da qualsiasi PC o smartphone connesso alla rete Wi-Fi domestica, digitando semplicemente nel browser `http://panigalemel.local` si accede direttamente alla dashboard di controllo.
+* **Access Point Moto (AP Mode):** Anche connessi all'hotspot `Panigale-Mel-AP`, `http://panigalemel.local` è risolto nativamente sia via mDNS sia dal server DNS spoofing integrato.
+
+### 2. Captive Portal Automatico in Modalità AP
+Quando l'ESP32-S3 è in modalità Access Point (SSID: `Panigale-Mel-AP`, password: `mammamelap`, IP: `192.168.4.1`):
+1. **Server DNS e Captive Portal Nativo:** Il componente nativo `captive_portal:` di ESPHome gestisce le query DNS e i rilevamenti automatici dei sistemi operativi (Android, iOS CNA, Windows NCSI).
+2. **Priorità Rotte Dirette:** Gli handler personalizzati del controller hanno precedenza assoluta, servendo istantaneamente la dashboard Panigale su `/` e `/home`.
+
+---
+
+## 📁 Struttura del Progetto
 
 ```text
 EspHomePorting/
-├── smarthome-esps3.yaml         # Configurazione principale ESPHome (S3, AP Panigale, 3 Switches)
+├── smarthome-esps3.yaml         # Configurazione ESPHome (S3, 2 Relays, 2 Binary Sensors, Captive Portal, WebServer)
 ├── glassmorphism.css            # Stile personalizzato con sfondo #020001 e bottoni immagine
-├── secrets.yaml                 # Credenziali Wi-Fi e chiave API
-├── README.md                    # Questa documentazione con schema elettrico
+├── secrets.yaml                 # Credenziali Wi-Fi e chiave crittografica
+├── README.md                    # Questa documentazione con schema elettrico e dettagli tecnici
+├── COMMAND.md                   # Comandi utili per la compilazione, flash e monitor seriale
 ├── docs/
-│   ├── FLASHING_GUIDE.md        # Istruzioni dettagliate per compilazione e flash USB/OTA
-│   └── ROUTES_AND_USAGE.md      # Elenco completo delle rotte e utilizzo API
-├── img/compresse/               # Immagini sorgente WebP
-│   ├── LogoMel.webp
-│   ├── Luci_di_posizione.webp
-│   ├── Anabbagliante.webp
-│   └── Abbagliante.webp
+│   ├── FLASHING_GUIDE.md        # Istruzioni passo-passo per il flashing USB/OTA
+│   └── ROUTES_AND_USAGE.md      # Elenco completo delle rotte API (/home, /status, /togglePin)
+├── img/compresse/               # Immagini WebP salvate in Flash (LogoMel, Posizione, Anabbagliante)
 └── src/                         # Architettura MVC in C++
     ├── model/
     │   ├── CustomButtonModel.h
-    │   └── CustomButtonModel.cpp # Gestione NVS e mapping GPIO 4, 5, 6
+    │   └── CustomButtonModel.cpp # Gestione bottoni personalizzati NVS Flash
     ├── view/
-    │   ├── ImagesData.h         # Array binari immagini WebP salvati in Flash (PROGMEM)
+    │   ├── ImagesData.h         # Dati binari PROGMEM delle immagini WebP
     │   ├── ImagesData.cpp
     │   ├── NavigationManager.h
-    │   ├── NavigationManager.cpp # Navbar fissa sul fondo dello schermo (Home e WiFi Config)
+    │   ├── NavigationManager.cpp # Navbar fissa inferiore
     │   ├── ViewConfig.h
-    │   ├── ViewConfig.cpp       # Form gestione Wi-Fi con scansione reti
+    │   ├── ViewConfig.cpp       # Form e scansione reti Wi-Fi con IP assegnato
     │   ├── ViewServices.h
-    │   └── ViewServices.cpp     # UI 3 Bottoni Immagine 100% puliti senza scritte sovrapposte
+    │   └── ViewServices.cpp     # Dashboard 2 bottoni con LED verde/grigio e polling live
     └── controller/
-        ├── DnsServerEspIdf.h    # Server DNS nativo ESP-IDF (lwip sockets) per Captive Portal
-        ├── DnsServerEspIdf.cpp
-        ├── CustomWebController.h
-        └── CustomWebController.cpp # Gestione rotte HTTP (/home), invio binario WebP e pulso 500ms
+        ├── CustomWebController.h # Router Web asincrono ed esposizione relè
+        └── CustomWebController.cpp # Gestione rotte HTTP (/home, /togglePin, /status, /customButtons)
 ```
-
----
-
-## 🎨 Caratteristiche dell'Interfaccia Grafica
-
-1. **Sfondo Tema:** Colore esatto `#020001` (nero profondo).
-2. **Logo in alto al centro:** `LogoMel.webp` servito direttamente in locale alla rotta `/logo.webp` al naturale, senza effetti di sfumatura o drop-shadow.
-3. **I 3 Pulsanti Immagine (100% contenitore):**
-   * **Posizione** (`/posizione.webp`): Immagine pulita a tutto spazio, impulso GPIO 4 per 500 ms.
-   * **Anabbagliante** (`/anabbagliante.webp`): Immagine pulita a tutto spazio, impulso GPIO 5 per 500 ms.
-   * **Abbagliante** (`/abbagliante.webp`): Immagine pulita a tutto spazio, impulso GPIO 6 per 500 ms.
-4. **Animazione Visiva a Impulso (500 ms):**
-   * Al clic del pulsante, compare l'icona clessidra ⏳ sovrapposta per esattamente **500 ms** in sincronia con l'impulso hardware inviato al relè, per poi scomparire automaticamente.
-5. **Navbar Fissa a Bordo Schermo:**
-   * Barra di navigazione ancorata al bordo inferiore dello schermo con icona casa **🏠 Home** (`/home`) e icona segnale **📶 WiFi Config** (`/config`).
-6. **Captive Portal Automatico alla Home:**
-   * Appena ci si connette all'AP `Panigale-Mel-AP`, il sistema reindirizza il popup captive portal direttamente su `http://192.168.4.1/home` (aprendo i comandi luci).
-   * La configurazione Wi-Fi non compare più in automatico: è accessibile manualmente premendo su `📶 WiFi Config` nella navbar.
-7. **Funzionalità Offline al 100%:**
-   * Tutte e 4 le immagini WebP sono memorizzate nella Flash dell'ESP32-S3 e servite localmente con invio binario nativo (`image/webp` con `Content-Length`), senza richiedere connessione ad internet.
-8. **Wi-Fi Dual Mode:**
-   * L'Access Point **`Panigale-Mel-AP`** rimane sempre attivo e accessibile per connessioni dirette da smartphone.
-
----
-
-## 🚀 Compilazione e Flash (Da eseguire quando vuoi tu)
-
-Come da tue istruzioni, la compilazione non viene avviata automaticamente. Quando desideri compilare e caricare il firmware sull'ESP32-S3:
-
-```bash
-cd /home/none/Arduino/libraries/EspHomePorting
-esphome run smarthome-esps3.yaml
-```
-
-
-
-non va bene, ESP deve stare in pooling sullo stato dei bottoni se no ce un disallineamenteo
-
-
-idea esp e detentore stato: bottone prende segnale da pine esp e lo riporta sul relay
-3.3V cosi anche cosi se cambia quel pin di stato il bottone riporta cosa giusta, quando bottone porta 3.3V sul tale pin di lettura so che devo cambiare e se da stato precedente  si apre  ce qualcosa che ogni mezzo secondo mi tira giu quel pin e quindi dopo un secondo io mi accorgo che il bottone ha cambiato stato. questo fatto per ogni  bottone,,
-
-
-oppure piu semplice relay ad impulsi finder 12V

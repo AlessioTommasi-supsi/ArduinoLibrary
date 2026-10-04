@@ -1,15 +1,15 @@
 #ifndef VIEW_CONFIG_H
 #define VIEW_CONFIG_H
 
-#include <Arduino.h>
+#include <string>
 #include "esphome/components/wifi/wifi_component.h"
 
 namespace smarthome {
 
 class ViewConfig {
 public:
-    static String generateConfigPageHTML();
-    static String generateWifiSwitchSuccessHTML(const String &ssid);
+    static std::string generateConfigPageHTML();
+    static std::string generateWifiSwitchSuccessHTML(const std::string &ssid, const std::string &ip = "");
 };
 
 } // namespace smarthome

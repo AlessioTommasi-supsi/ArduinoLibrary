@@ -2,8 +2,8 @@
 
 namespace smarthome {
 
-String NavigationManager::getNavbar() {
-    String navbar = R"raw(
+std::string NavigationManager::getNavbar() {
+    std::string navbar = R"raw(
         <!-- Navbar Floating Glassmorphism (Home & WiFi Config) -->
         <div class="navbar">
             <a href="/home">
@@ -19,8 +19,8 @@ String NavigationManager::getNavbar() {
     return navbar;
 }
 
-String NavigationManager::getNavbarCss() {
-    String css = R"raw(
+std::string NavigationManager::getNavbarCss() {
+    std::string css = R"raw(
     .navbar {
       position: fixed;
       bottom: 20px;

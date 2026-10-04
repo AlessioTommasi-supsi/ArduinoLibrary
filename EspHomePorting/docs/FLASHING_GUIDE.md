@@ -66,7 +66,7 @@ Dopo aver caricato il codice per la prima volta via USB, le successive modifiche
    ```bash
    esphome run smarthome-esps3.yaml --device 192.168.1.50
    # oppure
-   esphome run smarthome-esps3.yaml --device smarthome-s3.local
+   esphome run smarthome-esps3.yaml --device panigalemel.local
    ```
 
 ---

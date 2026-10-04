@@ -1,7 +1,7 @@
 #ifndef VIEW_SERVICES_H
 #define VIEW_SERVICES_H
 
-#include <Arduino.h>
+#include <string>
 #include <vector>
 #include "CustomButtonModel.h"
 
@@ -9,9 +9,9 @@ namespace smarthome {
 
 class ViewServices {
 public:
-    static String generateServicesHTML(const std::vector<CustomButtonItem> &customButtons);
-    static String generateCustomButtonsHTML(const std::vector<CustomButtonItem> &customButtons);
-    static String generateAddButtonFormHTML();
+    static std::string generateServicesHTML(const std::vector<CustomButtonItem> &customButtons, bool posState = false, bool anabState = false);
+    static std::string generateCustomButtonsHTML(const std::vector<CustomButtonItem> &customButtons);
+    static std::string generateAddButtonFormHTML();
 };
 
 } // namespace smarthome

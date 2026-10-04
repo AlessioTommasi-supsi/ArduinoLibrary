@@ -1,14 +1,14 @@
 #ifndef NAVIGATION_MANAGER_H
 #define NAVIGATION_MANAGER_H
 
-#include <Arduino.h>
+#include <string>
 
 namespace smarthome {
 
 class NavigationManager {
 public:
-    static String getNavbar();
-    static String getNavbarCss();
+    static std::string getNavbar();
+    static std::string getNavbarCss();
 };
 
 } // namespace smarthome

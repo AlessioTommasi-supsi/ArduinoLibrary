@@ -1,17 +1,17 @@
 #ifndef CUSTOM_BUTTON_MODEL_H
 #define CUSTOM_BUTTON_MODEL_H
 
-#include <Arduino.h>
 #include <nvs_flash.h>
 #include <nvs.h>
 #include <vector>
+#include <string>
 
 namespace smarthome {
 
 struct CustomButtonItem {
-    String label;
-    String emoji;
-    String url;
+    std::string label;
+    std::string emoji;
+    std::string url;
 };
 
 class CustomButtonModel {
@@ -24,8 +24,8 @@ public:
 
     void loadCustomButtons();
     void saveCustomButtons();
-    void addButton(const String &label, const String &emoji, const String &url);
-    void removeButton(const String &label);
+    void addButton(const std::string &label, const std::string &emoji, const std::string &url);
+    void removeButton(const std::string &label);
     const std::vector<CustomButtonItem>& getButtons() const;
     int getValidGpio(int pinNum);
 };

@@ -3,8 +3,8 @@
 
 namespace smarthome {
 
-String ViewServices::generateCustomButtonsHTML(const std::vector<CustomButtonItem> &customButtons) {
-    String html = "";
+std::string ViewServices::generateCustomButtonsHTML(const std::vector<CustomButtonItem> &customButtons) {
+    std::string html = "";
     for (const auto &btn : customButtons) {
         html += "<div class='emoji-button-wrapper'>";
         html += "  <button class='emoji-button' onclick=\"fetchData(this, '" + btn.url + "')\">";
@@ -18,8 +18,13 @@ String ViewServices::generateCustomButtonsHTML(const std::vector<CustomButtonIte
     return html;
 }
 
-String ViewServices::generateServicesHTML(const std::vector<CustomButtonItem> &customButtons) {
-    String html = R"raw(
+std::string ViewServices::generateServicesHTML(const std::vector<CustomButtonItem> &customButtons, bool posState, bool anabState) {
+    std::string posClass = posState ? "is-on" : "is-off";
+    std::string posText  = posState ? "ACCESO" : "SPENTO";
+    std::string anabClass = anabState ? "is-on" : "is-off";
+    std::string anabText  = anabState ? "ACCESO" : "SPENTO";
+
+    std::string html = R"raw(
 <!DOCTYPE html>
 <html>
 <head>
@@ -32,15 +37,31 @@ String ViewServices::generateServicesHTML(const std::vector<CustomButtonItem> &c
         .logo_top_container { text-align: center; margin-top: 10px; margin-bottom: 25px; }
         .logo_top_image { max-width: 250px; height: auto; }
         .glass_container { background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(12px); border-radius: 20px; padding: 25px; border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8); margin: 0 auto; max-width: 1000px; }
-        .emoji-button-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
-        .emoji-button-wrapper { position: relative; flex: 0 1 calc(33.333% - 20px); max-width: calc(33.333% - 20px); min-width: 240px; display: flex; flex-direction: column; align-items: center; }
-        .image-button { position: relative; width: 100%; height: 220px; border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 16px; overflow: hidden; padding: 0; cursor: pointer; background: #000; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6); transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
-        .image-button:hover { transform: translateY(-4px) scale(1.02); border-color: #ff1a1a; box-shadow: 0 12px 25px rgba(255, 26, 26, 0.35); }
+        .emoji-button-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; }
+        .emoji-button-wrapper { position: relative; flex: 0 1 calc(50% - 24px); max-width: 340px; min-width: 240px; display: flex; flex-direction: column; align-items: center; }
+        .image-button { position: relative; width: 100%; height: 220px; border: 2px solid rgba(255, 255, 255, 0.15); border-radius: 16px; overflow: hidden; padding: 0; cursor: pointer; background: #000; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6); transition: transform 0.2s ease, box-shadow 0.25s ease, border-color 0.25s ease; }
+        .image-button:hover { transform: translateY(-4px) scale(1.02); }
         .image-button:active, .image-button.loading-state { transform: scale(0.97); opacity: 0.85; }
         .image-button .btn-img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .loading-icon { display: none; position: absolute; top: 10px; right: 12px; font-size: 28px; z-index: 10; filter: drop-shadow(0 0 6px rgba(0,0,0,0.9)); }
         .loading-state .loading-icon { display: block; animation: pulse-spin 0.5s ease-in-out; }
         @keyframes pulse-spin { 0% { transform: scale(0.8) rotate(0deg); } 50% { transform: scale(1.2) rotate(90deg); } 100% { transform: scale(1.0) rotate(180deg); } }
+
+        /* Indicatore di stato LED centrale */
+        .status-indicator-container { display: inline-flex; align-items: center; justify-content: center; gap: 9px; margin-top: 14px; padding: 7px 18px; border-radius: 20px; background: rgba(0, 0, 0, 0.55); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(8px); }
+        .status-led { width: 14px; height: 14px; border-radius: 50%; transition: all 0.3s ease; }
+        .status-text { font-size: 13px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; transition: color 0.3s ease; }
+
+        /* Stato ACCESO (Verde fluo con glow neon) */
+        .emoji-button-wrapper.is-on .image-button { border-color: #00ff66; box-shadow: 0 0 20px rgba(0, 255, 102, 0.4), 0 8px 25px rgba(0, 0, 0, 0.8); }
+        .emoji-button-wrapper.is-on .status-led { background-color: #00ff66; box-shadow: 0 0 10px #00ff66, 0 0 20px rgba(0, 255, 102, 0.7); border: 2px solid #b3ffcc; }
+        .emoji-button-wrapper.is-on .status-text { color: #00ff66; text-shadow: 0 0 8px rgba(0, 255, 102, 0.4); }
+
+        /* Stato SPENTO (Grigio scuro neutro) */
+        .emoji-button-wrapper.is-off .image-button { border-color: rgba(255, 255, 255, 0.15); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6); }
+        .emoji-button-wrapper.is-off .status-led { background-color: #404040; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8); border: 2px solid #282828; }
+        .emoji-button-wrapper.is-off .status-text { color: #7a7a7a; }
+
         .emoji-button { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 16px; width: 100%; height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 70px; color: #fff; cursor: pointer; transition: 0.2s ease; position: relative; }
         .emoji-button:hover { transform: translateY(-4px) scale(1.02); background: rgba(255, 255, 255, 0.18); border-color: #ff1a1a; }
         .emoji-button label { display: block; margin-top: 10px; font-size: 18px; font-weight: 700; color: #f1f5f9; }
@@ -48,15 +69,48 @@ String ViewServices::generateServicesHTML(const std::vector<CustomButtonItem> &c
         .trash-btn:hover { background: rgba(255, 34, 34, 0.85); color: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255, 34, 34, 0.4); }
     </style>
     <script>
-        function fetchData(button, apiUrl) {
-            button.classList.add('loading-state');
-            fetch(apiUrl)
-                .then(r => r.text())
-                .catch(err => console.error(err));
-            setTimeout(() => {
-                button.classList.remove('loading-state');
-            }, 500);
+        function updateCardState(pin, isOn) {
+            var card = document.getElementById('card-' + pin);
+            if (!card) return;
+            var textEl = card.querySelector('.status-text');
+            if (isOn) {
+                card.classList.remove('is-off');
+                card.classList.add('is-on');
+                if (textEl) textEl.textContent = 'ACCESO';
+            } else {
+                card.classList.remove('is-on');
+                card.classList.add('is-off');
+                if (textEl) textEl.textContent = 'SPENTO';
+            }
         }
+
+        function toggleLight(button, pin) {
+            button.classList.add('loading-state');
+            fetch('/togglePin?pin=' + pin)
+                .then(r => r.json())
+                .then(data => {
+                    updateCardState(data.pin, data.state);
+                })
+                .catch(err => console.error(err))
+                .finally(() => {
+                    setTimeout(() => {
+                        button.classList.remove('loading-state');
+                    }, 300);
+                });
+        }
+
+        function syncStatus() {
+            fetch('/status')
+                .then(r => r.json())
+                .then(data => {
+                    updateCardState(4, data.pos);
+                    updateCardState(5, data.anab);
+                })
+                .catch(err => console.error(err));
+        }
+
+        // Sincronizzazione periodica continua (ogni 1.2s)
+        setInterval(syncStatus, 1200);
     </script>
 </head>
 <body>
@@ -69,27 +123,27 @@ String ViewServices::generateServicesHTML(const std::vector<CustomButtonItem> &c
         <h2 style="color: #ff2222; text-transform: uppercase; letter-spacing: 2px;">Controllo Luci</h2>
         <div class="emoji-button-container">
             <!-- 1. Posizione (GPIO 4) -->
-            <div class="emoji-button-wrapper">
-                <button class="image-button" onclick="fetchData(this, 'pulsePin?pin=4')">
+            <div class="emoji-button-wrapper )raw" + posClass + R"raw(" id="card-4">
+                <button class="image-button" onclick="toggleLight(this, 4)">
                     <img src="/posizione.webp" alt="Posizione" class="btn-img">
                     <div class="loading-icon">&#8987;</div>
                 </button>
+                <div class="status-indicator-container">
+                    <div class="status-led"></div>
+                    <span class="status-text">)raw" + posText + R"raw(</span>
+                </div>
             </div>
 
             <!-- 2. Anabbagliante (GPIO 5) -->
-            <div class="emoji-button-wrapper">
-                <button class="image-button" onclick="fetchData(this, 'pulsePin?pin=5')">
+            <div class="emoji-button-wrapper )raw" + anabClass + R"raw(" id="card-5">
+                <button class="image-button" onclick="toggleLight(this, 5)">
                     <img src="/anabbagliante.webp" alt="Anabbagliante" class="btn-img">
                     <div class="loading-icon">&#8987;</div>
                 </button>
-            </div>
-
-            <!-- 3. Abbagliante (GPIO 6) -->
-            <div class="emoji-button-wrapper">
-                <button class="image-button" onclick="fetchData(this, 'pulsePin?pin=6')">
-                    <img src="/abbagliante.webp" alt="Abbagliante" class="btn-img">
-                    <div class="loading-icon">&#8987;</div>
-                </button>
+                <div class="status-indicator-container">
+                    <div class="status-led"></div>
+                    <span class="status-text">)raw" + anabText + R"raw(</span>
+                </div>
             </div>
 
             <!-- Bottoni Dinamici Custom NVS -->
@@ -110,8 +164,8 @@ String ViewServices::generateServicesHTML(const std::vector<CustomButtonItem> &c
     return html;
 }
 
-String ViewServices::generateAddButtonFormHTML() {
-    String html = R"raw(
+std::string ViewServices::generateAddButtonFormHTML() {
+    std::string html = R"raw(
 <!DOCTYPE html>
 <html>
 <head>
